@@ -21,8 +21,17 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 function RootComponent() {
   const location = useLocation();
   const isAuthRoute = location.pathname.startsWith('/auth/');
-  const isDashboardRoute = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/projects');
-  const isMinimalLayout = isAuthRoute || isDashboardRoute;
+  const isProtectedRoute = 
+    location.pathname.startsWith('/inbox') || 
+    location.pathname.startsWith('/today') ||
+    location.pathname.startsWith('/upcoming') ||
+    location.pathname.startsWith('/calendar') ||
+    location.pathname.startsWith('/completed') ||
+    location.pathname.startsWith('/trash') ||
+    location.pathname.startsWith('/projects') ||
+    location.pathname.startsWith('/profile') ||
+    location.pathname.startsWith('/settings');
+  const isMinimalLayout = isAuthRoute || isProtectedRoute;
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="unstack-ui-theme">

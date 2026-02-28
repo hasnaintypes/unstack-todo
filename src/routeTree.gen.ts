@@ -13,7 +13,14 @@ import { Route as PublicRouteImport } from './routes/_public'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as PublicMarketingRouteImport } from './routes/_public/_marketing'
 import { Route as PublicMarketingIndexRouteImport } from './routes/_public/_marketing/index'
-import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
+import { Route as ProtectedUpcomingIndexRouteImport } from './routes/_protected/upcoming/index'
+import { Route as ProtectedTrashIndexRouteImport } from './routes/_protected/trash/index'
+import { Route as ProtectedTodayIndexRouteImport } from './routes/_protected/today/index'
+import { Route as ProtectedSettingsIndexRouteImport } from './routes/_protected/settings/index'
+import { Route as ProtectedProfileIndexRouteImport } from './routes/_protected/profile/index'
+import { Route as ProtectedInboxIndexRouteImport } from './routes/_protected/inbox/index'
+import { Route as ProtectedCompletedIndexRouteImport } from './routes/_protected/completed/index'
+import { Route as ProtectedCalendarIndexRouteImport } from './routes/_protected/calendar/index'
 import { Route as PublicAuthSignUpIndexRouteImport } from './routes/_public/auth/sign-up/index'
 import { Route as PublicAuthSignInIndexRouteImport } from './routes/_public/auth/sign-in/index'
 import { Route as PublicMarketingAboutIndexRouteImport } from './routes/_public/_marketing/about/index'
@@ -35,9 +42,44 @@ const PublicMarketingIndexRoute = PublicMarketingIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicMarketingRoute,
 } as any)
-const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
+const ProtectedUpcomingIndexRoute = ProtectedUpcomingIndexRouteImport.update({
+  id: '/upcoming/',
+  path: '/upcoming/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedTrashIndexRoute = ProtectedTrashIndexRouteImport.update({
+  id: '/trash/',
+  path: '/trash/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedTodayIndexRoute = ProtectedTodayIndexRouteImport.update({
+  id: '/today/',
+  path: '/today/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedSettingsIndexRoute = ProtectedSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedProfileIndexRoute = ProtectedProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedInboxIndexRoute = ProtectedInboxIndexRouteImport.update({
+  id: '/inbox/',
+  path: '/inbox/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedCompletedIndexRoute = ProtectedCompletedIndexRouteImport.update({
+  id: '/completed/',
+  path: '/completed/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedCalendarIndexRoute = ProtectedCalendarIndexRouteImport.update({
+  id: '/calendar/',
+  path: '/calendar/',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const PublicAuthSignUpIndexRoute = PublicAuthSignUpIndexRouteImport.update({
@@ -59,14 +101,28 @@ const PublicMarketingAboutIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicMarketingIndexRoute
-  '/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/calendar/': typeof ProtectedCalendarIndexRoute
+  '/completed/': typeof ProtectedCompletedIndexRoute
+  '/inbox/': typeof ProtectedInboxIndexRoute
+  '/profile/': typeof ProtectedProfileIndexRoute
+  '/settings/': typeof ProtectedSettingsIndexRoute
+  '/today/': typeof ProtectedTodayIndexRoute
+  '/trash/': typeof ProtectedTrashIndexRoute
+  '/upcoming/': typeof ProtectedUpcomingIndexRoute
   '/about/': typeof PublicMarketingAboutIndexRoute
   '/auth/sign-in/': typeof PublicAuthSignInIndexRoute
   '/auth/sign-up/': typeof PublicAuthSignUpIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicMarketingIndexRoute
-  '/dashboard': typeof ProtectedDashboardIndexRoute
+  '/calendar': typeof ProtectedCalendarIndexRoute
+  '/completed': typeof ProtectedCompletedIndexRoute
+  '/inbox': typeof ProtectedInboxIndexRoute
+  '/profile': typeof ProtectedProfileIndexRoute
+  '/settings': typeof ProtectedSettingsIndexRoute
+  '/today': typeof ProtectedTodayIndexRoute
+  '/trash': typeof ProtectedTrashIndexRoute
+  '/upcoming': typeof ProtectedUpcomingIndexRoute
   '/about': typeof PublicMarketingAboutIndexRoute
   '/auth/sign-in': typeof PublicAuthSignInIndexRoute
   '/auth/sign-up': typeof PublicAuthSignUpIndexRoute
@@ -76,7 +132,14 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_public/_marketing': typeof PublicMarketingRouteWithChildren
-  '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/_protected/calendar/': typeof ProtectedCalendarIndexRoute
+  '/_protected/completed/': typeof ProtectedCompletedIndexRoute
+  '/_protected/inbox/': typeof ProtectedInboxIndexRoute
+  '/_protected/profile/': typeof ProtectedProfileIndexRoute
+  '/_protected/settings/': typeof ProtectedSettingsIndexRoute
+  '/_protected/today/': typeof ProtectedTodayIndexRoute
+  '/_protected/trash/': typeof ProtectedTrashIndexRoute
+  '/_protected/upcoming/': typeof ProtectedUpcomingIndexRoute
   '/_public/_marketing/': typeof PublicMarketingIndexRoute
   '/_public/_marketing/about/': typeof PublicMarketingAboutIndexRoute
   '/_public/auth/sign-in/': typeof PublicAuthSignInIndexRoute
@@ -86,18 +149,44 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard/'
+    | '/calendar/'
+    | '/completed/'
+    | '/inbox/'
+    | '/profile/'
+    | '/settings/'
+    | '/today/'
+    | '/trash/'
+    | '/upcoming/'
     | '/about/'
     | '/auth/sign-in/'
     | '/auth/sign-up/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/about' | '/auth/sign-in' | '/auth/sign-up'
+  to:
+    | '/'
+    | '/calendar'
+    | '/completed'
+    | '/inbox'
+    | '/profile'
+    | '/settings'
+    | '/today'
+    | '/trash'
+    | '/upcoming'
+    | '/about'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
   id:
     | '__root__'
     | '/_protected'
     | '/_public'
     | '/_public/_marketing'
-    | '/_protected/dashboard/'
+    | '/_protected/calendar/'
+    | '/_protected/completed/'
+    | '/_protected/inbox/'
+    | '/_protected/profile/'
+    | '/_protected/settings/'
+    | '/_protected/today/'
+    | '/_protected/trash/'
+    | '/_protected/upcoming/'
     | '/_public/_marketing/'
     | '/_public/_marketing/about/'
     | '/_public/auth/sign-in/'
@@ -139,11 +228,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicMarketingIndexRouteImport
       parentRoute: typeof PublicMarketingRoute
     }
-    '/_protected/dashboard/': {
-      id: '/_protected/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
+    '/_protected/upcoming/': {
+      id: '/_protected/upcoming/'
+      path: '/upcoming'
+      fullPath: '/upcoming/'
+      preLoaderRoute: typeof ProtectedUpcomingIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/trash/': {
+      id: '/_protected/trash/'
+      path: '/trash'
+      fullPath: '/trash/'
+      preLoaderRoute: typeof ProtectedTrashIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/today/': {
+      id: '/_protected/today/'
+      path: '/today'
+      fullPath: '/today/'
+      preLoaderRoute: typeof ProtectedTodayIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/settings/': {
+      id: '/_protected/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof ProtectedSettingsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/profile/': {
+      id: '/_protected/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProtectedProfileIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/inbox/': {
+      id: '/_protected/inbox/'
+      path: '/inbox'
+      fullPath: '/inbox/'
+      preLoaderRoute: typeof ProtectedInboxIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/completed/': {
+      id: '/_protected/completed/'
+      path: '/completed'
+      fullPath: '/completed/'
+      preLoaderRoute: typeof ProtectedCompletedIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/calendar/': {
+      id: '/_protected/calendar/'
+      path: '/calendar'
+      fullPath: '/calendar/'
+      preLoaderRoute: typeof ProtectedCalendarIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_public/auth/sign-up/': {
@@ -171,11 +309,25 @@ declare module '@tanstack/react-router' {
 }
 
 interface ProtectedRouteChildren {
-  ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
+  ProtectedCalendarIndexRoute: typeof ProtectedCalendarIndexRoute
+  ProtectedCompletedIndexRoute: typeof ProtectedCompletedIndexRoute
+  ProtectedInboxIndexRoute: typeof ProtectedInboxIndexRoute
+  ProtectedProfileIndexRoute: typeof ProtectedProfileIndexRoute
+  ProtectedSettingsIndexRoute: typeof ProtectedSettingsIndexRoute
+  ProtectedTodayIndexRoute: typeof ProtectedTodayIndexRoute
+  ProtectedTrashIndexRoute: typeof ProtectedTrashIndexRoute
+  ProtectedUpcomingIndexRoute: typeof ProtectedUpcomingIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
-  ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
+  ProtectedCalendarIndexRoute: ProtectedCalendarIndexRoute,
+  ProtectedCompletedIndexRoute: ProtectedCompletedIndexRoute,
+  ProtectedInboxIndexRoute: ProtectedInboxIndexRoute,
+  ProtectedProfileIndexRoute: ProtectedProfileIndexRoute,
+  ProtectedSettingsIndexRoute: ProtectedSettingsIndexRoute,
+  ProtectedTodayIndexRoute: ProtectedTodayIndexRoute,
+  ProtectedTrashIndexRoute: ProtectedTrashIndexRoute,
+  ProtectedUpcomingIndexRoute: ProtectedUpcomingIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

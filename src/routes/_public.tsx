@@ -4,7 +4,7 @@ export const Route = createFileRoute('/_public')({
   beforeLoad: ({ context }) => {
     if (context.auth.user) {
       throw redirect({
-        to: '/dashboard',
+        to: '/inbox',
       })
     }
   },
