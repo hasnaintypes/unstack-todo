@@ -1,7 +1,7 @@
-import { createContext, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
-import { authService } from '@/services/auth';
-import type { Models } from 'appwrite';
+import { createContext, useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import { authService } from "@/services/auth";
+import type { Models } from "appwrite";
 
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null;

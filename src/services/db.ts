@@ -1,7 +1,8 @@
-import { databases, ID } from '@/lib/appwrite';
+import { databases, ID } from "@/lib/appwrite";
+import type { DatabaseQuery, DocumentPayload } from "@/types/database";
 
 export const dbService = {
-  async listDocuments(databaseId: string, collectionId: string, queries: any[] = []) {
+  async listDocuments(databaseId: string, collectionId: string, queries: DatabaseQuery[] = []) {
     return await databases.listDocuments(databaseId, collectionId, queries);
   },
 
@@ -9,15 +10,20 @@ export const dbService = {
     return await databases.getDocument(databaseId, collectionId, documentId);
   },
 
-  async createDocument(databaseId: string, collectionId: string, data: any) {
+  async createDocument(databaseId: string, collectionId: string, data: DocumentPayload) {
     return await databases.createDocument(databaseId, collectionId, ID.unique(), data);
   },
 
-  async updateDocument(databaseId: string, collectionId: string, documentId: string, data: any) {
+  async updateDocument(
+    databaseId: string,
+    collectionId: string,
+    documentId: string,
+    data: DocumentPayload
+  ) {
     return await databases.updateDocument(databaseId, collectionId, documentId, data);
   },
 
   async deleteDocument(databaseId: string, collectionId: string, documentId: string) {
     return await databases.deleteDocument(databaseId, collectionId, documentId);
-  }
+  },
 };

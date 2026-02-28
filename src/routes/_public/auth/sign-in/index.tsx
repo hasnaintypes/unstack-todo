@@ -1,9 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { AuthForm } from '@/components/auth/auth-form'
+import { createFileRoute } from "@tanstack/react-router";
+import { AuthForm } from "@/components/auth/auth-form";
 
-export const Route = createFileRoute('/_public/auth/sign-in/')({
+export const Route = createFileRoute("/_public/auth/sign-in/")({
   component: SignInPage,
-})
+});
 
 function SignInPage() {
   return (

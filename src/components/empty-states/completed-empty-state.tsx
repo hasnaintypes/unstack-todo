@@ -13,9 +13,7 @@ export function CompletedEmptyState() {
 
       <div className="text-center space-y-2 max-w-md">
         <h2 className="text-xl font-semibold">No completed tasks yet</h2>
-        <p className="text-muted-foreground text-sm">
-          Tasks you complete will show here.
-        </p>
+        <p className="text-muted-foreground text-sm">Tasks you complete will show here.</p>
       </div>
     </div>
   );

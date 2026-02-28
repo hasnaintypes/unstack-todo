@@ -14,8 +14,8 @@ export function Footer() {
               Hasnain<span className="text-primary">.dev</span>
             </h2>
             <p className="text-muted-foreground text-sm max-w-xs">
-              Building digital experiences with precision and passion. Open
-              source contributor and full-stack explorer.
+              Building digital experiences with precision and passion. Open source contributor and
+              full-stack explorer.
             </p>
             <div className="flex gap-4">
               <a
@@ -44,9 +44,7 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">
-              Project
-            </h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">Project</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <a href="#" className="hover:text-primary transition-colors">
@@ -68,9 +66,7 @@ export function Footer() {
 
           {/* Legal / Contact */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">
-              Legal
-            </h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">Legal</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <a href="#" className="hover:text-primary transition-colors">

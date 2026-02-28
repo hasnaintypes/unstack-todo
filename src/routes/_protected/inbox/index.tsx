@@ -1,27 +1,27 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { InboxEmptyState } from '@/components/empty-states'
-import type { EmptyStateTaskInput } from '@/components/empty-states'
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { InboxEmptyState } from "@/components/empty-states";
+import type { EmptyStateTaskInput } from "@/components/empty-states";
 
-export const Route = createFileRoute('/_protected/inbox/')({
+export const Route = createFileRoute("/_protected/inbox/")({
   component: InboxPage,
-})
+});
 
 function InboxPage() {
-  const [tasks, setTasks] = useState<
-    (EmptyStateTaskInput & { id: string; section: 'Inbox' })[]
-  >([])
+  const [tasks, setTasks] = useState<(EmptyStateTaskInput & { id: string; section: "Inbox" })[]>(
+    []
+  );
 
   const handleAddTask = (task: EmptyStateTaskInput) => {
     setTasks((previous) => [
       {
         ...task,
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        section: 'Inbox',
+        section: "Inbox",
       },
       ...previous,
-    ])
-  }
+    ]);
+  };
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -39,7 +39,7 @@ function InboxPage() {
                 ) : null}
                 <p className="mt-2 text-xs text-muted-foreground">
                   {task.section} · {task.priority} · {task.category}
-                  {task.dueDate ? ` · ${task.dueDate}` : ''}
+                  {task.dueDate ? ` · ${task.dueDate}` : ""}
                 </p>
               </div>
             ))}
@@ -47,5 +47,5 @@ function InboxPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

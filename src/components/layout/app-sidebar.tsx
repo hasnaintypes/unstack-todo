@@ -28,18 +28,9 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Link } from "@tanstack/react-router";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -51,9 +42,19 @@ export function AppSidebar() {
   const navItems = [
     { icon: Inbox, label: "Inbox", to: "/inbox" as const, badge: null as string | null },
     { icon: Calendar, label: "Today", to: "/today" as const, badge: "1" as string | null },
-    { icon: CalendarDays, label: "Upcoming", to: "/upcoming" as const, badge: null as string | null },
+    {
+      icon: CalendarDays,
+      label: "Upcoming",
+      to: "/upcoming" as const,
+      badge: null as string | null,
+    },
     { icon: Calendar, label: "Calendar", to: "/calendar" as const, badge: null as string | null },
-    { icon: CheckCircle2, label: "Completed", to: "/completed" as const, badge: null as string | null },
+    {
+      icon: CheckCircle2,
+      label: "Completed",
+      to: "/completed" as const,
+      badge: null as string | null,
+    },
     { icon: Trash2, label: "Trash", to: "/trash" as const, badge: null as string | null },
   ];
 
@@ -69,52 +70,51 @@ export function AppSidebar() {
     });
   };
 
- const projectGroups = [
-   {
-     name: "Work – Sprint Tasks",
-     tasks: [
-       { name: "Fix login validation bug", status: "in-progress" },
-       { name: "Implement Appwrite auth flow", status: "todo" },
-       { name: "Refactor API service layer", status: "todo" },
-       { name: "Write unit tests for auth", status: "todo" },
-     ],
-   },
-   {
-     name: "Trip Plan 2024",
-     tasks: [
-       { name: "Book flight tickets", status: "in-progress" },
-       { name: "Reserve hotel", status: "todo" },
-       { name: "Create travel itinerary", status: "todo" },
-       { name: "Apply for travel insurance", status: "todo" },
-     ],
-   },
-   {
-     name: "Personal Development",
-     tasks: [
-       { name: "Learn Tailwind advanced patterns", status: "in-progress" },
-       { name: "Build Vite + Appwrite demo", status: "todo" },
-       { name: "Read about system design basics", status: "todo" },
-     ],
-   },
-   {
-     name: "Health & Routine",
-     tasks: [
-       { name: "Morning workout", status: "done" },
-       { name: "Drink 2L water", status: "in-progress" },
-       { name: "Sleep before 11 PM", status: "todo" },
-     ],
-   },
-   {
-     name: "Side Project – Unstack Todo",
-     tasks: [
-       { name: "Set up Tailwind + shadcn/ui", status: "done" },
-       { name: "Design task board UI", status: "in-progress" },
-       { name: "Persist tasks with Appwrite DB", status: "todo" },
-       { name: "Add drag-and-drop support", status: "todo" },
-     ],
-   },
- ];
-
+  const projectGroups = [
+    {
+      name: "Work – Sprint Tasks",
+      tasks: [
+        { name: "Fix login validation bug", status: "in-progress" },
+        { name: "Implement Appwrite auth flow", status: "todo" },
+        { name: "Refactor API service layer", status: "todo" },
+        { name: "Write unit tests for auth", status: "todo" },
+      ],
+    },
+    {
+      name: "Trip Plan 2024",
+      tasks: [
+        { name: "Book flight tickets", status: "in-progress" },
+        { name: "Reserve hotel", status: "todo" },
+        { name: "Create travel itinerary", status: "todo" },
+        { name: "Apply for travel insurance", status: "todo" },
+      ],
+    },
+    {
+      name: "Personal Development",
+      tasks: [
+        { name: "Learn Tailwind advanced patterns", status: "in-progress" },
+        { name: "Build Vite + Appwrite demo", status: "todo" },
+        { name: "Read about system design basics", status: "todo" },
+      ],
+    },
+    {
+      name: "Health & Routine",
+      tasks: [
+        { name: "Morning workout", status: "done" },
+        { name: "Drink 2L water", status: "in-progress" },
+        { name: "Sleep before 11 PM", status: "todo" },
+      ],
+    },
+    {
+      name: "Side Project – Unstack Todo",
+      tasks: [
+        { name: "Set up Tailwind + shadcn/ui", status: "done" },
+        { name: "Design task board UI", status: "in-progress" },
+        { name: "Persist tasks with Appwrite DB", status: "todo" },
+        { name: "Add drag-and-drop support", status: "todo" },
+      ],
+    },
+  ];
 
   return (
     <Sidebar className="border-r bg-sidebar/50 backdrop-blur-sm">
@@ -182,9 +182,7 @@ export function AppSidebar() {
                         !isProjectsExpanded && "-rotate-90"
                       )}
                     />
-                    <span className="text-sm text-foreground font-semibold">
-                      Projects
-                    </span>
+                    <span className="text-sm text-foreground font-semibold">Projects</span>
                   </button>
                 </CollapsibleTrigger>
                 <button
@@ -234,8 +232,8 @@ export function AppSidebar() {
                                               task.status === "in-progress"
                                                 ? "text-primary animate-pulse"
                                                 : task.status === "done"
-                                                ? "text-green-500"
-                                                : "text-muted-foreground/30",
+                                                  ? "text-green-500"
+                                                  : "text-muted-foreground/30"
                                             )}
                                           />
                                         </div>
@@ -245,8 +243,8 @@ export function AppSidebar() {
                                             task.status === "in-progress"
                                               ? "text-foreground font-medium"
                                               : task.status === "done"
-                                              ? "text-muted-foreground line-through"
-                                              : "text-muted-foreground group-hover:text-foreground",
+                                                ? "text-muted-foreground line-through"
+                                                : "text-muted-foreground group-hover:text-foreground"
                                           )}
                                         >
                                           {task.name}

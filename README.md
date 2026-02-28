@@ -65,6 +65,7 @@ A modern, feature-rich task management application built with React, TypeScript,
 ### Additional Feature Suggestions
 
 #### Collaboration Features
+
 - Share tasks and projects with team members
 - Real-time collaboration on task lists
 - Comment threads on tasks
@@ -72,6 +73,7 @@ A modern, feature-rich task management application built with React, TypeScript,
 - Task assignment and delegation
 
 #### Advanced Task Management
+
 - Recurring tasks (daily, weekly, monthly)
 - Custom task templates
 - Bulk task operations
@@ -80,6 +82,7 @@ A modern, feature-rich task management application built with React, TypeScript,
 - Calendar integration (Google Calendar, Outlook)
 
 #### Productivity Enhancements
+
 - Pomodoro timer integration
 - Focus mode with distraction blocking
 - Task effort estimation
@@ -87,15 +90,8 @@ A modern, feature-rich task management application built with React, TypeScript,
 - Daily/weekly goals and streaks
 - Habit tracking
 
-#### Integration & Automation
-- Email to task conversion
-- Import from Todoist, Trello, Asana
-- Zapier/Make automation support
-- API for custom integrations
-- Browser extension for quick task capture
-- Mobile apps (iOS/Android)
-
 #### Data & Analytics
+
 - Export to CSV/JSON
 - Backup and sync across devices
 - Advanced search and filtering
@@ -106,6 +102,7 @@ A modern, feature-rich task management application built with React, TypeScript,
 ## Tech Stack
 
 ### Frontend
+
 - **React 19.2.0** - UI library with latest features
 - **TypeScript 5.9** - Type safety and better DX
 - **Vite 7.2** - Fast build tool and dev server
@@ -119,29 +116,34 @@ A modern, feature-rich task management application built with React, TypeScript,
 - **Sonner** - Toast notifications
 
 ### Backend & Services
+
 - **Appwrite 22.0** - Backend as a Service (Auth, Database, Storage)
 
 ### Recommended Additions for AI Features
 
 #### AI & Machine Learning
+
 - **OpenAI GPT-4** or **Anthropic Claude** - Natural language processing for task generation
 - **LangChain** - LLM application framework
 - **Vercel AI SDK** - Streamlined AI integration
 - **Hugging Face Transformers** - Custom ML models (optional)
 
 #### Notification Services
+
 - **Twilio API** - WhatsApp Business API integration
 - **Discord.js** - Discord bot implementation
 - **Node-cron** - Scheduled task runner
 - **Bull Queue** - Job queue for handling reminders
 
 #### Backend Enhancement
+
 - **Node.js/Express** or **Next.js API Routes** - Custom API endpoints
 - **Prisma** - Type-safe ORM (if moving from Appwrite)
 - **PostgreSQL** or **MongoDB** - Database for AI data
 - **Redis** - Caching and session management
 
 #### DevOps & Monitoring
+
 - **Vercel** or **Netlify** - Frontend deployment
 - **Railway** or **Render** - Backend deployment
 - **Sentry** - Error tracking
@@ -159,22 +161,26 @@ A modern, feature-rich task management application built with React, TypeScript,
 ### Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/hasnaintypes/unstack-todo.git
 cd unstack-todo
 ```
 
 2. Install dependencies
+
 ```bash
 pnpm install
 ```
 
 3. Set up environment variables
+
 ```bash
 cp .env.example .env
 ```
 
 4. Configure your Appwrite credentials in `.env`
+
 ```env
 VITE_APPWRITE_ENDPOINT=your_endpoint
 VITE_APPWRITE_PROJECT_ID=your_project_id
@@ -183,6 +189,7 @@ VITE_APPWRITE_COLLECTION_ID=your_collection_id
 ```
 
 5. Start the development server
+
 ```bash
 pnpm dev
 ```

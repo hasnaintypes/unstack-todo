@@ -1,15 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  User,
-  LogOut,
-  Settings,
-  Search,
-  Calendar,
-  Plus,
-  LayoutDashboard,
-} from "lucide-react";
+import { User, LogOut, Settings, Search, Calendar, Plus, LayoutDashboard } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -31,14 +24,15 @@ import {
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
   const goToProfile = () => {
-    window.location.assign("/profile");
+    navigate({ to: "/profile" });
   };
 
   const goToSettings = () => {
-    window.location.assign("/settings");
+    navigate({ to: "/settings" });
   };
 
   // 1. Keyboard shortcut listener (Cmd+K)
@@ -94,9 +88,7 @@ export function DashboardHeader() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-60" sideOffset={8}>
             <div className="flex flex-col space-y-1 p-2">
-              <p className="text-sm font-medium leading-none">
-                {user?.name || "Member"}
-              </p>
+              <p className="text-sm font-medium leading-none">{user?.name || "Member"}</p>
               <p className="text-xs leading-none text-muted-foreground">
                 {user?.email || "member@tasky.ai"}
               </p>

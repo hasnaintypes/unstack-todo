@@ -1,73 +1,75 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { useAuth } from "@/hooks/use-auth"
-import { useState } from "react"
-import { Link } from "@tanstack/react-router"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 
-import { useNavigate } from "@tanstack/react-router"
-import { toast } from "sonner"
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react";
 
 interface AuthFormProps extends React.ComponentProps<"div"> {
-  type: "sign-in" | "sign-up"
+  type: "sign-in" | "sign-up";
 }
 
 export function AuthForm({ className, type, ...props }: AuthFormProps) {
-  const { signIn, signUp } = useAuth()
-  const navigate = useNavigate()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [name, setName] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+  const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const isSignIn = type === "sign-in"
+  const isSignIn = type === "sign-in";
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
     try {
       if (isSignIn) {
-        await signIn(email, password)
-        toast.success("Welcome back!")
+        await signIn(email, password);
+        toast.success("Welcome back!");
       } else {
         // Password validation: 8+ chars, 1 uppercase, 1 lowercase, 1 digit
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         if (!passwordRegex.test(password)) {
-          throw new Error("Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, and a number.")
+          throw new Error(
+            "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, and a number."
+          );
         }
         if (!name.trim()) {
-          throw new Error("Name is required for sign up.")
+          throw new Error("Name is required for sign up.");
         }
-        await signUp(email, password, name)
-        toast.success("Account created successfully!")
+        await signUp(email, password, name);
+        toast.success("Account created successfully!");
       }
-      navigate({ to: "/inbox" })
-    } catch (err: any) {
-      toast.error(err.message || "An error occurred. Please try again.")
+      navigate({ to: "/inbox" });
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred. Please try again.";
+      toast.error(errorMessage);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className={cn("flex flex-col gap-4", className)} {...props}>
       <form onSubmit={handleSubmit}>
         <FieldGroup className="gap-4">
           <div className="flex flex-col items-center gap-1.5 text-center">
-            <h1 className="text-xl font-bold">
-              {isSignIn ? "Welcome Back" : "Create an Account"}
-            </h1>
+            <h1 className="text-xl font-bold">{isSignIn ? "Welcome Back" : "Create an Account"}</h1>
             <FieldDescription>
               {isSignIn ? (
                 <>
@@ -143,9 +145,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
                 ) : (
                   <Eye className="size-4 cursor-pointer" />
                 )}
-                <span className="sr-only">
-                  {showPassword ? "Hide password" : "Show password"}
-                </span>
+                <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
               </button>
             </div>
           </Field>
@@ -188,9 +188,16 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
         </FieldGroup>
       </form>
       <FieldDescription className="text-center text-[11px] leading-tight">
-        By clicking continue, you agree to our <a href="#" className="underline">Terms</a>{" "}
-        and <a href="#" className="underline">Privacy</a>.
+        By clicking continue, you agree to our{" "}
+        <a href="#" className="underline">
+          Terms
+        </a>{" "}
+        and{" "}
+        <a href="#" className="underline">
+          Privacy
+        </a>
+        .
       </FieldDescription>
     </div>
-  )
+  );
 }

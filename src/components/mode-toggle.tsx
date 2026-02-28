@@ -9,7 +9,9 @@ export function ModeToggle() {
 
   // Determine if checked based on current theme
   // If system, we need to check the actual rendered theme
-  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   return (
     <div className="inline-flex items-center gap-2">

@@ -1,10 +1,10 @@
-import { account, ID } from '@/lib/appwrite';
+import { account, ID } from "@/lib/appwrite";
 
 export const authService = {
   async getCurrentUser() {
     try {
       return await account.get();
-    } catch (error) {
+    } catch {
       return null;
     }
   },
@@ -18,6 +18,6 @@ export const authService = {
   },
 
   async logout() {
-    return await account.deleteSession('current');
-  }
+    return await account.deleteSession("current");
+  },
 };

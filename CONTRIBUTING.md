@@ -52,17 +52,20 @@ Feature suggestions are welcome! Please provide:
 ### Setup Steps
 
 1. Clone your fork
+
    ```bash
    git clone https://github.com/hasnaintypes/unstack-todo.git
    cd unstack-todo
    ```
 
 2. Install dependencies
+
    ```bash
    pnpm install
    ```
 
 3. Copy environment variables
+
    ```bash
    cp .env.example .env
    ```
@@ -120,6 +123,7 @@ Follow conventional commit format:
 - `chore:` Maintenance tasks
 
 Example:
+
 ```
 feat: add WhatsApp reminder integration
 fix: resolve calendar date selection bug

@@ -13,9 +13,7 @@ export function TrashEmptyState() {
 
       <div className="text-center space-y-2 max-w-md">
         <h2 className="text-xl font-semibold">Trash is empty</h2>
-        <p className="text-muted-foreground text-sm">
-          Deleted tasks will appear here for 30 days.
-        </p>
+        <p className="text-muted-foreground text-sm">Deleted tasks will appear here for 30 days.</p>
       </div>
     </div>
   );

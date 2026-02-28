@@ -8,9 +8,9 @@ export const Route = createFileRoute("/_protected/today/")({
 });
 
 function TodayPage() {
-  const [tasks, setTasks] = useState<
-    (EmptyStateTaskInput & { id: string; section: "Today" })[]
-  >([]);
+  const [tasks, setTasks] = useState<(EmptyStateTaskInput & { id: string; section: "Today" })[]>(
+    []
+  );
 
   const handleAddTask = (task: EmptyStateTaskInput) => {
     setTasks((previous) => [

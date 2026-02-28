@@ -1,10 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import {
-  LogOut,
-  User,
-  Settings,
-  Loader2,
-} from "lucide-react";
+import { LogOut, User, Settings, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,33 +41,20 @@ export function Header() {
       <header className="pointer-events-auto w-full max-w-5xl h-14 rounded-full border bg-background/60 backdrop-blur-lg shadow-sm px-6 flex items-center justify-between transition-all duration-300">
         {/* Logo Section */}
         <div className="flex items-center gap-8">
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
-          >
+          <Link to="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
             <div className="flex items-center justify-center">
               <img src={logo} alt="Unstack Logo" className="size-6 object-contain" />
             </div>
-            <span className="hidden font-bold tracking-tight sm:inline-block text-lg">
-              Unstack
-            </span>
+            <span className="hidden font-bold tracking-tight sm:inline-block text-lg">Unstack</span>
           </Link>
 
           {/* Desktop Navigation */}
           {user && (
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-              <Link
-                to="/inbox"
-                activeProps={activeLinkProps}
-                inactiveProps={inactiveLinkProps}
-              >
+              <Link to="/inbox" activeProps={activeLinkProps} inactiveProps={inactiveLinkProps}>
                 Home
               </Link>
-              <Link
-                to="/about"
-                activeProps={activeLinkProps}
-                inactiveProps={inactiveLinkProps}
-              >
+              <Link to="/about" activeProps={activeLinkProps} inactiveProps={inactiveLinkProps}>
                 About
               </Link>
             </nav>
@@ -91,7 +73,10 @@ export function Header() {
                   className="relative h-9 w-9 rounded-full ring-offset-background transition-colors hover:bg-muted"
                 >
                   <Avatar className="h-9 w-9 border">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} alt={user.name} />
+                    <AvatarImage
+                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`}
+                      alt={user.name}
+                    />
                     <AvatarFallback className="bg-primary/10 text-primary">
                       {user.name?.charAt(0) ?? "U"}
                     </AvatarFallback>
@@ -101,12 +86,8 @@ export function Header() {
               <DropdownMenuContent align="end" className="w-56 mt-2">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {user.name}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

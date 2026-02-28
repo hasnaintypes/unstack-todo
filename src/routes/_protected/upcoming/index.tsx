@@ -8,9 +8,9 @@ export const Route = createFileRoute("/_protected/upcoming/")({
 });
 
 function UpcomingPage() {
-  const [tasks, setTasks] = useState<
-    (EmptyStateTaskInput & { id: string; section: "Upcoming" })[]
-  >([]);
+  const [tasks, setTasks] = useState<(EmptyStateTaskInput & { id: string; section: "Upcoming" })[]>(
+    []
+  );
 
   const handleAddTask = (task: EmptyStateTaskInput) => {
     setTasks((previous) => [

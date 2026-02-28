@@ -1,21 +1,18 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import {
-  SidebarProvider,
-  SidebarInset,
-} from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/layout/app-sidebar"
-import { DashboardHeader } from "@/components/layout/dashboard-header"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { DashboardHeader } from "@/components/layout/dashboard-header";
 
-export const Route = createFileRoute('/_protected')({
+export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ context }) => {
     if (!context.auth.user && !context.auth.isLoading) {
       throw redirect({
-        to: '/auth/sign-in',
-      })
+        to: "/auth/sign-in",
+      });
     }
   },
   component: ProtectedLayout,
-})
+});
 
 function ProtectedLayout() {
   return (
@@ -32,5 +29,5 @@ function ProtectedLayout() {
         </SidebarInset>
       </div>
     </SidebarProvider>
-  )
+  );
 }

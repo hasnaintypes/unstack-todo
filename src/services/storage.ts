@@ -1,4 +1,4 @@
-import { storage, ID } from '@/lib/appwrite';
+import { storage, ID } from "@/lib/appwrite";
 
 export const storageService = {
   async uploadFile(bucketId: string, file: File) {
@@ -15,5 +15,5 @@ export const storageService = {
 
   async deleteFile(bucketId: string, fileId: string) {
     return await storage.deleteFile(bucketId, fileId);
-  }
+  },
 };
