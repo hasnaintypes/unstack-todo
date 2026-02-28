@@ -52,7 +52,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
         await signUp(email, password, name)
         toast.success("Account created successfully!")
       }
-      navigate({ to: "/dashboard" })
+      navigate({ to: "/inbox" })
     } catch (err: any) {
       toast.error(err.message || "An error occurred. Please try again.")
     } finally {

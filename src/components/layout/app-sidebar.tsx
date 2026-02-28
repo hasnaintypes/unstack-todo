@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Plus,
   Inbox,
@@ -10,6 +11,7 @@ import {
   Trash2,
   CircleDot,
   Hash,
+  Folder,
 } from "lucide-react";
 import { logo } from "@/assets";
 import { cn } from "@/lib/utils";
@@ -18,32 +20,54 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "@tanstack/react-router";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function AppSidebar() {
+  const { state } = useSidebar();
+  const [isProjectsExpanded, setIsProjectsExpanded] = useState(true);
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+    new Set(["Work – Sprint Tasks", "Side Project – Unstack Todo"])
+  );
+
   const navItems = [
-    { icon: Inbox, label: "Inbox", to: "/dashboard", badge: null },
-    { icon: Calendar, label: "Today", to: "/dashboard", badge: "1" },
-    { icon: CalendarDays, label: "Upcoming", to: "/dashboard", badge: null },
-    { icon: Calendar, label: "Calendar", to: "/dashboard", badge: null },
-    { icon: CheckCircle2, label: "Completed", to: "/dashboard", badge: null },
-    { icon: Trash2, label: "Trash", to: "/dashboard", badge: null },
+    { icon: Inbox, label: "Inbox", to: "/inbox" as const, badge: null as string | null },
+    { icon: Calendar, label: "Today", to: "/today" as const, badge: "1" as string | null },
+    { icon: CalendarDays, label: "Upcoming", to: "/upcoming" as const, badge: null as string | null },
+    { icon: Calendar, label: "Calendar", to: "/calendar" as const, badge: null as string | null },
+    { icon: CheckCircle2, label: "Completed", to: "/completed" as const, badge: null as string | null },
+    { icon: Trash2, label: "Trash", to: "/trash" as const, badge: null as string | null },
   ];
+
+  const toggleProject = (projectName: string) => {
+    setExpandedProjects((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectName)) {
+        newSet.delete(projectName);
+      } else {
+        newSet.add(projectName);
+      }
+      return newSet;
+    });
+  };
 
  const projectGroups = [
    {
@@ -99,7 +123,9 @@ export function AppSidebar() {
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 p-1">
             <img src={logo} alt="UnStack Todo" className="size-full" />
           </div>
-          <span className="text-lg font-bold tracking-tight">UnStack</span>
+          {state === "expanded" && (
+            <span className="text-lg font-bold tracking-tight">UnStack</span>
+          )}
         </div>
       </SidebarHeader>
 
@@ -107,30 +133,31 @@ export function AppSidebar() {
       <SidebarContent className="px-2 flex flex-col overflow-hidden">
         <SidebarGroup className="shrink-0">
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton className="text-primary hover:text-primary transition-colors">
-                <Plus className="size-4" />
-                <span className="font-medium">Add task</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarGroup className="shrink-0">
-          <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton asChild>
-                  <Link to={item.to as any}>
-                    <item.icon className="size-4" />
-                    <span>{item.label}</span>
-                    {item.badge && (
-                      <span className="ml-auto text-[10px] font-medium text-muted-foreground">
-                        {item.badge}
-                      </span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton asChild>
+                        <Link to={item.to}>
+                          <item.icon className="size-4" />
+                          {state === "expanded" && <span>{item.label}</span>}
+                          {state === "expanded" && item.badge && (
+                            <span className="ml-auto text-[10px] font-medium text-muted-foreground">
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    {state === "collapsed" && (
+                      <TooltipContent side="right">
+                        <p>{item.label}</p>
+                        {item.badge && <span className="ml-2 text-xs">({item.badge})</span>}
+                      </TooltipContent>
                     )}
-                  </Link>
-                </SidebarMenuButton>
+                  </Tooltip>
+                </TooltipProvider>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -140,80 +167,129 @@ export function AppSidebar() {
 
         {/* This group now takes up the remaining space */}
         <SidebarGroup className="flex-1 flex flex-col min-h-0">
-          <div className="flex items-center justify-between px-2 py-2 shrink-0">
-            <div className="flex items-center gap-2">
-              <ChevronDown className="size-3 text-muted-foreground" />
-              <SidebarGroupLabel className="p-0 text-foreground font-semibold">
-                Projects
-              </SidebarGroupLabel>
-            </div>
-            <SidebarGroupAction>
-              <Plus className="size-3" />
-            </SidebarGroupAction>
-          </div>
+          {state === "expanded" ? (
+            <Collapsible
+              open={isProjectsExpanded}
+              onOpenChange={setIsProjectsExpanded}
+              className="flex-1 flex flex-col min-h-0"
+            >
+              <div className="flex items-center justify-between px-2 py-1.5 shrink-0">
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center gap-1.5 cursor-pointer hover:bg-accent/50 rounded-md px-0 py-1 transition-colors flex-1">
+                    <ChevronDown
+                      className={cn(
+                        "size-3 text-muted-foreground transition-transform",
+                        !isProjectsExpanded && "-rotate-90"
+                      )}
+                    />
+                    <span className="text-sm text-foreground font-semibold">
+                      Projects
+                    </span>
+                  </button>
+                </CollapsibleTrigger>
+                <button
+                  type="button"
+                  className="flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  aria-label="Add project"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
 
-          {/* ScrollArea wraps only the project list */}
-          <ScrollArea className="flex-1 pr-3">
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-2">
-                {projectGroups.map((group) => (
-                  <Collapsible
-                    key={group.name}
-                    defaultOpen
-                    className="group/collapsible"
-                  >
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton className="hover:bg-transparent px-2 cursor-pointer">
-                          <Hash className="size-4 text-muted-foreground mr-1" />
-                          <span className="flex-1 font-semibold text-foreground/80">
-                            {group.name}
-                          </span>
-                          <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="relative mt-2 ml-7 py-1">
-                          <div className="absolute left-2 top-0 h-full w-px bg-border/60 cursor-pointer" />
-                          <SidebarMenu className="gap-3">
-                            {group.tasks.map((task) => (
-                              <SidebarMenuItem
-                                key={task.name}
-                                className="relative z-10 pl-2 cursor-pointer"
-                              >
-                                <SidebarMenuButton className="group h-7 px-0 hover:bg-transparent">
-                                  <div className="flex size-4 items-center justify-center rounded-full bg-background ring-2 ring-background">
-                                    <CircleDot
-                                      className={cn(
-                                        "size-3.5",
-                                        task.status === "in-progress"
-                                          ? "text-primary animate-pulse"
-                                          : "text-muted-foreground/30",
-                                      )}
-                                    />
-                                  </div>
-                                  <span
-                                    className={cn(
-                                      "ml-2 text-sm transition-colors cursor-pointer",
-                                      task.status === "in-progress"
-                                        ? "text-foreground font-medium"
-                                        : "text-muted-foreground group-hover:text-foreground",
-                                    )}
-                                  >
-                                    {task.name}
-                                  </span>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
-                            ))}
-                          </SidebarMenu>
-                        </div>
-                      </CollapsibleContent>
-                    </SidebarMenuItem>
-                  </Collapsible>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </ScrollArea>
+              {/* ScrollArea wraps only the project list - scrollbar hidden */}
+              <CollapsibleContent className="flex-1 min-h-0">
+                <div className="h-full overflow-auto pr-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  <SidebarGroupContent>
+                    <SidebarMenu className="gap-2">
+                      {projectGroups.map((group) => (
+                        <Collapsible
+                          key={group.name}
+                          open={expandedProjects.has(group.name)}
+                          onOpenChange={() => toggleProject(group.name)}
+                          className="group/collapsible"
+                        >
+                          <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuButton className="hover:bg-accent/50 px-2 cursor-pointer w-full justify-start">
+                                <Hash className="size-4 text-muted-foreground" />
+                                <span className="flex-1 font-medium text-foreground/90 text-left">
+                                  {group.name}
+                                </span>
+                              </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="relative mt-2 ml-5 py-1">
+                                <div className="absolute left-2 top-0 h-full w-px bg-border/50" />
+                                <SidebarMenu className="gap-2">
+                                  {group.tasks.map((task) => (
+                                    <SidebarMenuItem
+                                      key={task.name}
+                                      className="relative z-10 pl-3 cursor-pointer"
+                                    >
+                                      <SidebarMenuButton className="group h-7 px-0 hover:bg-transparent justify-start">
+                                        <div className="flex size-4 items-center justify-center rounded-full bg-background ring-2 ring-background shrink-0">
+                                          <CircleDot
+                                            className={cn(
+                                              "size-3.5",
+                                              task.status === "in-progress"
+                                                ? "text-primary animate-pulse"
+                                                : task.status === "done"
+                                                ? "text-green-500"
+                                                : "text-muted-foreground/30",
+                                            )}
+                                          />
+                                        </div>
+                                        <span
+                                          className={cn(
+                                            "ml-2 text-sm transition-colors cursor-pointer",
+                                            task.status === "in-progress"
+                                              ? "text-foreground font-medium"
+                                              : task.status === "done"
+                                              ? "text-muted-foreground line-through"
+                                              : "text-muted-foreground group-hover:text-foreground",
+                                          )}
+                                        >
+                                          {task.name}
+                                        </span>
+                                      </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                  ))}
+                                </SidebarMenu>
+                              </div>
+                            </CollapsibleContent>
+                          </SidebarMenuItem>
+                        </Collapsible>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          ) : (
+            // Collapsed sidebar - show just folder icon with tooltip
+            <div className="flex flex-col gap-1">
+              {projectGroups.map((group) => (
+                <TooltipProvider key={group.name}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        className="w-full justify-center"
+                        onClick={() => toggleProject(group.name)}
+                      >
+                        <Folder className="size-4 text-muted-foreground" />
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="font-semibold">{group.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {group.tasks.length} tasks
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
+            </div>
+          )}
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>

@@ -28,11 +28,18 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
   const [open, setOpen] = React.useState(false);
+
+  const goToProfile = () => {
+    window.location.assign("/profile");
+  };
+
+  const goToSettings = () => {
+    window.location.assign("/settings");
+  };
 
   // 1. Keyboard shortcut listener (Cmd+K)
   React.useEffect(() => {
@@ -55,16 +62,11 @@ export function DashboardHeader() {
     : "U";
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex flex-1 items-center">
-        <SidebarTrigger className="-ml-1 h-8 w-8 text-muted-foreground hover:bg-muted" />
-      </div>
-
-      <div className="flex shrink-0 items-center justify-center">
-        {/* 2. Search Trigger Button (Replaces raw input) */}
+    <header className="grid h-16 shrink-0 grid-cols-[auto_1fr_auto] items-center gap-4 border-b bg-background/95 px-6 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className="flex justify-center">
         <button
           onClick={() => setOpen(true)}
-          className="relative flex h-9 w-[400px] items-center justify-between rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary"
+          className="relative flex h-9 w-full max-w-115 items-center justify-between rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <div className="flex items-center gap-2">
             <Search className="size-4" />
@@ -76,7 +78,7 @@ export function DashboardHeader() {
         </button>
       </div>
 
-      <div className="flex flex-1 items-center justify-end gap-4">
+      <div className="flex items-center justify-end gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 rounded-full outline-none transition-transform active:scale-95">
@@ -100,11 +102,11 @@ export function DashboardHeader() {
               </p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={goToProfile}>
               <User className="mr-2 size-4" />
               <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={goToSettings}>
               <Settings className="mr-2 size-4" />
               <span>Settings</span>
             </DropdownMenuItem>
@@ -137,12 +139,12 @@ export function DashboardHeader() {
             </CommandItem>
             <CommandItem
               onSelect={() => {
-                console.log("Dashboard");
+                console.log("Inbox");
                 setOpen(false);
               }}
             >
               <LayoutDashboard className="mr-2 size-4" />
-              <span>Go to Dashboard</span>
+              <span>Go to Inbox</span>
             </CommandItem>
             <CommandItem
               onSelect={() => {
@@ -158,7 +160,7 @@ export function DashboardHeader() {
           <CommandGroup heading="Settings">
             <CommandItem
               onSelect={() => {
-                console.log("Profile");
+                goToProfile();
                 setOpen(false);
               }}
             >
@@ -167,7 +169,7 @@ export function DashboardHeader() {
             </CommandItem>
             <CommandItem
               onSelect={() => {
-                console.log("Settings");
+                goToSettings();
                 setOpen(false);
               }}
             >

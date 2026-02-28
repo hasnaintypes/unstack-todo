@@ -62,7 +62,7 @@ export function Header() {
           {user && (
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
               <Link
-                to="/dashboard"
+                to="/inbox"
                 activeProps={activeLinkProps}
                 inactiveProps={inactiveLinkProps}
               >
