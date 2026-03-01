@@ -1,9 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { HeroSection, Features, PricingSection, Testimonials, CTASection } from "@/components/home";
 
 export const Route = createFileRoute("/_public/_marketing/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  return <div>Hello "/_public/_marketing/"!</div>;
+  return (
+    <div className="relative min-h-screen bg-background">
+      <HeroSection />
+      <Features />
+      <PricingSection />
+      <Testimonials />
+      <CTASection />
+    </div>
+  );
 }
