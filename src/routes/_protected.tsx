@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
@@ -15,6 +15,9 @@ export const Route = createFileRoute("/_protected")({
 });
 
 function ProtectedLayout() {
+  const location = useLocation();
+  const isCalendarPage = location.pathname === "/calendar";
+
   return (
     <SidebarProvider>
       <div className="flex h-svh w-full overflow-hidden bg-background font-sans">
@@ -22,7 +25,7 @@ function ProtectedLayout() {
         <SidebarInset className="flex flex-col overflow-hidden">
           <DashboardHeader />
           <main className="flex-1 overflow-y-auto p-6 md:p-8">
-            <div className="max-w-5xl mx-auto">
+            <div className={isCalendarPage ? "max-w-screen-2xl mx-auto" : "max-w-5xl mx-auto"}>
               <Outlet />
             </div>
           </main>
