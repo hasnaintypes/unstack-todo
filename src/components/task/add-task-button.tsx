@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { TaskDialog } from "@/components/calendar/task-dialog";
+import { TaskAddDialog } from "./task-add-dialog";
 import { useCalendar } from "@/context/calendar-context";
 import type { CalendarTask } from "@/types/calendar";
 
@@ -29,7 +29,7 @@ export function AddTaskButton() {
   };
 
   return (
-    <TaskDialog
+    <TaskAddDialog
       open={isDialogOpen}
       onOpenChange={setIsDialogOpen}
       onSave={handleSaveTask}

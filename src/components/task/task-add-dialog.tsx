@@ -34,9 +34,19 @@ import {
 import { cn } from "@/lib/utils";
 import type { CalendarTask, TaskColor, TaskPriority } from "@/types/calendar";
 
-export interface TaskDialogProps {
+export interface EmptyStateTaskInput {
+  title: string;
+  description?: string;
+  subtasks?: string[];
+  dueDate?: string;
+  priority?: string;
+  category?: string;
+}
+
+export interface TaskAddDialogProps {
   task?: CalendarTask;
   onSave?: (task: Partial<CalendarTask>) => void;
+  onAddTask?: (task: EmptyStateTaskInput) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
@@ -74,7 +84,7 @@ const generateTimeOptions = () => {
 
 const TIME_OPTIONS = generateTimeOptions();
 
-export function TaskDialog({ task, onSave, open, onOpenChange, trigger }: TaskDialogProps) {
+export function TaskAddDialog({ task, onSave, onAddTask, open, onOpenChange, trigger }: TaskAddDialogProps) {
   const isEditMode = !!task;
 
   const [title, setTitle] = React.useState(task?.title || "");
@@ -122,21 +132,34 @@ export function TaskDialog({ task, onSave, open, onOpenChange, trigger }: TaskDi
   const handleSave = () => {
     if (!title.trim()) return;
 
-    const taskData: Partial<CalendarTask> = {
-      ...(isEditMode && { id: task.id }),
-      title: title.trim(),
-      description: description.trim() || undefined,
-      subtasks: subtasks.length > 0 ? subtasks : undefined,
-      dueDate: date ? format(date, "yyyy-MM-dd") : undefined,
-      startTime: startTime || undefined,
-      endTime: endTime || undefined,
-      priority,
-      color,
-      category: category.trim() || undefined,
-      status: task?.status || "todo",
-    };
-
-    onSave?.(taskData);
+    if (onAddTask) {
+      // For empty state components using EmptyStateTaskInput
+      const emptyStateTask: EmptyStateTaskInput = {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        subtasks: subtasks.length > 0 ? subtasks : undefined,
+        dueDate: date ? format(date, "PPP") : undefined,
+        priority: priority.toString(),
+        category: category.trim() || undefined,
+      };
+      onAddTask(emptyStateTask);
+    } else if (onSave) {
+      // For calendar components using CalendarTask
+      const taskData: Partial<CalendarTask> = {
+        ...(isEditMode && { id: task.id }),
+        title: title.trim(),
+        description: description.trim() || undefined,
+        subtasks: subtasks.length > 0 ? subtasks : undefined,
+        dueDate: date ? format(date, "yyyy-MM-dd") : undefined,
+        startTime: startTime || undefined,
+        endTime: endTime || undefined,
+        priority,
+        color,
+        category: category.trim() || undefined,
+        status: task?.status || "todo",
+      };
+      onSave(taskData);
+    }
 
     if (!isEditMode) {
       resetForm();

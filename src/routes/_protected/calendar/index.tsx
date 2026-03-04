@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarProvider } from "@/context/calendar-context";
-import { CalendarHeader, MonthView, DayView, WeekView, AddTaskButton } from "@/components/calendar";
+import { CalendarHeader, MonthView, DayView, WeekView } from "@/components/calendar";
+import { AddTaskButton } from "@/components/task";
 import { DndProviderWrapper } from "@/components/calendar/dnd/dnd-provider";
 import { useCalendar } from "@/context/calendar-context";
 import type { CalendarTask } from "@/types/calendar";
