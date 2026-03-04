@@ -2,9 +2,8 @@ import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns";
 import { useCalendar } from "@/context/calendar-context";
 import { isWorkingHour } from "@/lib/calendar-helpers";
 import { cn } from "@/lib/utils";
-import { TaskDetailsDialog } from "./task-details-dialog";
+import { TaskDetailsDialog, DraggableTask } from "@/components/task";
 import { DroppableTimeBlock } from "./dnd/droppable-time-block";
-import { DraggableTask } from "./dnd/draggable-task";
 import type { CalendarTask, TaskColor } from "@/types/calendar";
 
 const COLOR_CLASSES: Record<TaskColor, { bg: string; border: string; dot: string; text: string }> =
