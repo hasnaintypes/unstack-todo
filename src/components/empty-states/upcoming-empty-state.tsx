@@ -4,8 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { upcomingTaskEmptyState } from "@/assets";
 import { Button } from "@/components/ui/button";
-import { TaskAddDialog } from "./task-add-dialog";
-import type { EmptyStateTaskInput } from "./task-add-dialog";
+import { TaskAddDialog, type EmptyStateTaskInput } from "@/components/task";
 
 interface UpcomingEmptyStateProps {
   onAddTask: (task: EmptyStateTaskInput) => void;

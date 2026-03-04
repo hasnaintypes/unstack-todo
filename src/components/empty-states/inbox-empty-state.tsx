@@ -4,9 +4,8 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { inboxTaskEmptyState } from "@/assets";
 import { Button } from "@/components/ui/button";
-// Ensure this matches your filename for the Dialog component
-import { TaskAddDialog } from "./task-add-dialog";
-import type { EmptyStateTaskInput } from "./task-add-dialog";
+import { TaskAddDialog, type EmptyStateTaskInput } from "@/components/task";
+
 
 interface InboxEmptyStateProps {
   onAddTask: (task: EmptyStateTaskInput) => void;
