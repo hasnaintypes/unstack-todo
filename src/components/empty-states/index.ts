@@ -4,4 +4,3 @@ export { UpcomingEmptyState } from "./upcoming-empty-state";
 export { CompletedEmptyState } from "./completed-empty-state";
 export { TrashEmptyState } from "./trash-empty-state";
 export type { EmptyStateTaskInput } from "@/components/task";
-

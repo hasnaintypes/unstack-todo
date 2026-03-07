@@ -11,18 +11,19 @@ import {
   Palette,
 } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import type { CalendarTask, TaskColor } from "@/types/calendar";
-import { getPriorityLabel } from "@/lib/calendar-helpers";
+import type { CalendarTask, TaskColor } from "@/types/task";
+import { getPriorityLabel } from "@/lib/task-helpers";
 
-interface TaskDetailsDialogProps {
+interface TaskDetailsSheetProps {
   task: CalendarTask;
   children: React.ReactNode;
 }
@@ -33,48 +34,112 @@ const statusLabels = {
   completed: "Completed",
 };
 
-const COLOR_DISPLAY: Record<TaskColor, { name: string; class: string }> = {
-  blue: { name: "Blue", class: "border-blue-500 text-blue-700 dark:text-blue-300" },
-  green: { name: "Green", class: "border-green-500 text-green-700 dark:text-green-300" },
-  red: { name: "Red", class: "border-red-500 text-red-700 dark:text-red-300" },
-  yellow: { name: "Yellow", class: "border-yellow-500 text-yellow-700 dark:text-yellow-300" },
-  purple: { name: "Purple", class: "border-purple-500 text-purple-700 dark:text-purple-300" },
-  orange: { name: "Orange", class: "border-orange-500 text-orange-700 dark:text-orange-300" },
-  gray: { name: "Gray", class: "border-gray-500 text-gray-700 dark:text-gray-300" },
+const COLOR_DISPLAY: Record<
+  TaskColor,
+  { name: string; badgeClass: string; iconClass: string }
+> = {
+  blue: {
+    name: "Blue",
+    badgeClass: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+    iconClass: "text-blue-500",
+  },
+  green: {
+    name: "Green",
+    badgeClass: "bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/20",
+    iconClass: "text-green-500",
+  },
+  red: {
+    name: "Red",
+    badgeClass: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
+    iconClass: "text-red-500",
+  },
+  yellow: {
+    name: "Yellow",
+    badgeClass: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20",
+    iconClass: "text-yellow-500",
+  },
+  purple: {
+    name: "Purple",
+    badgeClass: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
+    iconClass: "text-purple-500",
+  },
+  orange: {
+    name: "Orange",
+    badgeClass: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20",
+    iconClass: "text-orange-500",
+  },
+  gray: {
+    name: "Gray",
+    badgeClass: "bg-gray-500/10 text-gray-700 dark:text-gray-300 border-gray-500/20",
+    iconClass: "text-gray-500",
+  },
 };
 
-const PRIORITY_CLASSES = {
-  1: "border-blue-500 text-blue-700 dark:text-blue-300",
-  2: "border-yellow-500 text-yellow-700 dark:text-yellow-300",
-  3: "border-orange-500 text-orange-700 dark:text-orange-300",
-  4: "border-red-500 text-red-700 dark:text-red-300",
+const PRIORITY_CONFIG = {
+  1: {
+    class: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+    iconClass: "text-blue-500",
+  },
+  2: {
+    class: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20",
+    iconClass: "text-yellow-500",
+  },
+  3: {
+    class: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20",
+    iconClass: "text-orange-500",
+  },
+  4: {
+    class: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
+    iconClass: "text-red-500",
+  },
 };
 
-export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
+export function TaskDetailsSheet({ task, children }: TaskDetailsSheetProps) {
+  const colorConfig = COLOR_DISPLAY[task.color];
+  const priorityConfig = PRIORITY_CONFIG[task.priority];
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-125">
-        <DialogHeader>
-          <DialogTitle className="text-xl">{task.title}</DialogTitle>
-        </DialogHeader>
+    <Sheet>
+      <SheetTrigger asChild>{children}</SheetTrigger>
+      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+        <SheetHeader className="pb-6">
+          <SheetTitle className="text-2xl font-semibold leading-tight pr-6">
+            {task.title}
+          </SheetTitle>
+        </SheetHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-6">
           {/* Status */}
-          <div className="flex items-start gap-3">
-            {task.status === "completed" ? (
-              <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
-            ) : (
-              <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />
-            )}
+          <div className="flex items-center gap-4">
+            <div
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full",
+                task.status === "completed"
+                  ? "bg-green-500/10"
+                  : task.status === "in-progress"
+                    ? "bg-blue-500/10"
+                    : "bg-muted"
+              )}
+            >
+              {task.status === "completed" ? (
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              ) : (
+                <Circle className="h-5 w-5 text-muted-foreground" />
+              )}
+            </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">Status</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                Status
+              </p>
               <Badge
                 variant="outline"
                 className={cn(
-                  "mt-1",
-                  task.status === "completed" && "border-green-600 text-green-600",
-                  task.status === "in-progress" && "border-blue-600 text-blue-600"
+                  "font-medium",
+                  task.status === "completed" &&
+                    "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300",
+                  task.status === "in-progress" &&
+                    "bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-300",
+                  task.status === "todo" && "bg-muted"
                 )}
               >
                 {statusLabels[task.status]}
@@ -82,12 +147,18 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
             </div>
           </div>
 
+          <Separator />
+
           {/* Due Date */}
-          <div className="flex items-start gap-3">
-            <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+              <Calendar className="h-5 w-5 text-foreground" />
+            </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">Due Date</p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                Due Date
+              </p>
+              <p className="text-sm font-medium">
                 {format(parseISO(task.dueDate), "EEEE, MMMM d, yyyy")}
               </p>
             </div>
@@ -95,11 +166,15 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
 
           {/* Time */}
           {(task.startTime || task.endTime) && (
-            <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <Clock className="h-5 w-5 text-foreground" />
+              </div>
               <div className="flex-1">
-                <p className="text-sm font-medium">Time</p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                  Time
+                </p>
+                <p className="text-sm font-medium">
                   {task.startTime && task.endTime
                     ? `${task.startTime} - ${task.endTime}`
                     : task.startTime || task.endTime}
@@ -108,74 +183,121 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
             </div>
           )}
 
+          <Separator />
+
           {/* Priority */}
-          <div className="flex items-start gap-3">
-            <Flag className="h-5 w-5 text-muted-foreground mt-0.5" />
+          <div className="flex items-center gap-4">
+            <div
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full",
+                priorityConfig.iconClass === "text-blue-500" && "bg-blue-500/10",
+                priorityConfig.iconClass === "text-yellow-500" && "bg-yellow-500/10",
+                priorityConfig.iconClass === "text-orange-500" && "bg-orange-500/10",
+                priorityConfig.iconClass === "text-red-500" && "bg-red-500/10"
+              )}
+            >
+              <Flag className={cn("h-5 w-5", priorityConfig.iconClass)} />
+            </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">Priority</p>
-              <Badge variant="outline" className={cn("mt-1", PRIORITY_CLASSES[task.priority])}>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                Priority
+              </p>
+              <Badge variant="outline" className={cn("font-medium", priorityConfig.class)}>
                 {getPriorityLabel(task.priority)}
               </Badge>
             </div>
           </div>
 
           {/* Color */}
-          <div className="flex items-start gap-3">
-            <Palette className="h-5 w-5 text-muted-foreground mt-0.5" />
+          <div className="flex items-center gap-4">
+            <div
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full",
+                colorConfig.iconClass === "text-blue-500" && "bg-blue-500/10",
+                colorConfig.iconClass === "text-green-500" && "bg-green-500/10",
+                colorConfig.iconClass === "text-red-500" && "bg-red-500/10",
+                colorConfig.iconClass === "text-yellow-500" && "bg-yellow-500/10",
+                colorConfig.iconClass === "text-purple-500" && "bg-purple-500/10",
+                colorConfig.iconClass === "text-orange-500" && "bg-orange-500/10",
+                colorConfig.iconClass === "text-gray-500" && "bg-gray-500/10"
+              )}
+            >
+              <Palette className={cn("h-5 w-5", colorConfig.iconClass)} />
+            </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">Color</p>
-              <Badge variant="outline" className={cn("mt-1", COLOR_DISPLAY[task.color].class)}>
-                {COLOR_DISPLAY[task.color].name}
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                Color
+              </p>
+              <Badge variant="outline" className={cn("font-medium", colorConfig.badgeClass)}>
+                {colorConfig.name}
               </Badge>
             </div>
           </div>
 
           {/* Category */}
           {task.category && (
-            <div className="flex items-start gap-3">
-              <Tag className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Category</p>
-                <p className="text-sm text-muted-foreground mt-1">{task.category}</p>
+            <>
+              <Separator />
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                  <Tag className="h-5 w-5 text-foreground" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                    Category
+                  </p>
+                  <p className="text-sm font-medium">{task.category}</p>
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {/* Description */}
           {task.description && (
-            <div className="flex items-start gap-3">
-              <AlignLeft className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Description</p>
-                <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
-                  {task.description}
-                </p>
+            <>
+              <Separator />
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted shrink-0">
+                  <AlignLeft className="h-5 w-5 text-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                    Description
+                  </p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">
+                    {task.description}
+                  </p>
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {/* Subtasks */}
           {task.subtasks && task.subtasks.length > 0 && (
-            <div className="flex items-start gap-3">
-              <ListTodo className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-medium mb-2">Subtasks</p>
-                <ul className="space-y-1">
-                  {task.subtasks.map((subtask, index) => (
-                    <li
-                      key={index}
-                      className="text-sm text-muted-foreground flex items-center gap-2"
-                    >
-                      <Circle className="h-3 w-3" />
-                      {subtask}
-                    </li>
-                  ))}
-                </ul>
+            <>
+              <Separator />
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted shrink-0">
+                  <ListTodo className="h-5 w-5 text-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    Subtasks
+                  </p>
+                  <ul className="space-y-2">
+                    {task.subtasks.map((subtask, index) => (
+                      <li key={index} className="flex items-start gap-2.5">
+                        <Circle className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                        <span className="text-sm leading-relaxed wrap-break-word">{subtask}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -6,7 +6,6 @@ import { inboxTaskEmptyState } from "@/assets";
 import { Button } from "@/components/ui/button";
 import { TaskAddDialog, type EmptyStateTaskInput } from "@/components/task";
 
-
 interface InboxEmptyStateProps {
   onAddTask: (task: EmptyStateTaskInput) => void;
 }

@@ -48,7 +48,6 @@ export function AppSidebar() {
       to: "/upcoming" as const,
       badge: null as string | null,
     },
-    { icon: Calendar, label: "Calendar", to: "/calendar" as const, badge: null as string | null },
     {
       icon: CheckCircle2,
       label: "Completed",

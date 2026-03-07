@@ -32,7 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import type { CalendarTask, TaskColor, TaskPriority } from "@/types/calendar";
+import type { CalendarTask, TaskColor, TaskPriority } from "@/types/task";
 
 export interface EmptyStateTaskInput {
   title: string;
@@ -84,7 +84,14 @@ const generateTimeOptions = () => {
 
 const TIME_OPTIONS = generateTimeOptions();
 
-export function TaskAddDialog({ task, onSave, onAddTask, open, onOpenChange, trigger }: TaskAddDialogProps) {
+export function TaskAddDialog({
+  task,
+  onSave,
+  onAddTask,
+  open,
+  onOpenChange,
+  trigger,
+}: TaskAddDialogProps) {
   const isEditMode = !!task;
 
   const [title, setTitle] = React.useState(task?.title || "");
