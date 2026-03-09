@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/shared/components/ui/switch";
+import { Button } from "@/shared/components/ui/button";
 
 export const Route = createFileRoute("/_protected/settings/")({
   component: SettingsPage,

@@ -1,51 +1,77 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { TodayEmptyState } from "@/components/empty-states";
-import type { EmptyStateTaskInput } from "@/components/empty-states";
+import { TaskEmptyState } from "@/features/tasks/components/empty-state";
+import { TaskList } from "@/features/tasks/components/task-list";
+import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
+import { useTodayTasks } from "@/features/tasks/hooks/use-task-filters";
+import { useTasks } from "@/app/providers/task-provider";
+import type { CalendarTask } from "@/features/tasks/types/task.types";
+import { todayTaskEmptyState } from "@/assets";
 
 export const Route = createFileRoute("/_protected/today/")({
   component: TodayPage,
 });
 
 function TodayPage() {
-  const [tasks, setTasks] = useState<(EmptyStateTaskInput & { id: string; section: "Today" })[]>(
-    []
-  );
+  const todayTasks = useTodayTasks();
+  const { addTask, updateTask, toggleTaskComplete, moveToTrash } = useTasks();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
 
-  const handleAddTask = (task: EmptyStateTaskInput) => {
-    setTasks((previous) => [
-      {
-        ...task,
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        section: "Today",
-      },
-      ...previous,
-    ]);
+  const handleAddTask = (taskData: Partial<CalendarTask>) => {
+    addTask({
+      ...taskData,
+      dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
+    } as Omit<CalendarTask, "id">);
+  };
+
+  const handleEditTask = (taskData: Partial<CalendarTask>) => {
+    if (editingTask) {
+      updateTask(editingTask.id, taskData);
+      setEditingTask(undefined);
+    }
+  };
+
+  const handleEditClick = (task: CalendarTask) => {
+    setEditingTask(task);
+    setIsAddDialogOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setEditingTask(undefined);
+    }
+    setIsAddDialogOpen(open);
   };
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      {tasks.length === 0 ? (
-        <TodayEmptyState onAddTask={handleAddTask} />
-      ) : (
-        <div className="container py-10 max-w-screen-2xl mx-auto px-4">
-          <h1 className="text-3xl font-bold tracking-tight mb-6">Today</h1>
-          <div className="space-y-3">
-            {tasks.map((task) => (
-              <div key={task.id} className="rounded-lg border bg-card p-4">
-                <p className="font-medium">{task.title}</p>
-                {task.description ? (
-                  <p className="mt-1 text-sm text-muted-foreground">{task.description}</p>
-                ) : null}
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {task.section} · {task.priority} · {task.category}
-                  {task.dueDate ? ` · ${task.dueDate}` : ""}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <>
+      <TaskList
+        title="Today"
+        tasks={todayTasks}
+        onToggleComplete={toggleTaskComplete}
+        onEdit={handleEditClick}
+        onDelete={moveToTrash}
+        onAddTask={() => setIsAddDialogOpen(true)}
+        groupBy="priority"
+        emptyState={
+          <TaskEmptyState
+            image={todayTaskEmptyState}
+            imageAlt="Empty today"
+            title="Today"
+            heading="A clear field ahead"
+            description="All your tasks for today are complete. Add a new task to get started."
+            onAddTask={() => setIsAddDialogOpen(true)}
+          />
+        }
+      />
+
+      <TaskAddDialog
+        task={editingTask}
+        open={isAddDialogOpen}
+        onOpenChange={handleDialogClose}
+        onSave={editingTask ? handleEditTask : handleAddTask}
+      />
+    </>
   );
 }

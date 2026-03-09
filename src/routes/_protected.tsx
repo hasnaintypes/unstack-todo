@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/layout/app-sidebar";
-import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { SidebarProvider, SidebarInset } from "@/shared/components/ui/sidebar";
+import { AppSidebar } from "@/shared/components/layout/app-sidebar";
+import { DashboardHeader } from "@/shared/components/layout/dashboard-header";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ context }) => {
