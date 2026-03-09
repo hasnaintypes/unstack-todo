@@ -1,0 +1,338 @@
+"use client";
+
+import * as React from "react";
+import { format, parseISO } from "date-fns";
+import {
+  Calendar as CalendarIcon,
+  Flag,
+  Tag,
+  AlignLeft,
+  Plus,
+  X,
+  FolderKanban,
+} from "lucide-react";
+
+import { Button } from "@/shared/components/ui/button";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Calendar } from "@/shared/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/components/ui/dialog";
+import { Separator } from "@/shared/components/ui/separator";
+import { TaskDropdownMenu } from "@/features/tasks/components/task-dropdown-menu";
+import type { CalendarTask, TaskPriority } from "@/features/tasks/types/task.types";
+
+export interface EmptyStateTaskInput {
+  title: string;
+  description?: string;
+  subtasks?: string[];
+  dueDate?: string;
+  priority?: string;
+  category?: string;
+  project?: string;
+}
+
+export interface TaskAddDialogProps {
+  task?: CalendarTask;
+  onSave?: (task: Partial<CalendarTask>) => void;
+  onAddTask?: (task: EmptyStateTaskInput) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}
+
+const PRIORITIES: { value: TaskPriority; label: string }[] = [
+  { value: 1, label: "Low" },
+  { value: 2, label: "Medium" },
+  { value: 3, label: "High" },
+  { value: 4, label: "Urgent" },
+];
+
+const DEFAULT_CATEGORIES = [
+  { value: "personal", label: "Personal" },
+  { value: "work", label: "Work" },
+  { value: "health", label: "Health" },
+  { value: "shopping", label: "Shopping" },
+];
+
+const DEFAULT_PROJECTS = [
+  { value: "inbox", label: "Inbox" },
+  { value: "personal", label: "Personal" },
+  { value: "work", label: "Work" },
+];
+
+export function TaskAddDialog({
+  task,
+  onSave,
+  onAddTask,
+  open,
+  onOpenChange,
+  trigger,
+}: TaskAddDialogProps) {
+  const isEditMode = !!task;
+
+  const [title, setTitle] = React.useState(task?.title || "");
+  const [description, setDescription] = React.useState(task?.description || "");
+  const [date, setDate] = React.useState<Date | undefined>(
+    task?.dueDate ? parseISO(task.dueDate) : undefined
+  );
+  const [priority, setPriority] = React.useState<TaskPriority>(task?.priority || 2);
+  const [category, setCategory] = React.useState(task?.category || "");
+  const [categories, setCategories] = React.useState(DEFAULT_CATEGORIES);
+  const [project, setProject] = React.useState(task?.project || "");
+  const [projects, setProjects] = React.useState(DEFAULT_PROJECTS);
+  const [subtasks, setSubtasks] = React.useState<string[]>(task?.subtasks || []);
+  const [newSubtask, setNewSubtask] = React.useState("");
+  const [isAddingSubtask, setIsAddingSubtask] = React.useState(false);
+
+  // Update form when task changes
+  React.useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description || "");
+      setDate(task.dueDate ? parseISO(task.dueDate) : undefined);
+      setPriority(task.priority);
+      setCategory(task.category || "");
+      setProject(task.project || "");
+      setSubtasks(task.subtasks || []);
+    }
+  }, [task]);
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setDate(undefined);
+    setPriority(2);
+    setCategory("");
+    setProject("");
+    setSubtasks([]);
+    setIsAddingSubtask(false);
+  };
+
+  const handleAddCategory = (label: string) => {
+    const value = label.toLowerCase().replace(/\s+/g, "-");
+    const newCategory = { value, label };
+    setCategories([...categories, newCategory]);
+    setCategory(value);
+  };
+
+  const handleAddProject = (label: string) => {
+    const value = label.toLowerCase().replace(/\s+/g, "-");
+    const newProject = { value, label };
+    setProjects([...projects, newProject]);
+    setProject(value);
+  };
+
+  const handleSave = () => {
+    if (!title.trim()) return;
+
+    if (onAddTask) {
+      // For empty state components using EmptyStateTaskInput
+      const emptyStateTask: EmptyStateTaskInput = {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        subtasks: subtasks.length > 0 ? subtasks : undefined,
+        dueDate: date ? format(date, "PPP") : undefined,
+        priority: priority.toString(),
+        category: category.trim() || undefined,
+        project: project.trim() || undefined,
+      };
+      onAddTask(emptyStateTask);
+    } else if (onSave) {
+      // For calendar components using CalendarTask
+      const taskData: Partial<CalendarTask> = {
+        ...(isEditMode && { id: task.id }),
+        title: title.trim(),
+        description: description.trim() || undefined,
+        subtasks: subtasks.length > 0 ? subtasks : undefined,
+        dueDate: date ? format(date, "yyyy-MM-dd") : undefined,
+        priority,
+        color: "blue", // Default color
+        category: category.trim() || undefined,
+        project: project.trim() || undefined,
+        status: task?.status || "todo",
+      };
+      onSave(taskData);
+    }
+
+    if (!isEditMode) {
+      resetForm();
+    }
+    onOpenChange?.(false);
+  };
+
+  const handleAddSubtask = () => {
+    if (newSubtask.trim()) {
+      setSubtasks([...subtasks, newSubtask.trim()]);
+      setNewSubtask("");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      <DialogContent className="sm:max-w-175 p-0 gap-0 border-none overflow-hidden bg-card shadow-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="sr-only">
+          <DialogTitle>{isEditMode ? "Edit Task" : "Add New Task"}</DialogTitle>
+        </DialogHeader>
+
+        <div className="p-5 space-y-4">
+          {/* Task Title */}
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Task name"
+            className="w-full bg-transparent px-0 text-xl font-semibold outline-none placeholder:text-muted-foreground/40"
+            autoFocus
+          />
+
+          {/* Description */}
+          <div className="flex gap-3">
+            <AlignLeft className="h-5 w-5 text-muted-foreground/60 shrink-0 mt-2" />
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Description"
+              className="min-h-25 resize-none border-none bg-transparent p-2 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50 leading-relaxed"
+            />
+          </div>
+
+          {/* Sub-tasks Section */}
+          <div className="space-y-2">
+            {subtasks.map((task, index) => (
+              <div key={index} className="group flex items-center gap-3 pl-8 text-sm">
+                <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0" />
+                <span className="flex-1 text-foreground/80">{task}</span>
+                <button onClick={() => setSubtasks(subtasks.filter((_, i) => i !== index))}>
+                  <X className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              </div>
+            ))}
+
+            {isAddingSubtask ? (
+              <div className="flex items-center gap-3 pl-8">
+                <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0" />
+                <input
+                  autoFocus
+                  className="flex-1 bg-transparent text-sm outline-none"
+                  value={newSubtask}
+                  onChange={(e) => setNewSubtask(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddSubtask();
+                    } else if (e.key === "Escape") {
+                      setIsAddingSubtask(false);
+                      setNewSubtask("");
+                    }
+                  }}
+                  onBlur={() => {
+                    if (newSubtask.trim()) {
+                      handleAddSubtask();
+                    }
+                    setIsAddingSubtask(false);
+                  }}
+                />
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAddingSubtask(true)}
+                className="flex items-center gap-2 pl-8 text-xs font-medium text-muted-foreground/60 hover:text-[#e44232] transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add sub-task
+              </button>
+            )}
+          </div>
+
+          {/* Date Row */}
+          <div className="border-t pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-9 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-accent"
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                    {date ? format(date, "MMM dd, yyyy") : "Due date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Project, Priority and Category Row */}
+          <div className="flex flex-wrap items-center gap-2 border-t pt-4">
+            <TaskDropdownMenu
+              icon={<FolderKanban className="h-4 w-4" />}
+              placeholder="Project"
+              value={project}
+              options={projects}
+              onValueChange={setProject}
+              onAddOption={handleAddProject}
+              showAddOption
+              addOptionLabel="Add project"
+              addDialogTitle="Create New Project"
+              addDialogDescription="Add a new project to organize your tasks."
+            />
+
+            <Separator orientation="vertical" className="h-6" />
+
+            <TaskDropdownMenu
+              icon={<Flag className="h-4 w-4" />}
+              placeholder="Priority"
+              value={priority.toString()}
+              options={PRIORITIES.map((p) => ({ value: p.value.toString(), label: p.label }))}
+              onValueChange={(val) => setPriority(parseInt(val) as TaskPriority)}
+            />
+
+            <Separator orientation="vertical" className="h-6" />
+
+            <TaskDropdownMenu
+              icon={<Tag className="h-4 w-4" />}
+              placeholder="Category"
+              value={category}
+              options={categories}
+              onValueChange={setCategory}
+              onAddOption={handleAddCategory}
+              showAddOption
+              addOptionLabel="Add category"
+              addDialogTitle="Create New Category"
+              addDialogDescription="Add a new category to group your tasks."
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-border/40 px-5 py-3 flex items-center justify-end bg-muted/20">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-4 text-sm font-semibold"
+              onClick={() => onOpenChange?.(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={!title.trim()}
+              onClick={handleSave}
+              className="h-9 px-4 text-sm font-semibold bg-[#e44232] hover:bg-[#c3392b] text-white"
+            >
+              {isEditMode ? "Save changes" : "Add task"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
