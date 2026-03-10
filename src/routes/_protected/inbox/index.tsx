@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_protected/inbox/")({
 
 function InboxPage() {
   const inboxTasks = useInboxTasks();
-  const { addTask, updateTask, toggleTaskComplete, moveToTrash } = useTasks();
+  const { addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } = useTasks();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
 
@@ -60,6 +60,7 @@ function InboxPage() {
         onToggleComplete={toggleTaskComplete}
         onEdit={handleEditClick}
         onDelete={moveToTrash}
+        onTaskClick={setSelectedTask}
         onAddTask={() => setIsAddDialogOpen(true)}
         showProject={false}
         emptyState={

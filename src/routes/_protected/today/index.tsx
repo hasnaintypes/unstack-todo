@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_protected/today/")({
 
 function TodayPage() {
   const todayTasks = useTodayTasks();
-  const { addTask, updateTask, toggleTaskComplete, moveToTrash } = useTasks();
+  const { addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } = useTasks();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
 
@@ -52,6 +52,7 @@ function TodayPage() {
         onToggleComplete={toggleTaskComplete}
         onEdit={handleEditClick}
         onDelete={moveToTrash}
+        onTaskClick={setSelectedTask}
         onAddTask={() => setIsAddDialogOpen(true)}
         groupBy="priority"
         emptyState={

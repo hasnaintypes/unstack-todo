@@ -4,14 +4,13 @@ import {
   Moon,
   Monitor,
   Palette,
-  Bell,
   Archive,
-  Clock,
 } from "lucide-react";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
 import { cn } from "@/shared/lib/utils";
 import { useTheme } from "@/app/providers/theme-provider";
+import { ReminderSettings } from "@/features/reminders/components/reminder-settings";
 
 export const Route = createFileRoute("/_protected/settings/")({
   component: SettingsPage,
@@ -85,36 +84,8 @@ function SettingsPage() {
         </div>
       </div>
 
-      {/* Notifications */}
-      <div className="rounded-xl border bg-card">
-        <div className="p-6 pb-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Bell className="size-4 text-muted-foreground" />
-            <h2 className="text-base font-semibold">Notifications</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Control how you receive updates
-          </p>
-        </div>
-        <Separator />
-        <div className="p-6 space-y-5">
-          <SettingRow
-            icon={<Bell className="size-4" />}
-            title="Email notifications"
-            description="Receive email updates for task activity"
-          >
-            <Switch defaultChecked />
-          </SettingRow>
-
-          <SettingRow
-            icon={<Clock className="size-4" />}
-            title="Daily summary"
-            description="Get a daily digest of your tasks and progress"
-          >
-            <Switch />
-          </SettingRow>
-        </div>
-      </div>
+      {/* Notifications (Reminders) */}
+      <ReminderSettings />
 
       {/* Task Behavior */}
       <div className="rounded-xl border bg-card">
