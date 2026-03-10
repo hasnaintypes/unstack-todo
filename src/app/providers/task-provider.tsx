@@ -1,4 +1,5 @@
 import * as React from "react";
+import { toast } from "sonner";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 import { taskService } from "@/features/tasks/services/task.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -62,9 +63,16 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     try {
       const newTask = await taskService.createTask(taskData, user.$id);
       setTasks((prev) => [newTask, ...prev]);
+      toast.success(`"${newTask.title}" added to your tasks`, {
+        description: newTask.dueDate ? `Due ${newTask.dueDate}` : "No due date set",
+        action: { label: "Undo", onClick: () => moveToTrash(newTask.id) },
+      });
     } catch (err) {
       console.error("Error adding task:", err);
       setError("Failed to add task");
+      toast.error("Couldn't create task", {
+        description: "Please check your connection and try again.",
+      });
       throw err;
     }
   }, [user?.$id]);
@@ -80,9 +88,15 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       setTasks((prev) =>
         prev.map((task) => (task.id === id ? updatedTask : task))
       );
+      toast.success("Changes saved", {
+        description: `"${updatedTask.title}" has been updated.`,
+      });
     } catch (err) {
       console.error("Error updating task:", err);
       setError("Failed to update task");
+      toast.error("Couldn't save changes", {
+        description: "Please check your connection and try again.",
+      });
       throw err;
     }
   }, [user?.$id]);
@@ -104,6 +118,17 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       setTasks((prev) =>
         prev.map((task) => (task.id === id ? updatedTask : task))
       );
+      toast.success(
+        updatedTask.status === "completed"
+          ? `"${updatedTask.title}" completed`
+          : `"${updatedTask.title}" reopened`,
+        {
+          description: updatedTask.status === "completed"
+            ? "Great job! Keep up the momentum."
+            : "Task is back on your active list.",
+          action: { label: "Undo", onClick: () => toggleTaskComplete(id) },
+        }
+      );
     } catch (err) {
       console.error("Error toggling task:", err);
       setError("Failed to toggle task");
@@ -115,9 +140,16 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     try {
       await taskService.moveToTrash(id);
       setTasks((prev) => prev.filter((task) => task.id !== id));
+      toast.success("Moved to trash", {
+        description: "Task will be permanently deleted after 30 days.",
+        action: { label: "Undo", onClick: () => restoreFromTrash(id) },
+      });
     } catch (err) {
       console.error("Error moving to trash:", err);
       setError("Failed to move task to trash");
+      toast.error("Couldn't move task to trash", {
+        description: "Please check your connection and try again.",
+      });
       throw err;
     }
   }, []);
@@ -126,9 +158,16 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     try {
       const restoredTask = await taskService.restoreFromTrash(id);
       setTasks((prev) => [restoredTask, ...prev]);
+      toast.success("Task restored", {
+        description: `"${restoredTask.title}" is back in your tasks.`,
+        action: { label: "Undo", onClick: () => moveToTrash(id) },
+      });
     } catch (err) {
       console.error("Error restoring task:", err);
       setError("Failed to restore task");
+      toast.error("Couldn't restore task", {
+        description: "Please check your connection and try again.",
+      });
       throw err;
     }
   }, []);
