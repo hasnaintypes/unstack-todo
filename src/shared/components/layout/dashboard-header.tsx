@@ -1,8 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { User, LogOut, Settings, Search, Calendar, Plus, LayoutDashboard } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import {
+  User,
+  LogOut,
+  Settings,
+  Search,
+  Calendar,
+  CalendarDays,
+  Plus,
+  Inbox,
+  CheckCircle2,
+} from "lucide-react";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
@@ -21,11 +31,34 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/shared/components/ui/command";
+import { SidebarTrigger } from "@/shared/components/ui/sidebar";
+import { Separator } from "@/shared/components/ui/separator";
+
+const PAGE_TITLES: Record<string, string> = {
+  "/inbox": "Inbox",
+  "/today": "Today",
+  "/upcoming": "Upcoming",
+  "/completed": "Completed",
+  "/trash": "Trash",
+  "/calendar": "Calendar",
+  "/profile": "Profile",
+  "/settings": "Settings",
+};
+
+function getPageTitle(pathname: string): string {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  if (pathname.startsWith("/projects/")) return "Project";
+  if (pathname.startsWith("/tasks/")) return "Task";
+  return "";
+}
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = React.useState(false);
+
+  const pageTitle = getPageTitle(location.pathname);
 
   const goToProfile = () => {
     navigate({ to: "/profile" });
@@ -35,7 +68,7 @@ export function DashboardHeader() {
     navigate({ to: "/settings" });
   };
 
-  // 1. Keyboard shortcut listener (Cmd+K)
+  // Keyboard shortcut listener (Cmd+K)
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -56,11 +89,23 @@ export function DashboardHeader() {
     : "U";
 
   return (
-    <header className="grid h-16 shrink-0 grid-cols-[auto_1fr_auto] items-center gap-4 border-b bg-background/95 px-6 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="flex justify-center">
+    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6">
+      {/* Left: Sidebar trigger + page title */}
+      <div className="flex items-center gap-3">
+        <SidebarTrigger className="-ml-2" />
+        {pageTitle && (
+          <>
+            <Separator orientation="vertical" className="h-5" />
+            <h1 className="text-sm font-semibold">{pageTitle}</h1>
+          </>
+        )}
+      </div>
+
+      {/* Center: Search */}
+      <div className="flex-1 flex justify-center">
         <button
           onClick={() => setOpen(true)}
-          className="relative flex h-9 w-full max-w-115 items-center justify-between rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary"
+          className="relative flex h-9 w-full max-w-md items-center justify-between rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <div className="flex items-center gap-2">
             <Search className="size-4" />
@@ -72,7 +117,8 @@ export function DashboardHeader() {
         </button>
       </div>
 
-      <div className="flex items-center justify-end gap-4">
+      {/* Right: Avatar */}
+      <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 rounded-full outline-none transition-transform active:scale-95">
@@ -114,38 +160,59 @@ export function DashboardHeader() {
         </DropdownMenu>
       </div>
 
-      {/* 3. Command Dialog Palette */}
+      {/* Command Dialog Palette */}
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Suggestions">
+          <CommandGroup heading="Actions">
             <CommandItem
               onSelect={() => {
-                console.log("New Task");
+                navigate({ to: "/inbox" });
                 setOpen(false);
               }}
             >
               <Plus className="mr-2 size-4" />
               <span>Create New Task</span>
             </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="Navigation">
             <CommandItem
               onSelect={() => {
-                console.log("Inbox");
+                navigate({ to: "/inbox" });
                 setOpen(false);
               }}
             >
-              <LayoutDashboard className="mr-2 size-4" />
+              <Inbox className="mr-2 size-4" />
               <span>Go to Inbox</span>
             </CommandItem>
             <CommandItem
               onSelect={() => {
-                console.log("Calendar");
+                navigate({ to: "/today" });
                 setOpen(false);
               }}
             >
               <Calendar className="mr-2 size-4" />
-              <span>View Calendar</span>
+              <span>Today</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() => {
+                navigate({ to: "/upcoming" });
+                setOpen(false);
+              }}
+            >
+              <CalendarDays className="mr-2 size-4" />
+              <span>Upcoming</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() => {
+                navigate({ to: "/completed" });
+                setOpen(false);
+              }}
+            >
+              <CheckCircle2 className="mr-2 size-4" />
+              <span>Completed</span>
             </CommandItem>
           </CommandGroup>
           <CommandSeparator />
