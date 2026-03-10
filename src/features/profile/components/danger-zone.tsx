@@ -1,20 +1,46 @@
+import { useState } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/shared/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { authService } from "@/features/auth/services/auth.service";
 
 export function DangerZone() {
-  const handleDeleteAccount = () => {
-    toast.info("Account deletion is not yet available. Please contact support.");
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (!user?.$id) return;
+    setIsDeleting(true);
+    try {
+      await authService.deleteAccount(user.$id);
+      await logout();
+      navigate({ to: "/auth/sign-in" });
+      toast.success("Account deleted", {
+        description: "Your account and all data have been removed.",
+      });
+    } catch (err) {
+      console.error("Account deletion error:", err);
+      toast.error("Failed to delete account", {
+        description: "Please try again or contact support.",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -27,35 +53,32 @@ export function DangerZone() {
             Permanently remove your account and all of your data.
           </p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="destructive" size="sm">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm" disabled={isDeleting}>
+              {isDeleting && <Loader2 className="size-4 mr-2 animate-spin" />}
               Delete Account
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Are you absolutely sure?</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete your account
-                and remove all of your data from our servers.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <DialogClose asChild>
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteAccount}
-                >
-                  Delete Account
-                </Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your account,
+                all tasks, projects, categories, and preferences.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteAccount}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete Account
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

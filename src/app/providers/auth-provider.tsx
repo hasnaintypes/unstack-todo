@@ -40,7 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, name?: string) => {
     await authService.signUp(email, password, name);
-    await signIn(email, password);
+    // signUp now auto-creates session + profile + preferences
+    await checkAuth();
   };
 
   const logout = async () => {
