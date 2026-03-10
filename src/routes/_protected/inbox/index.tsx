@@ -26,7 +26,6 @@ function InboxPage() {
       description: taskData.description,
       dueDate: taskData.dueDate || "",
       priority: taskData.priority || 2,
-      color: taskData.color || "blue",
       category: taskData.category,
       project: taskData.project || "inbox",
       status: taskData.status || "todo",

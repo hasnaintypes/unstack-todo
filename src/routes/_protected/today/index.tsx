@@ -71,6 +71,7 @@ function TodayPage() {
         open={isAddDialogOpen}
         onOpenChange={handleDialogClose}
         onSave={editingTask ? handleEditTask : handleAddTask}
+        defaultDate={editingTask ? undefined : new Date()}
       />
     </>
   );

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Input } from "@/shared/components/ui/input";
-import { Button } from "@/shared/components/ui/button";
+import { PersonalInfoCard } from "@/features/profile/components/personal-info-card";
+import { SecurityCard } from "@/features/profile/components/security-card";
+import { DangerZone } from "@/features/profile/components/danger-zone";
 
 export const Route = createFileRoute("/_protected/profile/")({
   component: ProfilePage,
@@ -8,30 +9,19 @@ export const Route = createFileRoute("/_protected/profile/")({
 
 function ProfilePage() {
   return (
-    <div className="container py-10 max-w-screen-2xl mx-auto px-4">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">Profile</h1>
-      <p className="text-muted-foreground mb-6">Manage your account details.</p>
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Page Header */}
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight">Profile Settings</h1>
+        <p className="text-sm text-muted-foreground">
+          Manage your account settings and set your profile preferences.
+        </p>
+      </div>
 
-      <div className="max-w-2xl rounded-xl border bg-card p-6 space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Full name</label>
-          <Input placeholder="Your name" />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Email</label>
-          <Input type="email" placeholder="you@example.com" />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Bio</label>
-          <textarea
-            placeholder="Tell us about yourself"
-            rows={4}
-            className="border-input placeholder:text-muted-foreground dark:bg-input/30 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none"
-          />
-        </div>
-        <div className="flex justify-end">
-          <Button>Save changes</Button>
-        </div>
+      <div className="space-y-6">
+        <PersonalInfoCard />
+        <SecurityCard />
+        <DangerZone />
       </div>
     </div>
   );
