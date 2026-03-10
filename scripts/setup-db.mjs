@@ -211,6 +211,14 @@ const TASKS = {
     { key: "deletedAt", type: "datetime", required: false },
     { key: "completedAt", type: "datetime", required: false },
     { key: "order", type: "integer", required: false, min: 0, max: 100000, defaultValue: 0 },
+    { key: "subtasks", type: "text", required: false },
+    { key: "reminderEnabled", type: "boolean", required: false, defaultValue: false },
+    {
+      key: "reminderBefore",
+      type: "enum",
+      elements: ["1d", "1h", "30m", "on_due"],
+      required: false,
+    },
   ],
   indexes: [
     { key: "idx_userId", type: "key", attributes: ["userId"] },
@@ -223,6 +231,7 @@ const TASKS = {
     { key: "idx_userId_deletedAt", type: "key", attributes: ["userId", "deletedAt"] },
     { key: "idx_userId_projectId", type: "key", attributes: ["userId", "projectId"] },
     { key: "idx_createdAt", type: "key", attributes: ["$createdAt"] },
+    { key: "idx_reminderEnabled", type: "key", attributes: ["reminderEnabled", "dueDate"] },
   ],
   permissions: collectionPermissions,
 };
@@ -252,8 +261,37 @@ const SUBTASKS = {
   permissions: collectionPermissions,
 };
 
+/**
+ * USER_PREFERENCES — Notification and reminder preferences per user.
+ * One document per user. Created automatically on signup.
+ */
+const USER_PREFERENCES = {
+  id: "user_preferences",
+  name: "User Preferences",
+  columns: [
+    { key: "userId", type: "varchar", size: 256, required: true },
+    { key: "emailEnabled", type: "boolean", required: false, defaultValue: false },
+    { key: "discordEnabled", type: "boolean", required: false, defaultValue: false },
+    { key: "discordUserId", type: "varchar", size: 256, required: false },
+    { key: "dailySummaryEnabled", type: "boolean", required: false, defaultValue: false },
+    { key: "dailySummaryTime", type: "varchar", size: 10, required: false, defaultValue: "09:00" },
+    {
+      key: "defaultReminderBefore",
+      type: "enum",
+      elements: ["1d", "1h", "30m", "on_due"],
+      required: false,
+      defaultValue: "1h",
+    },
+  ],
+  indexes: [
+    { key: "idx_userId", type: "unique", attributes: ["userId"] },
+    { key: "idx_dailySummary", type: "key", attributes: ["dailySummaryEnabled", "dailySummaryTime"] },
+  ],
+  permissions: collectionPermissions,
+};
+
 // All tables in creation order
-const ALL_TABLES = [PROFILES, PROJECTS, CATEGORIES, TASKS, SUBTASKS];
+const ALL_TABLES = [PROFILES, PROJECTS, CATEGORIES, TASKS, SUBTASKS, USER_PREFERENCES];
 
 // ---------------------------------------------------------------------------
 // Setup functions
