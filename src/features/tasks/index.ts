@@ -3,7 +3,7 @@ export {
   type TaskAddDialogProps,
   type EmptyStateTaskInput,
 } from "./components/task-add-dialog";
-export { TaskDetailsSheet } from "./components/task-details-dialog";
+export { TaskDetailSheet } from "./components/task-details-dialog";
 export { TaskDetailContent } from "./components/task-detail-content";
 export {
   TaskDropdownMenu,
@@ -29,5 +29,7 @@ export type {
   Subtask,
   TaskPriority,
   TaskStatus,
+  ReminderBefore,
 } from "./types/task.types";
 export { getPriorityLabel, getPriorityConfig } from "./utils/task-helpers";
+export { KanbanBoard } from "./components/kanban";

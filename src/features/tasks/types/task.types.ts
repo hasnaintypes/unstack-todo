@@ -7,6 +7,8 @@ export interface Subtask {
   completed: boolean;
 }
 
+export type ReminderBefore = "1d" | "1h" | "30m" | "on_due";
+
 export interface CalendarTask {
   id: string;
   title: string;
@@ -19,4 +21,6 @@ export interface CalendarTask {
   project?: string;
   status: TaskStatus;
   subtasks?: Subtask[];
+  reminderEnabled?: boolean;
+  reminderBefore?: ReminderBefore;
 }

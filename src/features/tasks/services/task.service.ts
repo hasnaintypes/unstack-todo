@@ -1,6 +1,6 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role } from "appwrite";
-import type { CalendarTask, Subtask, TaskStatus, TaskPriority } from "@/features/tasks/types/task.types";
+import type { CalendarTask, Subtask, TaskStatus, TaskPriority, ReminderBefore } from "@/features/tasks/types/task.types";
 // Note: color is no longer stored — it's derived from priority in the UI.
 
 /**
@@ -67,6 +67,8 @@ function taskToDocument(task: Omit<CalendarTask, "id">, userId: string) {
     userId,
     subtasks: task.subtasks ? JSON.stringify(task.subtasks) : null,
     completedAt: task.status === "completed" ? new Date().toISOString() : null,
+    reminderEnabled: task.reminderEnabled ?? false,
+    reminderBefore: task.reminderBefore || null,
   };
 }
 
@@ -101,6 +103,8 @@ function documentToTask(doc: any): CalendarTask {
     project: doc.projectId || undefined,
     status: (doc.status as TaskStatus) || "todo",
     subtasks: doc.subtasks ? safeParseSubtasks(doc.subtasks) : undefined,
+    reminderEnabled: doc.reminderEnabled ?? false,
+    reminderBefore: (doc.reminderBefore as ReminderBefore) || undefined,
   };
 }
 
@@ -202,6 +206,12 @@ export const taskService = {
       }
       if (updates.subtasks !== undefined) {
         updatePayload.subtasks = updates.subtasks ? JSON.stringify(updates.subtasks) : null;
+      }
+      if (updates.reminderEnabled !== undefined) {
+        updatePayload.reminderEnabled = updates.reminderEnabled;
+      }
+      if (updates.reminderBefore !== undefined) {
+        updatePayload.reminderBefore = updates.reminderBefore || null;
       }
 
       const doc = await databases.updateDocument(
