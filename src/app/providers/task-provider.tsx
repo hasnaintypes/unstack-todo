@@ -8,6 +8,8 @@ interface TaskContextValue {
   tasks: CalendarTask[];
   isLoading: boolean;
   error: string | null;
+  selectedTask: CalendarTask | null;
+  setSelectedTask: (task: CalendarTask | null) => void;
   addTask: (task: Omit<CalendarTask, "id">) => Promise<void>;
   updateTask: (id: string, updates: Partial<CalendarTask>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
@@ -27,6 +29,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [tasks, setTasks] = React.useState<CalendarTask[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = React.useState<CalendarTask | null>(null);
   const { user } = useAuth();
 
   // Load tasks from Appwrite when user is authenticated
@@ -174,39 +177,67 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
 
   const permanentlyDelete = React.useCallback(async (id: string) => {
     try {
+      // Capture task before deleting for undo
+      const deletedTask = tasks.find((t) => t.id === id);
       await taskService.permanentlyDelete(id);
       setTasks((prev) => prev.filter((task) => task.id !== id));
+      if (selectedTask?.id === id) setSelectedTask(null);
+      toast.success("Task permanently deleted", {
+        description: deletedTask ? `"${deletedTask.title}" has been removed.` : undefined,
+        action: deletedTask && user?.$id
+          ? {
+              label: "Undo",
+              onClick: async () => {
+                try {
+                  const restored = await taskService.createTask(
+                    { title: deletedTask.title, description: deletedTask.description, dueDate: deletedTask.dueDate, priority: deletedTask.priority, category: deletedTask.category, project: deletedTask.project, status: deletedTask.status, subtasks: deletedTask.subtasks },
+                    user.$id
+                  );
+                  setTasks((prev) => [restored, ...prev]);
+                  toast.success("Task restored");
+                } catch {
+                  toast.error("Failed to undo delete");
+                }
+              },
+            }
+          : undefined,
+      });
     } catch (err) {
       console.error("Error permanently deleting:", err);
       setError("Failed to permanently delete task");
+      toast.error("Couldn't delete task");
       throw err;
     }
-  }, []);
+  }, [tasks, selectedTask, user?.$id]);
 
   const clearCompleted = React.useCallback(async () => {
     if (!user?.$id) return;
 
     try {
+      const count = tasks.filter((t) => t.status === "completed").length;
       await taskService.clearCompleted(user.$id);
       setTasks((prev) => prev.filter((task) => task.status !== "completed"));
+      toast.success(`${count} completed task${count !== 1 ? "s" : ""} moved to trash`);
     } catch (err) {
       console.error("Error clearing completed:", err);
       setError("Failed to clear completed tasks");
+      toast.error("Couldn't clear completed tasks");
       throw err;
     }
-  }, [user?.$id]);
+  }, [user?.$id, tasks]);
 
   const emptyTrash = React.useCallback(async () => {
     if (!user?.$id) return;
 
     try {
       await taskService.emptyTrash(user.$id);
-      // Refresh tasks after emptying trash
       const fetchedTasks = await taskService.getAllTasks(user.$id);
       setTasks(fetchedTasks);
+      toast.success("Trash emptied", { description: "All trashed tasks have been permanently deleted." });
     } catch (err) {
       console.error("Error emptying trash:", err);
       setError("Failed to empty trash");
+      toast.error("Couldn't empty trash");
       throw err;
     }
   }, [user?.$id]);
@@ -218,9 +249,11 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       await taskService.restoreAllFromTrash(user.$id);
       const fetchedTasks = await taskService.getAllTasks(user.$id);
       setTasks(fetchedTasks);
+      toast.success("All tasks restored", { description: "Tasks have been moved back to their original locations." });
     } catch (err) {
       console.error("Error restoring all:", err);
       setError("Failed to restore all tasks");
+      toast.error("Couldn't restore tasks");
       throw err;
     }
   }, [user?.$id]);
@@ -245,6 +278,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     tasks,
     isLoading,
     error,
+    selectedTask,
+    setSelectedTask,
     addTask,
     updateTask,
     deleteTask,

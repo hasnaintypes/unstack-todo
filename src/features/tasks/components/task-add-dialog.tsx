@@ -10,6 +10,8 @@ import {
   Plus,
   X,
   FolderKanban,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -25,9 +27,13 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Separator } from "@/shared/components/ui/separator";
 import { TaskDropdownMenu } from "@/features/tasks/components/task-dropdown-menu";
-import type { CalendarTask, Subtask, TaskPriority } from "@/features/tasks/types/task.types";
+import type { CalendarTask, Subtask, TaskPriority, ReminderBefore } from "@/features/tasks/types/task.types";
+import { TaskReminderToggle } from "@/features/reminders/components/task-reminder-toggle";
 import { useProjects } from "@/app/providers/project-provider";
 import { useCategories } from "@/app/providers/category-provider";
+import { autoSetPriority, generateDescription, hasAiKey } from "@/shared/services/ai.service";
+import { cn } from "@/shared/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 
 export interface EmptyStateTaskInput {
   title: string;
@@ -92,6 +98,10 @@ export function TaskAddDialog({
   const [subtasks, setSubtasks] = React.useState<Subtask[]>(task?.subtasks || []);
   const [newSubtask, setNewSubtask] = React.useState("");
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false);
+  const [aiPrioritySet, setAiPrioritySet] = React.useState(false);
+  const [isGeneratingDesc, setIsGeneratingDesc] = React.useState(false);
+  const [reminderEnabled, setReminderEnabled] = React.useState(task?.reminderEnabled ?? false);
+  const [reminderBefore, setReminderBefore] = React.useState<ReminderBefore>(task?.reminderBefore ?? "1h");
 
   // Update form when task changes
   React.useEffect(() => {
@@ -103,6 +113,8 @@ export function TaskAddDialog({
       setCategory(task.category || "");
       setProject(task.project || "");
       setSubtasks(task.subtasks || []);
+      setReminderEnabled(task.reminderEnabled ?? false);
+      setReminderBefore(task.reminderBefore ?? "1h");
     }
   }, [task]);
 
@@ -122,6 +134,33 @@ export function TaskAddDialog({
     setProject("");
     setSubtasks([]);
     setIsAddingSubtask(false);
+    setAiPrioritySet(false);
+    setReminderEnabled(false);
+    setReminderBefore("1h");
+  };
+
+  const handleTitleBlur = async () => {
+    if (isEditMode || !hasAiKey() || !title.trim()) return;
+    try {
+      const suggested = await autoSetPriority(title.trim());
+      setPriority(suggested);
+      setAiPrioritySet(true);
+    } catch {
+      // silently fail
+    }
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!hasAiKey() || !title.trim() || isGeneratingDesc) return;
+    setIsGeneratingDesc(true);
+    try {
+      const desc = await generateDescription(title.trim());
+      if (desc) setDescription(desc);
+    } catch {
+      // silently fail
+    } finally {
+      setIsGeneratingDesc(false);
+    }
   };
 
   const handleAddCategory = async (label: string) => {
@@ -169,6 +208,8 @@ export function TaskAddDialog({
         category: category.trim() || undefined,
         project: project.trim() || undefined,
         status: task?.status || "todo",
+        reminderEnabled: date ? reminderEnabled : false,
+        reminderBefore: reminderEnabled && date ? reminderBefore : undefined,
       };
       onSave(taskData);
     }
@@ -200,6 +241,7 @@ export function TaskAddDialog({
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onBlur={handleTitleBlur}
             placeholder="Task name"
             className="w-full bg-transparent px-0 text-xl font-semibold outline-none placeholder:text-muted-foreground/40"
             autoFocus
@@ -207,7 +249,32 @@ export function TaskAddDialog({
 
           {/* Description */}
           <div className="flex gap-3">
-            <AlignLeft className="h-5 w-5 text-muted-foreground/60 shrink-0 mt-2" />
+            <div className="flex flex-col items-center gap-1 shrink-0 mt-2">
+              <AlignLeft className="h-5 w-5 text-muted-foreground/60" />
+              {hasAiKey() && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={handleGenerateDescription}
+                        disabled={!title.trim() || isGeneratingDesc}
+                        className="flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground/60 hover:text-[#e44232] hover:bg-[#e44232]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        {isGeneratingDesc ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      <p>Generate description with AI</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -280,6 +347,14 @@ export function TaskAddDialog({
                   <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
                 </PopoverContent>
               </Popover>
+              {date && (
+                <TaskReminderToggle
+                  enabled={reminderEnabled}
+                  reminderBefore={reminderBefore}
+                  onToggle={setReminderEnabled}
+                  onReminderBeforeChange={setReminderBefore}
+                />
+              )}
             </div>
           </div>
 
@@ -300,13 +375,21 @@ export function TaskAddDialog({
 
             <Separator orientation="vertical" className="h-6" />
 
-            <TaskDropdownMenu
-              icon={<Flag className="h-4 w-4" />}
-              placeholder="Priority"
-              value={priority.toString()}
-              options={PRIORITIES.map((p) => ({ value: p.value.toString(), label: p.label }))}
-              onValueChange={(val) => setPriority(parseInt(val) as TaskPriority)}
-            />
+            <div className="relative">
+              <TaskDropdownMenu
+                icon={<Flag className={cn("h-4 w-4", aiPrioritySet && "text-[#e44232]")} />}
+                placeholder="Priority"
+                value={priority.toString()}
+                options={PRIORITIES.map((p) => ({ value: p.value.toString(), label: p.label }))}
+                onValueChange={(val) => {
+                  setPriority(parseInt(val) as TaskPriority);
+                  setAiPrioritySet(false);
+                }}
+              />
+              {aiPrioritySet && (
+                <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-[#e44232]" />
+              )}
+            </div>
 
             <Separator orientation="vertical" className="h-6" />
 

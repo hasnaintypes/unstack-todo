@@ -1,7 +1,6 @@
 import * as React from "react";
 import { format, isToday, isTomorrow, isPast, isThisWeek } from "date-fns";
 import { Calendar, Pencil, Trash2, Flag, FolderKanban, Tag, RotateCcw, Sparkles } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
@@ -100,7 +99,6 @@ export function TaskItem({
   showRestore = false,
   className,
 }: TaskItemProps) {
-  const navigate = useNavigate();
   const [isHovered, setIsHovered] = React.useState(false);
   const dueDateInfo = task.dueDate ? formatDueDate(task.dueDate) : null;
   const isCompleted = task.status === "completed";
@@ -121,11 +119,7 @@ export function TaskItem({
   };
 
   const handleTaskClick = () => {
-    if (onClick) {
-      onClick(task);
-    } else {
-      navigate({ to: "/tasks/$taskId", params: { taskId: task.id } });
-    }
+    onClick?.(task);
   };
 
   return (
