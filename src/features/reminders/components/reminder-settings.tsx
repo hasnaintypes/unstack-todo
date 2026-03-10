@@ -41,11 +41,14 @@ export function ReminderSettings() {
 
   useEffect(() => {
     if (!user?.$id) return;
-    setIsLoading(true);
+    let cancelled = false;
     reminderService.getPreferences(user.$id).then((p) => {
-      setPrefs(p);
-      setIsLoading(false);
+      if (!cancelled) {
+        setPrefs(p);
+        setIsLoading(false);
+      }
     });
+    return () => { cancelled = true; };
   }, [user?.$id]);
 
   const updatePref = async (key: keyof Omit<UserReminderPreferences, "id" | "userId">, value: unknown) => {

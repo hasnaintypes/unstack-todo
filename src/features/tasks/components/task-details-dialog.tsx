@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import {
   CheckCircle2,
@@ -79,10 +79,10 @@ export function TaskDetailSheet({
 
   const isCompleted = task?.status === "completed";
 
-  // Reset edit mode when sheet closes or task changes
-  useEffect(() => {
-    if (!open) setIsEditing(false);
-  }, [open]);
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) setIsEditing(false);
+    onOpenChange(newOpen);
+  };
 
   const projectOptions = appProjects.map((p) => ({ value: p.name, label: p.name }));
   const categoryOptions = appCategories.map((c) => ({ value: c.name, label: c.name }));
@@ -135,7 +135,7 @@ export function TaskDetailSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto p-0">
         {task && (
           <>

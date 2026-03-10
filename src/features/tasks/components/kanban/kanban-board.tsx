@@ -8,7 +8,6 @@ import {
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
-  type DragOverEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "./kanban-column";
@@ -58,7 +57,7 @@ export function KanbanBoard({ tasks, onUpdateTask, onTaskClick, onToggleComplete
     if (task) setActiveTask(task);
   };
 
-  const handleDragOver = (_event: DragOverEvent) => {
+  const handleDragOver = () => {
     // Could add visual feedback here
   };
 
