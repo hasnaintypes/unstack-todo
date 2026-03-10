@@ -20,7 +20,6 @@ import { Route as ProtectedSettingsIndexRouteImport } from './routes/_protected/
 import { Route as ProtectedProfileIndexRouteImport } from './routes/_protected/profile/index'
 import { Route as ProtectedInboxIndexRouteImport } from './routes/_protected/inbox/index'
 import { Route as ProtectedCompletedIndexRouteImport } from './routes/_protected/completed/index'
-import { Route as ProtectedTasksTaskIdRouteImport } from './routes/_protected/tasks/$taskId'
 import { Route as ProtectedProjectsProjectIdRouteImport } from './routes/_protected/projects/$projectId'
 import { Route as PublicAuthSignUpIndexRouteImport } from './routes/_public/auth/sign-up/index'
 import { Route as PublicAuthSignInIndexRouteImport } from './routes/_public/auth/sign-in/index'
@@ -78,11 +77,6 @@ const ProtectedCompletedIndexRoute = ProtectedCompletedIndexRouteImport.update({
   path: '/completed/',
   getParentRoute: () => ProtectedRoute,
 } as any)
-const ProtectedTasksTaskIdRoute = ProtectedTasksTaskIdRouteImport.update({
-  id: '/tasks/$taskId',
-  path: '/tasks/$taskId',
-  getParentRoute: () => ProtectedRoute,
-} as any)
 const ProtectedProjectsProjectIdRoute =
   ProtectedProjectsProjectIdRouteImport.update({
     id: '/projects/$projectId',
@@ -109,7 +103,6 @@ const PublicMarketingAboutIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof PublicMarketingIndexRoute
   '/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/tasks/$taskId': typeof ProtectedTasksTaskIdRoute
   '/completed/': typeof ProtectedCompletedIndexRoute
   '/inbox/': typeof ProtectedInboxIndexRoute
   '/profile/': typeof ProtectedProfileIndexRoute
@@ -124,7 +117,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PublicMarketingIndexRoute
   '/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/tasks/$taskId': typeof ProtectedTasksTaskIdRoute
   '/completed': typeof ProtectedCompletedIndexRoute
   '/inbox': typeof ProtectedInboxIndexRoute
   '/profile': typeof ProtectedProfileIndexRoute
@@ -142,7 +134,6 @@ export interface FileRoutesById {
   '/_public': typeof PublicRouteWithChildren
   '/_public/_marketing': typeof PublicMarketingRouteWithChildren
   '/_protected/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/_protected/tasks/$taskId': typeof ProtectedTasksTaskIdRoute
   '/_protected/completed/': typeof ProtectedCompletedIndexRoute
   '/_protected/inbox/': typeof ProtectedInboxIndexRoute
   '/_protected/profile/': typeof ProtectedProfileIndexRoute
@@ -160,7 +151,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/projects/$projectId'
-    | '/tasks/$taskId'
     | '/completed/'
     | '/inbox/'
     | '/profile/'
@@ -175,7 +165,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/projects/$projectId'
-    | '/tasks/$taskId'
     | '/completed'
     | '/inbox'
     | '/profile'
@@ -192,7 +181,6 @@ export interface FileRouteTypes {
     | '/_public'
     | '/_public/_marketing'
     | '/_protected/projects/$projectId'
-    | '/_protected/tasks/$taskId'
     | '/_protected/completed/'
     | '/_protected/inbox/'
     | '/_protected/profile/'
@@ -290,13 +278,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedCompletedIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
-    '/_protected/tasks/$taskId': {
-      id: '/_protected/tasks/$taskId'
-      path: '/tasks/$taskId'
-      fullPath: '/tasks/$taskId'
-      preLoaderRoute: typeof ProtectedTasksTaskIdRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
     '/_protected/projects/$projectId': {
       id: '/_protected/projects/$projectId'
       path: '/projects/$projectId'
@@ -330,7 +311,6 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteChildren {
   ProtectedProjectsProjectIdRoute: typeof ProtectedProjectsProjectIdRoute
-  ProtectedTasksTaskIdRoute: typeof ProtectedTasksTaskIdRoute
   ProtectedCompletedIndexRoute: typeof ProtectedCompletedIndexRoute
   ProtectedInboxIndexRoute: typeof ProtectedInboxIndexRoute
   ProtectedProfileIndexRoute: typeof ProtectedProfileIndexRoute
@@ -342,7 +322,6 @@ interface ProtectedRouteChildren {
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedProjectsProjectIdRoute: ProtectedProjectsProjectIdRoute,
-  ProtectedTasksTaskIdRoute: ProtectedTasksTaskIdRoute,
   ProtectedCompletedIndexRoute: ProtectedCompletedIndexRoute,
   ProtectedInboxIndexRoute: ProtectedInboxIndexRoute,
   ProtectedProfileIndexRoute: ProtectedProfileIndexRoute,
