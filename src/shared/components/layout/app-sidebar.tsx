@@ -12,7 +12,6 @@ import {
   Trash2,
   Hash,
   CircleDot,
-  Folder,
   FolderOpen,
   MoreHorizontal,
   Pencil,
@@ -153,9 +152,19 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar/50 backdrop-blur-sm">
-      <SidebarHeader className="p-4 flex flex-row items-center justify-between gap-2 border-b">
-        <div className="flex items-center gap-3 px-1">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 p-1">
+      <SidebarHeader
+        className={cn(
+          "flex flex-row items-center border-b",
+          state === "expanded"
+            ? "p-4 justify-between gap-2"
+            : "p-2 justify-center"
+        )}
+      >
+        <div className={cn(
+          "flex items-center",
+          state === "expanded" ? "gap-3 px-1" : "justify-center"
+        )}>
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 p-1 shrink-0">
             <img src={logo} alt="UnStack Todo" className="size-full" />
           </div>
           {state === "expanded" && (
@@ -164,7 +173,10 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2 flex flex-col overflow-hidden">
+      <SidebarContent className={cn(
+        "flex flex-col overflow-hidden",
+        state === "expanded" ? "px-2" : "px-0"
+      )}>
         <SidebarGroup className="shrink-0">
           <SidebarMenu>
             {navItems.map((item) => (
@@ -345,8 +357,8 @@ export function AppSidebar() {
                                                 className="group h-7 px-0 hover:bg-transparent justify-start"
                                               >
                                                 <Link
-                                                  to="/tasks/$taskId"
-                                                  params={{ taskId: task.id }}
+                                                  to="/projects/$projectId"
+                                                  params={{ projectId: project.id }}
                                                   className="flex items-center w-full"
                                                 >
                                                   <div className="flex size-4 items-center justify-center rounded-full bg-background ring-2 ring-background shrink-0">
@@ -492,45 +504,49 @@ export function AppSidebar() {
               )}
             </div>
           ) : (
-            /* Collapsed sidebar - show just folder icon */
-            <div className="flex flex-col gap-1">
+            /* Collapsed sidebar - show centered project icons */
+            <SidebarMenu className="items-center gap-1 px-1">
               {activeProjects.map((project) => (
-                <TooltipProvider key={project.id}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <SidebarMenuButton asChild className="w-full justify-center">
-                        <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                          <Folder className="size-4 text-muted-foreground" />
-                        </Link>
-                      </SidebarMenuButton>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-xs">
-                      <p className="font-semibold">{project.name}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {(tasksByProject[project.name] || []).length} tasks
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <SidebarMenuItem key={project.id} className="w-full">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuButton asChild className="justify-center">
+                          <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                            <Hash className={cn("size-4", getColorClass(project.color).replace("bg-", "text-"))} />
+                          </Link>
+                        </SidebarMenuButton>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs">
+                        <p className="font-semibold">{project.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {(tasksByProject[project.name] || []).length} tasks
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </SidebarMenuItem>
               ))}
               {activeProjects.length === 0 && !isLoading && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <SidebarMenuButton
-                        className="w-full justify-center"
-                        onClick={() => setIsAddDialogOpen(true)}
-                      >
-                        <Plus className="size-4 text-muted-foreground" />
-                      </SidebarMenuButton>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      <p>Create project</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <SidebarMenuItem className="w-full">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuButton
+                          className="justify-center"
+                          onClick={() => setIsAddDialogOpen(true)}
+                        >
+                          <Plus className="size-4 text-muted-foreground" />
+                        </SidebarMenuButton>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>Create project</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </SidebarMenuItem>
               )}
-            </div>
+            </SidebarMenu>
           )}
         </SidebarGroup>
       </SidebarContent>

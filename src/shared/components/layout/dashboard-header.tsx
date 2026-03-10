@@ -1,16 +1,10 @@
 "use client";
 
-import * as React from "react";
 import {
   User,
   LogOut,
   Settings,
   Search,
-  Calendar,
-  CalendarDays,
-  Plus,
-  Inbox,
-  CheckCircle2,
 } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -22,17 +16,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/shared/components/ui/command";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 import { Separator } from "@/shared/components/ui/separator";
+import { CommandPalette } from "@/shared/components/command-palette";
 
 const PAGE_TITLES: Record<string, string> = {
   "/inbox": "Inbox",
@@ -52,11 +38,15 @@ function getPageTitle(pathname: string): string {
   return "";
 }
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  searchOpen?: boolean;
+  onSearchOpenChange?: (open: boolean) => void;
+}
+
+export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [open, setOpen] = React.useState(false);
 
   const pageTitle = getPageTitle(location.pathname);
 
@@ -67,18 +57,6 @@ export function DashboardHeader() {
   const goToSettings = () => {
     navigate({ to: "/settings" });
   };
-
-  // Keyboard shortcut listener (Cmd+K)
-  React.useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
-    };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
 
   const initials = user?.name
     ? user.name
@@ -104,7 +82,7 @@ export function DashboardHeader() {
       {/* Center: Search */}
       <div className="flex-1 flex justify-center">
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => onSearchOpenChange?.(true)}
           className="relative flex h-9 w-full max-w-md items-center justify-between rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <div className="flex items-center gap-2">
@@ -160,84 +138,11 @@ export function DashboardHeader() {
         </DropdownMenu>
       </div>
 
-      {/* Command Dialog Palette */}
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Type a command or search..." />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Actions">
-            <CommandItem
-              onSelect={() => {
-                navigate({ to: "/inbox" });
-                setOpen(false);
-              }}
-            >
-              <Plus className="mr-2 size-4" />
-              <span>Create New Task</span>
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Navigation">
-            <CommandItem
-              onSelect={() => {
-                navigate({ to: "/inbox" });
-                setOpen(false);
-              }}
-            >
-              <Inbox className="mr-2 size-4" />
-              <span>Go to Inbox</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={() => {
-                navigate({ to: "/today" });
-                setOpen(false);
-              }}
-            >
-              <Calendar className="mr-2 size-4" />
-              <span>Today</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={() => {
-                navigate({ to: "/upcoming" });
-                setOpen(false);
-              }}
-            >
-              <CalendarDays className="mr-2 size-4" />
-              <span>Upcoming</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={() => {
-                navigate({ to: "/completed" });
-                setOpen(false);
-              }}
-            >
-              <CheckCircle2 className="mr-2 size-4" />
-              <span>Completed</span>
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Settings">
-            <CommandItem
-              onSelect={() => {
-                goToProfile();
-                setOpen(false);
-              }}
-            >
-              <User className="mr-2 size-4" />
-              <span>Manage Profile</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={() => {
-                goToSettings();
-                setOpen(false);
-              }}
-            >
-              <Settings className="mr-2 size-4" />
-              <span>App Settings</span>
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
+      {/* Command Palette */}
+      <CommandPalette
+        open={searchOpen ?? false}
+        onOpenChange={onSearchOpenChange ?? (() => {})}
+      />
     </header>
   );
 }
