@@ -1,6 +1,7 @@
 import * as React from "react";
 import { format, isToday, isTomorrow, isPast, isThisWeek } from "date-fns";
-import { Calendar, Pencil, Trash2, Flag, FolderKanban, Tag, RotateCcw } from "lucide-react";
+import { Calendar, Pencil, Trash2, Flag, FolderKanban, Tag, RotateCcw, Sparkles } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
@@ -99,6 +100,7 @@ export function TaskItem({
   showRestore = false,
   className,
 }: TaskItemProps) {
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = React.useState(false);
   const dueDateInfo = task.dueDate ? formatDueDate(task.dueDate) : null;
   const isCompleted = task.status === "completed";
@@ -119,7 +121,11 @@ export function TaskItem({
   };
 
   const handleTaskClick = () => {
-    onClick?.(task);
+    if (onClick) {
+      onClick(task);
+    } else {
+      navigate({ to: "/tasks/$taskId", params: { taskId: task.id } });
+    }
   };
 
   return (
@@ -227,11 +233,18 @@ export function TaskItem({
             </span>
           )}
 
+          {/* AI Generated tag */}
+          {task.description?.includes("[AI Generated]") && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#e44232]/10 text-[#e44232] font-medium">
+              <Sparkles className="h-3 w-3" />
+              AI
+            </span>
+          )}
+
           {/* Subtasks count */}
           {task.subtasks && task.subtasks.length > 0 && (
             <span className="text-muted-foreground">
-              {task.subtasks.filter((st) => st !== "").length} subtask
-              {task.subtasks.length !== 1 ? "s" : ""}
+              {task.subtasks.filter((s) => s.completed).length}/{task.subtasks.length} subtask{task.subtasks.length !== 1 ? "s" : ""}
             </span>
           )}
         </div>

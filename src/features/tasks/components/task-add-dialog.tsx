@@ -25,12 +25,14 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Separator } from "@/shared/components/ui/separator";
 import { TaskDropdownMenu } from "@/features/tasks/components/task-dropdown-menu";
-import type { CalendarTask, TaskPriority } from "@/features/tasks/types/task.types";
+import type { CalendarTask, Subtask, TaskPriority } from "@/features/tasks/types/task.types";
+import { useProjects } from "@/app/providers/project-provider";
+import { useCategories } from "@/app/providers/category-provider";
 
 export interface EmptyStateTaskInput {
   title: string;
   description?: string;
-  subtasks?: string[];
+  subtasks?: Subtask[];
   dueDate?: string;
   priority?: string;
   category?: string;
@@ -44,6 +46,7 @@ export interface TaskAddDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
+  defaultDate?: Date;
 }
 
 const PRIORITIES: { value: TaskPriority; label: string }[] = [
@@ -53,18 +56,6 @@ const PRIORITIES: { value: TaskPriority; label: string }[] = [
   { value: 4, label: "Urgent" },
 ];
 
-const DEFAULT_CATEGORIES = [
-  { value: "personal", label: "Personal" },
-  { value: "work", label: "Work" },
-  { value: "health", label: "Health" },
-  { value: "shopping", label: "Shopping" },
-];
-
-const DEFAULT_PROJECTS = [
-  { value: "inbox", label: "Inbox" },
-  { value: "personal", label: "Personal" },
-  { value: "work", label: "Work" },
-];
 
 export function TaskAddDialog({
   task,
@@ -73,20 +64,32 @@ export function TaskAddDialog({
   open,
   onOpenChange,
   trigger,
+  defaultDate,
 }: TaskAddDialogProps) {
   const isEditMode = !!task;
+  const { projects: appProjects, addProject } = useProjects();
+  const { categories: appCategories, addCategory } = useCategories();
+
+  // Build project options from real data
+  const projectOptions = React.useMemo(() => {
+    const opts = appProjects.map((p) => ({ value: p.name, label: p.name }));
+    return [{ value: "inbox", label: "Inbox" }, ...opts];
+  }, [appProjects]);
+
+  // Build category options from real Appwrite data
+  const categoryOptions = React.useMemo(() => {
+    return appCategories.map((c) => ({ value: c.name, label: c.name }));
+  }, [appCategories]);
 
   const [title, setTitle] = React.useState(task?.title || "");
   const [description, setDescription] = React.useState(task?.description || "");
   const [date, setDate] = React.useState<Date | undefined>(
-    task?.dueDate ? parseISO(task.dueDate) : undefined
+    task?.dueDate ? parseISO(task.dueDate) : defaultDate
   );
   const [priority, setPriority] = React.useState<TaskPriority>(task?.priority || 2);
   const [category, setCategory] = React.useState(task?.category || "");
-  const [categories, setCategories] = React.useState(DEFAULT_CATEGORIES);
   const [project, setProject] = React.useState(task?.project || "");
-  const [projects, setProjects] = React.useState(DEFAULT_PROJECTS);
-  const [subtasks, setSubtasks] = React.useState<string[]>(task?.subtasks || []);
+  const [subtasks, setSubtasks] = React.useState<Subtask[]>(task?.subtasks || []);
   const [newSubtask, setNewSubtask] = React.useState("");
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false);
 
@@ -103,10 +106,17 @@ export function TaskAddDialog({
     }
   }, [task]);
 
+  // Sync defaultDate when it changes and not in edit mode
+  React.useEffect(() => {
+    if (!task && defaultDate) {
+      setDate(defaultDate);
+    }
+  }, [defaultDate, task]);
+
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setDate(undefined);
+    setDate(defaultDate);
     setPriority(2);
     setCategory("");
     setProject("");
@@ -114,18 +124,22 @@ export function TaskAddDialog({
     setIsAddingSubtask(false);
   };
 
-  const handleAddCategory = (label: string) => {
-    const value = label.toLowerCase().replace(/\s+/g, "-");
-    const newCategory = { value, label };
-    setCategories([...categories, newCategory]);
-    setCategory(value);
+  const handleAddCategory = async (label: string) => {
+    try {
+      await addCategory({ name: label });
+      setCategory(label);
+    } catch (err) {
+      console.error("Error creating category:", err);
+    }
   };
 
-  const handleAddProject = (label: string) => {
-    const value = label.toLowerCase().replace(/\s+/g, "-");
-    const newProject = { value, label };
-    setProjects([...projects, newProject]);
-    setProject(value);
+  const handleAddProject = async (label: string) => {
+    try {
+      await addProject({ name: label });
+      setProject(label);
+    } catch (err) {
+      console.error("Error creating project:", err);
+    }
   };
 
   const handleSave = () => {
@@ -152,7 +166,6 @@ export function TaskAddDialog({
         subtasks: subtasks.length > 0 ? subtasks : undefined,
         dueDate: date ? format(date, "yyyy-MM-dd") : undefined,
         priority,
-        color: "blue", // Default color
         category: category.trim() || undefined,
         project: project.trim() || undefined,
         status: task?.status || "todo",
@@ -160,15 +173,16 @@ export function TaskAddDialog({
       onSave(taskData);
     }
 
-    if (!isEditMode) {
+    if (isEditMode) {
+      onOpenChange?.(false);
+    } else {
       resetForm();
     }
-    onOpenChange?.(false);
   };
 
   const handleAddSubtask = () => {
     if (newSubtask.trim()) {
-      setSubtasks([...subtasks, newSubtask.trim()]);
+      setSubtasks([...subtasks, { title: newSubtask.trim(), completed: false }]);
       setNewSubtask("");
     }
   };
@@ -204,10 +218,10 @@ export function TaskAddDialog({
 
           {/* Sub-tasks Section */}
           <div className="space-y-2">
-            {subtasks.map((task, index) => (
+            {subtasks.map((subtask, index) => (
               <div key={index} className="group flex items-center gap-3 pl-8 text-sm">
                 <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0" />
-                <span className="flex-1 text-foreground/80">{task}</span>
+                <span className="flex-1 text-foreground/80">{subtask.title}</span>
                 <button onClick={() => setSubtasks(subtasks.filter((_, i) => i !== index))}>
                   <X className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
@@ -275,7 +289,7 @@ export function TaskAddDialog({
               icon={<FolderKanban className="h-4 w-4" />}
               placeholder="Project"
               value={project}
-              options={projects}
+              options={projectOptions}
               onValueChange={setProject}
               onAddOption={handleAddProject}
               showAddOption
@@ -300,7 +314,7 @@ export function TaskAddDialog({
               icon={<Tag className="h-4 w-4" />}
               placeholder="Category"
               value={category}
-              options={categories}
+              options={categoryOptions}
               onValueChange={setCategory}
               onAddOption={handleAddCategory}
               showAddOption

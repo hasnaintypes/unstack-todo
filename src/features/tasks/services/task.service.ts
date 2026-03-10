@@ -1,6 +1,7 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role } from "appwrite";
-import type { CalendarTask, TaskStatus, TaskPriority } from "@/features/tasks/types/task.types";
+import type { CalendarTask, Subtask, TaskStatus, TaskPriority } from "@/features/tasks/types/task.types";
+// Note: color is no longer stored — it's derived from priority in the UI.
 
 /**
  * Appwrite Database Configuration
@@ -41,11 +42,11 @@ import type { CalendarTask, TaskStatus, TaskPriority } from "@/features/tasks/ty
  */
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
-const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID;
+const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
 
-if (!DATABASE_ID || !TASKS_COLLECTION_ID) {
+if (!DATABASE_ID) {
   console.error(
-    "Missing Appwrite configuration. Please set VITE_APPWRITE_DATABASE_ID and VITE_APPWRITE_TASKS_COLLECTION_ID in your .env file"
+    "Missing Appwrite configuration. Please set VITE_APPWRITE_DATABASE_ID in your .env file"
   );
 }
 
@@ -60,9 +61,8 @@ function taskToDocument(task: Omit<CalendarTask, "id">, userId: string) {
     startTime: task.startTime || null,
     endTime: task.endTime || null,
     priority: task.priority || 2,
-    color: task.color || "blue",
-    category: task.category || null,
-    project: task.project || null,
+    categoryId: task.category || null,
+    projectId: task.project || null,
     status: task.status || "todo",
     userId,
     subtasks: task.subtasks ? JSON.stringify(task.subtasks) : null,
@@ -70,10 +70,15 @@ function taskToDocument(task: Omit<CalendarTask, "id">, userId: string) {
   };
 }
 
-function safeParseSubtasks(raw: string): string[] {
+function safeParseSubtasks(raw: string): Subtask[] {
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item: unknown) =>
+      typeof item === "string"
+        ? { title: item, completed: false }
+        : (item as Subtask)
+    );
   } catch {
     return [];
   }
@@ -91,11 +96,10 @@ function documentToTask(doc: any): CalendarTask {
     dueDate: doc.dueDate || "",
     startTime: doc.startTime || undefined,
     endTime: doc.endTime || undefined,
-    priority: doc.priority as TaskPriority,
-    color: doc.color,
-    category: doc.category || undefined,
-    project: doc.project || undefined,
-    status: doc.status as TaskStatus,
+    priority: (doc.priority as TaskPriority) || 2,
+    category: doc.categoryId || undefined,
+    project: doc.projectId || undefined,
+    status: (doc.status as TaskStatus) || "todo",
     subtasks: doc.subtasks ? safeParseSubtasks(doc.subtasks) : undefined,
   };
 }
@@ -186,9 +190,8 @@ export const taskService = {
       if (updates.startTime !== undefined) updatePayload.startTime = updates.startTime || null;
       if (updates.endTime !== undefined) updatePayload.endTime = updates.endTime || null;
       if (updates.priority !== undefined) updatePayload.priority = updates.priority;
-      if (updates.color !== undefined) updatePayload.color = updates.color;
-      if (updates.category !== undefined) updatePayload.category = updates.category || null;
-      if (updates.project !== undefined) updatePayload.project = updates.project || null;
+      if (updates.category !== undefined) updatePayload.categoryId = updates.category || null;
+      if (updates.project !== undefined) updatePayload.projectId = updates.project || null;
       if (updates.status !== undefined) {
         updatePayload.status = updates.status;
         if (updates.status === "completed") {

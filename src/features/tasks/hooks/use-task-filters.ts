@@ -14,6 +14,7 @@ export function useInboxTasks() {
 
   return useMemo(() => {
     return tasks.filter((task) => {
+      if (task.status === "completed") return false;
       // Include tasks without project or with project "inbox"
       return !task.project || task.project === "inbox";
     });
@@ -29,6 +30,7 @@ export function useTodayTasks() {
 
   return useMemo(() => {
     return tasks.filter((task) => {
+      if (task.status === "completed") return false;
       if (!task.dueDate) return false;
 
       try {
@@ -49,6 +51,7 @@ export function useUpcomingTasks() {
 
   return useMemo(() => {
     return tasks.filter((task) => {
+      if (task.status === "completed") return false;
       if (!task.dueDate) return false;
 
       try {

@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { TaskAddDialog, type EmptyStateTaskInput } from "@/features/tasks/components/task-add-dialog";
 
 interface TaskEmptyStateProps {
   image: string;
@@ -12,7 +10,7 @@ interface TaskEmptyStateProps {
   heading: string;
   description: string;
   showAddButton?: boolean;
-  onAddTask?: (task: EmptyStateTaskInput) => void;
+  onAddTask?: () => void;
 }
 
 export function TaskEmptyState({
@@ -24,13 +22,6 @@ export function TaskEmptyState({
   showAddButton = true,
   onAddTask,
 }: TaskEmptyStateProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleAddTask = (task: EmptyStateTaskInput) => {
-    onAddTask?.(task);
-    setIsOpen(false);
-  };
-
   if (!showAddButton || !onAddTask) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] px-4">
@@ -54,22 +45,15 @@ export function TaskEmptyState({
       {/* Header Row */}
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-
-        <TaskAddDialog
-          open={isOpen}
-          onOpenChange={setIsOpen}
-          onAddTask={handleAddTask}
-          trigger={
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-[#e44232] hover:bg-[#e44232]/5 hover:text-[#c3392b] font-semibold gap-1.5 cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              Add task
-            </Button>
-          }
-        />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onAddTask}
+          className="text-[#e44232] hover:bg-[#e44232]/5 hover:text-[#c3392b] font-semibold gap-1.5 cursor-pointer"
+        >
+          <Plus className="h-4 w-4" />
+          Add task
+        </Button>
       </div>
 
       {/* Main Content Area */}
@@ -89,7 +73,7 @@ export function TaskEmptyState({
           </div>
 
           <Button
-            onClick={() => setIsOpen(true)}
+            onClick={onAddTask}
             className="bg-[#e44232] hover:bg-[#c3392b] text-white font-semibold px-6"
           >
             <Plus className="h-4 w-4 mr-2" />

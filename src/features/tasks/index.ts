@@ -4,6 +4,7 @@ export {
   type EmptyStateTaskInput,
 } from "./components/task-add-dialog";
 export { TaskDetailsSheet } from "./components/task-details-dialog";
+export { TaskDetailContent } from "./components/task-detail-content";
 export {
   TaskDropdownMenu,
   type TaskDropdownMenuProps,
@@ -25,7 +26,8 @@ export {
 } from "./hooks/use-task-filters";
 export type {
   CalendarTask,
-  TaskColor,
+  Subtask,
   TaskPriority,
   TaskStatus,
 } from "./types/task.types";
+export { getPriorityLabel, getPriorityConfig } from "./utils/task-helpers";
