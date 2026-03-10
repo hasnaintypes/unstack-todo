@@ -1,0 +1,10 @@
+export type { Project } from "./types/project.types";
+export { projectService } from "./services/project.service";
+export { useProjects } from "@/app/providers/project-provider";
+export { PROJECT_COLORS, PROJECT_COLOR_MAP, getColorClass } from "./utils/colors";
+export { StatCard } from "./components/stat-card";
+export { ProjectHeader } from "./components/project-header";
+export { ProjectStatCards, ProjectCharts, useProjectStats } from "./components/project-stats";
+export { AiTaskGenerator } from "./components/ai-task-generator";
+export { ProjectNotFound } from "./components/project-not-found";
+export { CreateProjectDialog } from "./components/create-project-dialog";
