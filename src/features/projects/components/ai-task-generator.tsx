@@ -22,14 +22,17 @@ export function AiTaskGenerator({ project, onClose, onAddTasks, autoGenerate }: 
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = useCallback(async () => {
     setIsGenerating(true);
-    setTimeout(() => {
-      const result = generateTaskSuggestions(project.name, project.description || "");
+    try {
+      const result = await generateTaskSuggestions(project.name, project.description || "");
       setSuggestions(result);
-      setSelectedSuggestions(new Set(result.map((_, i) => i)));
+      setSelectedSuggestions(new Set(result.map((_: TaskSuggestion, i: number) => i)));
+    } catch (err) {
+      console.error("Error generating suggestions:", err);
+    } finally {
       setIsGenerating(false);
-    }, 800);
+    }
   }, [project]);
 
   // Auto-generate on mount if requested
