@@ -1,51 +1,86 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { InboxEmptyState } from "@/components/empty-states";
-import type { EmptyStateTaskInput } from "@/components/empty-states";
+import { TaskEmptyState } from "@/features/tasks/components/empty-state";
+import { TaskList } from "@/features/tasks/components/task-list";
+import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
+import { useInboxTasks } from "@/features/tasks/hooks/use-task-filters";
+import { useTasks } from "@/app/providers/task-provider";
+import type { CalendarTask } from "@/features/tasks/types/task.types";
+import { inboxTaskEmptyState } from "@/assets";
 
 export const Route = createFileRoute("/_protected/inbox/")({
   component: InboxPage,
 });
 
 function InboxPage() {
-  const [tasks, setTasks] = useState<(EmptyStateTaskInput & { id: string; section: "Inbox" })[]>(
-    []
-  );
+  const inboxTasks = useInboxTasks();
+  const { addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } = useTasks();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
 
-  const handleAddTask = (task: EmptyStateTaskInput) => {
-    setTasks((previous) => [
-      {
-        ...task,
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        section: "Inbox",
-      },
-      ...previous,
-    ]);
+  const handleAddTask = (taskData: Partial<CalendarTask>) => {
+    if (!taskData.title) return;
+
+    addTask({
+      title: taskData.title,
+      description: taskData.description,
+      dueDate: taskData.dueDate || "",
+      priority: taskData.priority || 2,
+      category: taskData.category,
+      project: taskData.project || "inbox",
+      status: taskData.status || "todo",
+      subtasks: taskData.subtasks,
+    });
+  };
+
+  const handleEditTask = (taskData: Partial<CalendarTask>) => {
+    if (editingTask) {
+      updateTask(editingTask.id, taskData);
+      setEditingTask(undefined);
+    }
+  };
+
+  const handleEditClick = (task: CalendarTask) => {
+    setEditingTask(task);
+    setIsAddDialogOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setEditingTask(undefined);
+    }
+    setIsAddDialogOpen(open);
   };
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      {tasks.length === 0 ? (
-        <InboxEmptyState onAddTask={handleAddTask} />
-      ) : (
-        <div className="container py-10 max-w-screen-2xl mx-auto px-4">
-          <h1 className="text-3xl font-bold tracking-tight mb-6">Inbox</h1>
-          <div className="space-y-3">
-            {tasks.map((task) => (
-              <div key={task.id} className="rounded-lg border bg-card p-4">
-                <p className="font-medium">{task.title}</p>
-                {task.description ? (
-                  <p className="mt-1 text-sm text-muted-foreground">{task.description}</p>
-                ) : null}
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {task.section} · {task.priority} · {task.category}
-                  {task.dueDate ? ` · ${task.dueDate}` : ""}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <>
+      <TaskList
+        title="Inbox"
+        tasks={inboxTasks}
+        onToggleComplete={toggleTaskComplete}
+        onEdit={handleEditClick}
+        onDelete={moveToTrash}
+        onTaskClick={setSelectedTask}
+        onAddTask={() => setIsAddDialogOpen(true)}
+        showProject={false}
+        emptyState={
+          <TaskEmptyState
+            image={inboxTaskEmptyState}
+            imageAlt="Empty inbox"
+            title="Inbox"
+            heading="What's on your mind?"
+            description="Capture tasks that don't have a specific category. Everything you add here stays private."
+            onAddTask={() => setIsAddDialogOpen(true)}
+          />
+        }
+      />
+
+      <TaskAddDialog
+        task={editingTask}
+        open={isAddDialogOpen}
+        onOpenChange={handleDialogClose}
+        onSave={editingTask ? handleEditTask : handleAddTask}
+      />
+    </>
   );
 }

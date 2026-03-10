@@ -1,0 +1,10 @@
+{
+  "name": "discord-oauth",
+  "version": "1.0.0",
+  "description": "HTTP function for Discord OAuth2 connect/callback/disconnect",
+  "main": "src/main.js",
+  "type": "module",
+  "dependencies": {
+    "node-appwrite": "^14.0.0"
+  }
+}

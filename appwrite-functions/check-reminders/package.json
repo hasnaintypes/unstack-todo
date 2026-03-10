@@ -1,0 +1,10 @@
+{
+  "name": "check-reminders",
+  "version": "1.0.0",
+  "description": "CRON function to check task reminders and send notifications",
+  "main": "src/main.js",
+  "type": "module",
+  "dependencies": {
+    "node-appwrite": "^14.0.0"
+  }
+}
