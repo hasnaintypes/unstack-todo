@@ -67,13 +67,14 @@ export const projectService = {
 
   async updateProject(
     projectId: string,
-    updates: Partial<Pick<Project, "name" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
+    updates: Partial<Pick<Project, "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
   ): Promise<Project> {
     const payload: Record<string, unknown> = {};
     if (updates.name !== undefined) {
       payload.name = updates.name;
       payload.slug = generateSlug(updates.name);
     }
+    if (updates.description !== undefined) payload.description = updates.description || null;
     if (updates.color !== undefined) payload.color = updates.color;
     if (updates.icon !== undefined) payload.icon = updates.icon || null;
     if (updates.order !== undefined) payload.position = updates.order;

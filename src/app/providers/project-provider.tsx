@@ -9,7 +9,7 @@ interface ProjectContextValue {
   addProject: (data: { name: string; description?: string; color?: string; icon?: string }) => Promise<Project>;
   updateProject: (
     id: string,
-    updates: Partial<Pick<Project, "name" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
+    updates: Partial<Pick<Project, "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
   ) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
   refreshProjects: () => Promise<void>;
@@ -57,7 +57,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const updateProject = React.useCallback(
     async (
       id: string,
-      updates: Partial<Pick<Project, "name" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
+      updates: Partial<Pick<Project, "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
     ) => {
       const updated = await projectService.updateProject(id, updates);
       setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));
