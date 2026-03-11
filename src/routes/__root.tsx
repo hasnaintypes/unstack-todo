@@ -54,7 +54,7 @@ function RootComponent() {
               </main>
               {!isMinimalLayout && <Footer />}
               <Toaster />
-              <TanStackRouterDevtools />
+              {import.meta.env.DEV && <TanStackRouterDevtools />}
             </div>
           </CategoryProvider>
         </ProjectProvider>
