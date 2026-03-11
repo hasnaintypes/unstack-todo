@@ -214,6 +214,13 @@ const TASKS = {
       elements: ["1d", "1h", "30m", "on_due"],
       required: false,
     },
+    {
+      key: "recurrence",
+      type: "enum",
+      elements: ["daily", "weekly", "monthly", "weekdays"],
+      required: false,
+    },
+    { key: "attachments", type: "text", required: false },
   ],
   indexes: [
     { key: "idx_userId", type: "key", attributes: ["userId"] },
@@ -289,8 +296,49 @@ const USER_PREFERENCES = {
   permissions: collectionPermissions,
 };
 
+/**
+ * TASK_COMMENTS — Comments on tasks. One-to-many relationship with tasks.
+ */
+const TASK_COMMENTS = {
+  id: "task_comments",
+  name: "Task Comments",
+  columns: [
+    { key: "taskId", type: "varchar", size: 256, required: true },
+    { key: "userId", type: "varchar", size: 256, required: true },
+    { key: "content", type: "text", required: true },
+  ],
+  indexes: [
+    { key: "idx_taskId", type: "key", attributes: ["taskId"] },
+    { key: "idx_userId", type: "key", attributes: ["userId"] },
+    { key: "idx_taskId_createdAt", type: "key", attributes: ["taskId", "$createdAt"] },
+  ],
+  permissions: collectionPermissions,
+};
+
+/**
+ * TASK_TEMPLATES — Saved task templates for quick task creation.
+ */
+const TASK_TEMPLATES = {
+  id: "task_templates",
+  name: "Task Templates",
+  columns: [
+    { key: "userId", type: "varchar", size: 256, required: true },
+    { key: "name", type: "varchar", size: 256, required: true },
+    { key: "title", type: "varchar", size: 256, required: true },
+    { key: "description", type: "text", required: false },
+    { key: "priority", type: "integer", required: false, min: 1, max: 4, defaultValue: 2 },
+    { key: "subtasks", type: "text", required: false },
+    { key: "categoryId", type: "varchar", size: 256, required: false },
+    { key: "projectId", type: "varchar", size: 256, required: false },
+  ],
+  indexes: [
+    { key: "idx_userId", type: "key", attributes: ["userId"] },
+  ],
+  permissions: collectionPermissions,
+};
+
 // All tables in creation order
-const ALL_TABLES = [PROFILES, PROJECTS, CATEGORIES, TASKS, SUBTASKS, USER_PREFERENCES];
+const ALL_TABLES = [PROFILES, PROJECTS, CATEGORIES, TASKS, SUBTASKS, USER_PREFERENCES, TASK_COMMENTS, TASK_TEMPLATES];
 
 // ---------------------------------------------------------------------------
 // Setup functions

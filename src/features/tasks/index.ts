@@ -27,9 +27,11 @@ export {
 export type {
   CalendarTask,
   Subtask,
+  Attachment,
   TaskPriority,
   TaskStatus,
   ReminderBefore,
+  Recurrence,
 } from "./types/task.types";
 export { getPriorityLabel, getPriorityConfig } from "./utils/task-helpers";
 export { KanbanBoard } from "./components/kanban";
