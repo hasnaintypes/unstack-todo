@@ -40,52 +40,56 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     loadTasks();
   }, [user?.$id]);
 
-  const addTask = React.useCallback(async (taskData: Omit<CalendarTask, "id">) => {
-    if (!user?.$id) {
-      setError("User not authenticated");
-      throw new Error("User not authenticated");
-    }
+  const addTask = React.useCallback(
+    async (taskData: Omit<CalendarTask, "id">) => {
+      if (!user?.$id) {
+        setError("User not authenticated");
+        throw new Error("User not authenticated");
+      }
 
-    try {
-      const newTask = await taskService.createTask(taskData, user.$id);
-      setTasks((prev) => [newTask, ...prev]);
-      toast.success(`"${newTask.title}" added to your tasks`, {
-        description: newTask.dueDate ? `Due ${newTask.dueDate}` : "No due date set",
-        action: { label: "Undo", onClick: () => moveToTrashRef.current(newTask.id) },
-      });
-    } catch (err) {
-      console.error("Error adding task:", err);
-      setError("Failed to add task");
-      toast.error("Couldn't create task", {
-        description: "Please check your connection and try again.",
-      });
-      throw err;
-    }
-  }, [user?.$id]);
+      try {
+        const newTask = await taskService.createTask(taskData, user.$id);
+        setTasks((prev) => [newTask, ...prev]);
+        toast.success(`"${newTask.title}" added to your tasks`, {
+          description: newTask.dueDate ? `Due ${newTask.dueDate}` : "No due date set",
+          action: { label: "Undo", onClick: () => moveToTrashRef.current(newTask.id) },
+        });
+      } catch (err) {
+        console.error("Error adding task:", err);
+        setError("Failed to add task");
+        toast.error("Couldn't create task", {
+          description: "Please check your connection and try again.",
+        });
+        throw err;
+      }
+    },
+    [user?.$id]
+  );
 
-  const updateTask = React.useCallback(async (id: string, updates: Partial<CalendarTask>) => {
-    if (!user?.$id) {
-      setError("User not authenticated");
-      throw new Error("User not authenticated");
-    }
+  const updateTask = React.useCallback(
+    async (id: string, updates: Partial<CalendarTask>) => {
+      if (!user?.$id) {
+        setError("User not authenticated");
+        throw new Error("User not authenticated");
+      }
 
-    try {
-      const updatedTask = await taskService.updateTask(id, updates);
-      setTasks((prev) =>
-        prev.map((task) => (task.id === id ? updatedTask : task))
-      );
-      toast.success("Changes saved", {
-        description: `"${updatedTask.title}" has been updated.`,
-      });
-    } catch (err) {
-      console.error("Error updating task:", err);
-      setError("Failed to update task");
-      toast.error("Couldn't save changes", {
-        description: "Please check your connection and try again.",
-      });
-      throw err;
-    }
-  }, [user?.$id]);
+      try {
+        const updatedTask = await taskService.updateTask(id, updates);
+        setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
+        toast.success("Changes saved", {
+          description: `"${updatedTask.title}" has been updated.`,
+        });
+      } catch (err) {
+        console.error("Error updating task:", err);
+        setError("Failed to update task");
+        toast.error("Couldn't save changes", {
+          description: "Please check your connection and try again.",
+        });
+        throw err;
+      }
+    },
+    [user?.$id]
+  );
 
   const deleteTask = React.useCallback(async (id: string) => {
     try {
@@ -101,17 +105,16 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const toggleTaskComplete = React.useCallback(async (id: string) => {
     try {
       const updatedTask = await taskService.toggleTaskComplete(id);
-      setTasks((prev) =>
-        prev.map((task) => (task.id === id ? updatedTask : task))
-      );
+      setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
       toast.success(
         updatedTask.status === "completed"
           ? `"${updatedTask.title}" completed`
           : `"${updatedTask.title}" reopened`,
         {
-          description: updatedTask.status === "completed"
-            ? "Great job! Keep up the momentum."
-            : "Task is back on your active list.",
+          description:
+            updatedTask.status === "completed"
+              ? "Great job! Keep up the momentum."
+              : "Task is back on your active list.",
           action: { label: "Undo", onClick: () => toggleTaskComplete(id) },
         }
       );
@@ -161,40 +164,53 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   moveToTrashRef.current = moveToTrash;
   restoreFromTrashRef.current = restoreFromTrash;
 
-  const permanentlyDelete = React.useCallback(async (id: string) => {
-    try {
-      // Capture task before deleting for undo
-      const deletedTask = tasks.find((t) => t.id === id);
-      await taskService.permanentlyDelete(id);
-      setTasks((prev) => prev.filter((task) => task.id !== id));
-      if (selectedTask?.id === id) setSelectedTask(null);
-      toast.success("Task permanently deleted", {
-        description: deletedTask ? `"${deletedTask.title}" has been removed.` : undefined,
-        action: deletedTask && user?.$id
-          ? {
-              label: "Undo",
-              onClick: async () => {
-                try {
-                  const restored = await taskService.createTask(
-                    { title: deletedTask.title, description: deletedTask.description, dueDate: deletedTask.dueDate, priority: deletedTask.priority, category: deletedTask.category, project: deletedTask.project, status: deletedTask.status, subtasks: deletedTask.subtasks },
-                    user.$id
-                  );
-                  setTasks((prev) => [restored, ...prev]);
-                  toast.success("Task restored");
-                } catch {
-                  toast.error("Failed to undo delete");
+  const permanentlyDelete = React.useCallback(
+    async (id: string) => {
+      try {
+        // Capture task before deleting for undo
+        const deletedTask = tasks.find((t) => t.id === id);
+        await taskService.permanentlyDelete(id);
+        setTasks((prev) => prev.filter((task) => task.id !== id));
+        if (selectedTask?.id === id) setSelectedTask(null);
+        toast.success("Task permanently deleted", {
+          description: deletedTask ? `"${deletedTask.title}" has been removed.` : undefined,
+          action:
+            deletedTask && user?.$id
+              ? {
+                  label: "Undo",
+                  onClick: async () => {
+                    try {
+                      const restored = await taskService.createTask(
+                        {
+                          title: deletedTask.title,
+                          description: deletedTask.description,
+                          dueDate: deletedTask.dueDate,
+                          priority: deletedTask.priority,
+                          category: deletedTask.category,
+                          project: deletedTask.project,
+                          status: deletedTask.status,
+                          subtasks: deletedTask.subtasks,
+                        },
+                        user.$id
+                      );
+                      setTasks((prev) => [restored, ...prev]);
+                      toast.success("Task restored");
+                    } catch {
+                      toast.error("Failed to undo delete");
+                    }
+                  },
                 }
-              },
-            }
-          : undefined,
-      });
-    } catch (err) {
-      console.error("Error permanently deleting:", err);
-      setError("Failed to permanently delete task");
-      toast.error("Couldn't delete task");
-      throw err;
-    }
-  }, [tasks, selectedTask, user?.$id]);
+              : undefined,
+        });
+      } catch (err) {
+        console.error("Error permanently deleting:", err);
+        setError("Failed to permanently delete task");
+        toast.error("Couldn't delete task");
+        throw err;
+      }
+    },
+    [tasks, selectedTask, user?.$id]
+  );
 
   const clearCompleted = React.useCallback(async () => {
     if (!user?.$id) return;
@@ -219,7 +235,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       await taskService.emptyTrash(user.$id);
       const fetchedTasks = await taskService.getAllTasks(user.$id);
       setTasks(fetchedTasks);
-      toast.success("Trash emptied", { description: "All trashed tasks have been permanently deleted." });
+      toast.success("Trash emptied", {
+        description: "All trashed tasks have been permanently deleted.",
+      });
     } catch (err) {
       console.error("Error emptying trash:", err);
       setError("Failed to empty trash");
@@ -235,7 +253,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       await taskService.restoreAllFromTrash(user.$id);
       const fetchedTasks = await taskService.getAllTasks(user.$id);
       setTasks(fetchedTasks);
-      toast.success("All tasks restored", { description: "Tasks have been moved back to their original locations." });
+      toast.success("All tasks restored", {
+        description: "Tasks have been moved back to their original locations.",
+      });
     } catch (err) {
       console.error("Error restoring all:", err);
       setError("Failed to restore all tasks");

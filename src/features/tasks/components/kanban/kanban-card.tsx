@@ -12,15 +12,15 @@ interface KanbanCardProps {
   isDragOverlay?: boolean;
 }
 
-export function KanbanCard({ task, onTaskClick, onToggleComplete, isDragOverlay }: KanbanCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
+export function KanbanCard({
+  task,
+  onTaskClick,
+  onToggleComplete,
+  isDragOverlay,
+}: KanbanCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),

@@ -43,8 +43,10 @@ export function TaskDetailContent({ task, onUpdateSubtasks }: TaskDetailContentP
             variant="outline"
             className={cn(
               "text-xs font-medium",
-              task.status === "completed" && "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300",
-              task.status === "in-progress" && "bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-300",
+              task.status === "completed" &&
+                "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300",
+              task.status === "in-progress" &&
+                "bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-300",
               task.status === "todo" && "bg-muted"
             )}
           >
@@ -54,7 +56,10 @@ export function TaskDetailContent({ task, onUpdateSubtasks }: TaskDetailContentP
 
         {/* Due Date */}
         {task.dueDate && (
-          <PropertyRow icon={<Calendar className="size-4 text-muted-foreground" />} label="Due date">
+          <PropertyRow
+            icon={<Calendar className="size-4 text-muted-foreground" />}
+            label="Due date"
+          >
             <span className="text-sm">{format(parseISO(task.dueDate), "MMM d, yyyy")}</span>
           </PropertyRow>
         )}
@@ -71,7 +76,10 @@ export function TaskDetailContent({ task, onUpdateSubtasks }: TaskDetailContentP
         )}
 
         {/* Priority */}
-        <PropertyRow icon={<Flag className={cn("size-4", priorityConfig.iconClass)} />} label="Priority">
+        <PropertyRow
+          icon={<Flag className={cn("size-4", priorityConfig.iconClass)} />}
+          label="Priority"
+        >
           <Badge variant="outline" className={cn("text-xs font-medium", priorityConfig.badgeClass)}>
             {priorityConfig.label}
           </Badge>
@@ -113,7 +121,9 @@ export function TaskDetailContent({ task, onUpdateSubtasks }: TaskDetailContentP
         <div className="pt-3 border-t">
           <div className="flex items-center gap-2 mb-2">
             <AlignLeft className="size-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Description</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Description
+            </span>
           </div>
           <p className="text-sm leading-relaxed whitespace-pre-wrap break-words pl-6 text-foreground/80">
             {task.description}
@@ -127,7 +137,9 @@ export function TaskDetailContent({ task, onUpdateSubtasks }: TaskDetailContentP
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <ListTodo className="size-4 text-muted-foreground" />
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Subtasks</span>
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Subtasks
+              </span>
             </div>
             <span className="text-xs text-muted-foreground tabular-nums">
               {completedSubtasks}/{totalSubtasks}
@@ -138,7 +150,9 @@ export function TaskDetailContent({ task, onUpdateSubtasks }: TaskDetailContentP
           <div className="h-1.5 w-full rounded-full bg-muted mb-3 ml-6 max-w-[calc(100%-1.5rem)]">
             <div
               className="h-full rounded-full bg-[#e44232] transition-all duration-300"
-              style={{ width: `${totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0}%` }}
+              style={{
+                width: `${totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0}%`,
+              }}
             />
           </div>
 

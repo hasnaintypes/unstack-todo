@@ -111,8 +111,8 @@ function TrashPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Empty trash?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete all {trashedTasks.length} item{trashedTasks.length !== 1 ? "s" : ""} in
-              trash. This action cannot be undone.
+              This will permanently delete all {trashedTasks.length} item
+              {trashedTasks.length !== 1 ? "s" : ""} in trash. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -133,8 +133,8 @@ function TrashPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Restore all tasks?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will restore all {trashedTasks.length} item{trashedTasks.length !== 1 ? "s" : ""} from trash back
-              to their original locations.
+              This will restore all {trashedTasks.length} item{trashedTasks.length !== 1 ? "s" : ""}{" "}
+              from trash back to their original locations.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

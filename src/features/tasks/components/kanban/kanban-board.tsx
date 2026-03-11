@@ -27,7 +27,12 @@ const COLUMNS: { id: TaskStatus; title: string; colorClass: string }[] = [
   { id: "completed", title: "Completed", colorClass: "bg-green-500" },
 ];
 
-export function KanbanBoard({ tasks, onUpdateTask, onTaskClick, onToggleComplete }: KanbanBoardProps) {
+export function KanbanBoard({
+  tasks,
+  onUpdateTask,
+  onTaskClick,
+  onToggleComplete,
+}: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<CalendarTask | null>(null);
 
   const sensors = useSensors(
@@ -37,9 +42,9 @@ export function KanbanBoard({ tasks, onUpdateTask, onTaskClick, onToggleComplete
 
   const tasksByStatus = useMemo(() => {
     const grouped: Record<TaskStatus, CalendarTask[]> = {
-      "todo": [],
+      todo: [],
       "in-progress": [],
-      "completed": [],
+      completed: [],
     };
     for (const task of tasks) {
       const status = task.status || "todo";

@@ -3,10 +3,7 @@ import { Sparkles, X, Check, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { cn } from "@/shared/lib/utils";
-import {
-  generateTaskSuggestions,
-  type TaskSuggestion,
-} from "@/shared/services/ai.service";
+import { generateTaskSuggestions, type TaskSuggestion } from "@/shared/services/ai.service";
 import type { Project } from "@/features/projects/types/project.types";
 
 interface AiTaskGeneratorProps {
@@ -16,7 +13,12 @@ interface AiTaskGeneratorProps {
   autoGenerate?: boolean;
 }
 
-export function AiTaskGenerator({ project, onClose, onAddTasks, autoGenerate }: AiTaskGeneratorProps) {
+export function AiTaskGenerator({
+  project,
+  onClose,
+  onAddTasks,
+  autoGenerate,
+}: AiTaskGeneratorProps) {
   const [suggestions, setSuggestions] = useState<TaskSuggestion[]>([]);
   const [selectedSuggestions, setSelectedSuggestions] = useState<Set<number>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
@@ -79,7 +81,9 @@ export function AiTaskGenerator({ project, onClose, onAddTasks, autoGenerate }: 
         {isGenerating ? (
           <div className="flex flex-col items-center py-8 gap-3">
             <Loader2 className="size-6 animate-spin text-[#e44232]" />
-            <p className="text-sm text-muted-foreground">Generating tasks for &quot;{project.name}&quot;...</p>
+            <p className="text-sm text-muted-foreground">
+              Generating tasks for &quot;{project.name}&quot;...
+            </p>
           </div>
         ) : suggestions.length > 0 ? (
           <div className="space-y-4">
@@ -95,25 +99,29 @@ export function AiTaskGenerator({ project, onClose, onAddTasks, autoGenerate }: 
                       : "border-transparent hover:bg-accent/50"
                   )}
                 >
-                  <div className={cn(
-                    "flex size-5 items-center justify-center rounded border-2 shrink-0 mt-0.5 transition-colors",
-                    selectedSuggestions.has(i)
-                      ? "bg-[#e44232] border-[#e44232]"
-                      : "border-muted-foreground/30"
-                  )}>
+                  <div
+                    className={cn(
+                      "flex size-5 items-center justify-center rounded border-2 shrink-0 mt-0.5 transition-colors",
+                      selectedSuggestions.has(i)
+                        ? "bg-[#e44232] border-[#e44232]"
+                        : "border-muted-foreground/30"
+                    )}
+                  >
                     {selectedSuggestions.has(i) && <Check className="size-3 text-white" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{s.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{s.description}</p>
                   </div>
-                  <span className={cn(
-                    "text-[10px] font-medium px-1.5 py-0.5 rounded shrink-0",
-                    s.priority === 4 && "bg-red-500/10 text-red-600",
-                    s.priority === 3 && "bg-orange-500/10 text-orange-600",
-                    s.priority === 2 && "bg-yellow-500/10 text-yellow-600",
-                    s.priority === 1 && "bg-blue-500/10 text-blue-600",
-                  )}>
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium px-1.5 py-0.5 rounded shrink-0",
+                      s.priority === 4 && "bg-red-500/10 text-red-600",
+                      s.priority === 3 && "bg-orange-500/10 text-orange-600",
+                      s.priority === 2 && "bg-yellow-500/10 text-yellow-600",
+                      s.priority === 1 && "bg-blue-500/10 text-blue-600"
+                    )}
+                  >
                     P{s.priority}
                   </span>
                 </button>
@@ -134,7 +142,11 @@ export function AiTaskGenerator({ project, onClose, onAddTasks, autoGenerate }: 
                   disabled={selectedSuggestions.size === 0 || isAdding}
                   className="bg-[#e44232] hover:bg-[#c3392b] text-white gap-1.5"
                 >
-                  {isAdding ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3.5" />}
+                  {isAdding ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Plus className="size-3.5" />
+                  )}
                   Add {selectedSuggestions.size} task{selectedSuggestions.size !== 1 ? "s" : ""}
                 </Button>
               </div>
@@ -143,8 +155,14 @@ export function AiTaskGenerator({ project, onClose, onAddTasks, autoGenerate }: 
         ) : (
           <div className="flex flex-col items-center py-8 gap-3">
             <Sparkles className="size-8 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">Click generate to create task suggestions</p>
-            <Button size="sm" onClick={handleGenerate} className="bg-[#e44232] hover:bg-[#c3392b] text-white">
+            <p className="text-sm text-muted-foreground">
+              Click generate to create task suggestions
+            </p>
+            <Button
+              size="sm"
+              onClick={handleGenerate}
+              className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+            >
               Generate Tasks
             </Button>
           </div>

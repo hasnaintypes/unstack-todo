@@ -66,8 +66,9 @@ function CompletedPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Clear completed tasks?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will move all {completedTasks.length} completed task{completedTasks.length !== 1 ? "s" : ""} to
-              trash. You can restore them from trash within 30 days.
+              This will move all {completedTasks.length} completed task
+              {completedTasks.length !== 1 ? "s" : ""} to trash. You can restore them from trash
+              within 30 days.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

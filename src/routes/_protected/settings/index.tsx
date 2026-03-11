@@ -1,11 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Sun,
-  Moon,
-  Monitor,
-  Palette,
-  Archive,
-} from "lucide-react";
+import { Sun, Moon, Monitor, Palette, Archive } from "lucide-react";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
 import { cn } from "@/shared/lib/utils";
@@ -30,9 +24,7 @@ function SettingsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Customize your workspace preferences
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">Customize your workspace preferences</p>
       </div>
 
       {/* Appearance */}
@@ -42,9 +34,7 @@ function SettingsPage() {
             <Palette className="size-4 text-muted-foreground" />
             <h2 className="text-base font-semibold">Appearance</h2>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Choose how the app looks
-          </p>
+          <p className="text-xs text-muted-foreground">Choose how the app looks</p>
         </div>
         <Separator />
         <div className="p-6">
@@ -94,9 +84,7 @@ function SettingsPage() {
             <Archive className="size-4 text-muted-foreground" />
             <h2 className="text-base font-semibold">Tasks</h2>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Configure task behavior
-          </p>
+          <p className="text-xs text-muted-foreground">Configure task behavior</p>
         </div>
         <Separator />
         <div className="p-6 space-y-5">

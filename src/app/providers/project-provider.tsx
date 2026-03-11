@@ -44,7 +44,12 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const updateProject = React.useCallback(
     async (
       id: string,
-      updates: Partial<Pick<Project, "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
+      updates: Partial<
+        Pick<
+          Project,
+          "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order"
+        >
+      >
     ) => {
       const updated = await projectService.updateProject(id, updates);
       setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));

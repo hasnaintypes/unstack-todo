@@ -23,7 +23,8 @@ function ProjectDetailPage() {
   const { projectId } = Route.useParams();
   const navigate = useNavigate();
   const { projects, updateProject, deleteProject } = useProjects();
-  const { tasks, addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } = useTasks();
+  const { tasks, addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } =
+    useTasks();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<CalendarTask | undefined>();

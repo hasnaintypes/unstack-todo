@@ -3,7 +3,10 @@ import { Permission, Role } from "appwrite";
 import type { UserReminderPreferences } from "../types/reminder.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
-const PREFERENCES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREFERENCES_COLLECTION_ID || import.meta.env.VITE_APPWRITE_USER_PREFERENCES_COLLECTION_ID || "user_preferences";
+const PREFERENCES_COLLECTION_ID =
+  import.meta.env.VITE_APPWRITE_PREFERENCES_COLLECTION_ID ||
+  import.meta.env.VITE_APPWRITE_USER_PREFERENCES_COLLECTION_ID ||
+  "user_preferences";
 
 const DEFAULT_PREFERENCES: Omit<UserReminderPreferences, "id" | "userId"> = {
   emailEnabled: false,
@@ -30,11 +33,10 @@ function documentToPreferences(doc: any): UserReminderPreferences {
 export const reminderService = {
   async getPreferences(userId: string): Promise<UserReminderPreferences> {
     try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        PREFERENCES_COLLECTION_ID,
-        [Query.equal("userId", userId), Query.limit(1)]
-      );
+      const response = await databases.listDocuments(DATABASE_ID, PREFERENCES_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.limit(1),
+      ]);
 
       if (response.documents.length > 0) {
         return documentToPreferences(response.documents[0]);

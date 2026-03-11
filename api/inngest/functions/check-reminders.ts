@@ -22,8 +22,7 @@ export const checkReminders = inngest.createFunction(
 
     const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
     const TASKS_COLLECTION_ID = process.env.TASKS_COLLECTION_ID || "tasks";
-    const PREFERENCES_COLLECTION_ID =
-      process.env.PREFERENCES_COLLECTION_ID || "user_preferences";
+    const PREFERENCES_COLLECTION_ID = process.env.PREFERENCES_COLLECTION_ID || "user_preferences";
 
     const tasksResponse = await step.run("query-reminder-tasks", async () => {
       const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
@@ -92,9 +91,7 @@ export const checkReminders = inngest.createFunction(
               });
               logger.info(`Discord notification sent for task: ${task.title}`);
             } catch (discordErr) {
-              logger.error(
-                `Failed to send Discord notification: ${(discordErr as Error).message}`
-              );
+              logger.error(`Failed to send Discord notification: ${(discordErr as Error).message}`);
             }
           }
         });

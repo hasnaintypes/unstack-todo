@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Sparkles, Loader2, MoreHorizontal, Pencil, Trash2, Check, X, List, LayoutGrid } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Sparkles,
+  Loader2,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+  List,
+  LayoutGrid,
+} from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -105,9 +117,7 @@ export function ProjectHeader({
                       : "opacity-60 hover:opacity-100 hover:scale-105"
                   )}
                 >
-                  {editColor === c.value && (
-                    <Check className="size-3 text-white" />
-                  )}
+                  {editColor === c.value && <Check className="size-3 text-white" />}
                 </button>
               ))}
             </div>
@@ -144,7 +154,12 @@ export function ProjectHeader({
       </Button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
-          <div className={cn("size-3.5 rounded-full shrink-0", PROJECT_COLOR_MAP[project.color] || "bg-blue-500")} />
+          <div
+            className={cn(
+              "size-3.5 rounded-full shrink-0",
+              PROJECT_COLOR_MAP[project.color] || "bg-blue-500"
+            )}
+          />
           <h1 className="text-2xl font-bold tracking-tight truncate">{project.name}</h1>
         </div>
         {project.description && (
@@ -175,8 +190,18 @@ export function ProjectHeader({
             </Button>
           </div>
         )}
-        <Button variant="outline" size="sm" onClick={onAiGenerate} disabled={isAiGenerating} className="gap-1.5">
-          {isAiGenerating ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onAiGenerate}
+          disabled={isAiGenerating}
+          className="gap-1.5"
+        >
+          {isAiGenerating ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="size-3.5" />
+          )}
           {isAiGenerating ? "Generating..." : "AI Generate"}
         </Button>
         <Button
@@ -198,7 +223,10 @@ export function ProjectHeader({
               <Pencil className="size-4 mr-2" />
               Edit Project
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={onDelete}
+              className="text-destructive focus:text-destructive"
+            >
               <Trash2 className="size-4 mr-2" />
               Delete Project
             </DropdownMenuItem>

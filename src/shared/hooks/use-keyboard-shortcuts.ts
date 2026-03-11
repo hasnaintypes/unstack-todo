@@ -42,13 +42,15 @@ export function useKeyboardShortcuts(shortcuts: Shortcut[]) {
         const altMatch = shortcut.alt ? e.altKey : !e.altKey;
 
         // For Cmd/Ctrl shortcuts, match either meta or ctrl
-        const modMatch = shortcut.meta || shortcut.ctrl
-          ? (e.metaKey || e.ctrlKey) && (shortcut.shift ? e.shiftKey : true)
-          : ctrlMatch && metaMatch && shiftMatch && altMatch;
+        const modMatch =
+          shortcut.meta || shortcut.ctrl
+            ? (e.metaKey || e.ctrlKey) && (shortcut.shift ? e.shiftKey : true)
+            : ctrlMatch && metaMatch && shiftMatch && altMatch;
 
-        const finalKeyMatch = shortcut.meta || shortcut.ctrl
-          ? keyMatch && modMatch
-          : keyMatch && ctrlMatch && metaMatch && shiftMatch && altMatch;
+        const finalKeyMatch =
+          shortcut.meta || shortcut.ctrl
+            ? keyMatch && modMatch
+            : keyMatch && ctrlMatch && metaMatch && shiftMatch && altMatch;
 
         if (finalKeyMatch) {
           if (!shortcut.allowInInput && isInputElement(e.target)) continue;

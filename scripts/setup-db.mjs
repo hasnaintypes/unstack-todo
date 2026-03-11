@@ -77,10 +77,7 @@ if (!ENDPOINT || !PROJECT_ID || !API_KEY) {
 // ---------------------------------------------------------------------------
 // Appwrite client (server-side)
 // ---------------------------------------------------------------------------
-const client = new Client()
-  .setEndpoint(ENDPOINT)
-  .setProject(PROJECT_ID)
-  .setKey(API_KEY);
+const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID).setKey(API_KEY);
 
 const databases = new Databases(client);
 
@@ -131,9 +128,7 @@ const PROFILES = {
       defaultValue: 2,
     },
   ],
-  indexes: [
-    { key: "idx_userId", type: "unique", attributes: ["userId"] },
-  ],
+  indexes: [{ key: "idx_userId", type: "unique", attributes: ["userId"] }],
   permissions: collectionPermissions,
 };
 
@@ -285,7 +280,11 @@ const USER_PREFERENCES = {
   ],
   indexes: [
     { key: "idx_userId", type: "unique", attributes: ["userId"] },
-    { key: "idx_dailySummary", type: "key", attributes: ["dailySummaryEnabled", "dailySummaryTime"] },
+    {
+      key: "idx_dailySummary",
+      type: "key",
+      attributes: ["dailySummaryEnabled", "dailySummaryTime"],
+    },
   ],
   permissions: collectionPermissions,
 };
@@ -431,12 +430,7 @@ async function createAttribute(dbId, collectionId, col) {
       );
 
     case "datetime":
-      return databases.createDatetimeAttribute(
-        dbId,
-        collectionId,
-        col.key,
-        col.required || false
-      );
+      return databases.createDatetimeAttribute(dbId, collectionId, col.key, col.required || false);
 
     default:
       console.log(`    ? Unknown type: ${col.type} for ${col.key}`);
@@ -449,18 +443,14 @@ async function createAttribute(dbId, collectionId, col) {
 async function waitForAttributes(dbId, collectionId, expectedCount, maxRetries = 30) {
   for (let i = 0; i < maxRetries; i++) {
     const collection = await databases.getCollection(dbId, collectionId);
-    const ready = collection.attributes.filter(
-      (a) => a.status === "available"
-    ).length;
+    const ready = collection.attributes.filter((a) => a.status === "available").length;
 
     if (ready >= expectedCount) {
       console.log(`  All ${ready} attributes ready.`);
       return;
     }
 
-    const failed = collection.attributes.filter(
-      (a) => a.status === "failed"
-    );
+    const failed = collection.attributes.filter((a) => a.status === "failed");
     if (failed.length > 0) {
       console.warn(
         `  Warning: ${failed.length} attribute(s) failed: ${failed.map((a) => a.key).join(", ")}`

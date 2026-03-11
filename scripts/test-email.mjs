@@ -30,10 +30,15 @@ function loadEnv() {
       const eqIdx = trimmed.indexOf("=");
       if (eqIdx === -1) continue;
       const key = trimmed.slice(0, eqIdx).trim();
-      const value = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
+      const value = trimmed
+        .slice(eqIdx + 1)
+        .trim()
+        .replace(/^["']|["']$/g, "");
       if (!process.env[key]) process.env[key] = value;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 loadEnv();
@@ -43,7 +48,9 @@ const PROJECT_ID = process.env.VITE_APPWRITE_PROJECT_ID;
 const API_KEY = process.env.APPWRITE_API_KEY;
 
 if (!ENDPOINT || !PROJECT_ID || !API_KEY) {
-  console.error("\n  Missing env vars. Need VITE_APPWRITE_ENDPOINT, VITE_APPWRITE_PROJECT_ID, APPWRITE_API_KEY\n");
+  console.error(
+    "\n  Missing env vars. Need VITE_APPWRITE_ENDPOINT, VITE_APPWRITE_PROJECT_ID, APPWRITE_API_KEY\n"
+  );
   process.exit(1);
 }
 
@@ -53,10 +60,7 @@ if (!recipientEmail) {
   process.exit(1);
 }
 
-const client = new Client()
-  .setEndpoint(ENDPOINT)
-  .setProject(PROJECT_ID)
-  .setKey(API_KEY);
+const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID).setKey(API_KEY);
 
 const messaging = new Messaging(client);
 const users = new Users(client);
@@ -104,14 +108,16 @@ async function main() {
 
       // Find email target
       const targets = user.targets || [];
-      const emailTarget = targets.find(t => t.providerType === "email");
+      const emailTarget = targets.find((t) => t.providerType === "email");
       if (emailTarget) {
         targetId = emailTarget.$id;
         console.log(`   Email target: ${targetId}`);
       } else {
         console.log("   No email target found on this user.");
         console.log("   This usually means the user registered before Messaging was enabled.");
-        console.log("   The user needs to re-verify their email, or you can create a target manually.\n");
+        console.log(
+          "   The user needs to re-verify their email, or you can create a target manually.\n"
+        );
       }
     } else {
       console.log(`   No user found with email: ${recipientEmail}`);
@@ -144,14 +150,14 @@ async function main() {
         messageId,
         subject,
         htmlContent,
-        [],                  // topics
-        [targetUserId],      // users
-        [],                  // targets
-        [],                  // cc
-        [],                  // bcc
-        [],                  // attachments (corrected param order)
-        false,               // draft
-        true                 // html
+        [], // topics
+        [targetUserId], // users
+        [], // targets
+        [], // cc
+        [], // bcc
+        [], // attachments (corrected param order)
+        false, // draft
+        true // html
       );
       console.log(`\n   Email sent successfully!`);
       console.log(`   Message ID: ${result.$id}`);
@@ -167,14 +173,14 @@ async function main() {
         messageId,
         subject,
         htmlContent,
-        [],              // topics
-        [],              // users
-        [targetId],      // targets
-        [],              // cc
-        [],              // bcc
-        [],              // attachments
-        false,           // draft
-        true             // html
+        [], // topics
+        [], // users
+        [targetId], // targets
+        [], // cc
+        [], // bcc
+        [], // attachments
+        false, // draft
+        true // html
       );
       console.log(`\n   Email sent successfully!`);
       console.log(`   Message ID: ${result.$id}`);
@@ -187,7 +193,6 @@ async function main() {
     console.log("   To test, use the email of a user who has signed up in the app.\n");
     console.log("   Alternatively, you can test the SMTP provider directly:");
     console.log("   Appwrite Console > Messaging > Messages > Create Message > Email\n");
-
   } catch (err) {
     console.error(`\n   Failed to send email!`);
     console.error(`   Error: ${err.message}`);
@@ -200,7 +205,9 @@ async function main() {
       console.error("\n   The user has no email target. This happens when:");
       console.error("   - The user signed up before Messaging was enabled");
       console.error("   - The user has no verified email");
-      console.error("   Try: Appwrite Console > Messaging > Messages > Create Message (manual test)\n");
+      console.error(
+        "   Try: Appwrite Console > Messaging > Messages > Create Message (manual test)\n"
+      );
     } else {
       console.error(`\n   Full error: ${JSON.stringify(err, null, 2)}\n`);
     }

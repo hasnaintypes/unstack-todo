@@ -24,50 +24,37 @@ export const dailySummary = inngest.createFunction(
 
     const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
     const TASKS_COLLECTION_ID = process.env.TASKS_COLLECTION_ID || "tasks";
-    const PREFERENCES_COLLECTION_ID =
-      process.env.PREFERENCES_COLLECTION_ID || "user_preferences";
+    const PREFERENCES_COLLECTION_ID = process.env.PREFERENCES_COLLECTION_ID || "user_preferences";
 
     const now = new Date();
     const currentHour = now.getUTCHours().toString().padStart(2, "0");
 
     const matchingPrefs = await step.run("query-user-preferences", async () => {
-      const prefsResponse = await databases.listDocuments(
-        DATABASE_ID,
-        PREFERENCES_COLLECTION_ID,
-        [
-          Query.equal("dailySummaryEnabled", true),
-          Query.startsWith("dailySummaryTime", `${currentHour}:`),
-          Query.limit(100),
-        ]
-      );
+      const prefsResponse = await databases.listDocuments(DATABASE_ID, PREFERENCES_COLLECTION_ID, [
+        Query.equal("dailySummaryEnabled", true),
+        Query.startsWith("dailySummaryTime", `${currentHour}:`),
+        Query.limit(100),
+      ]);
       return prefsResponse.documents;
     });
 
-    logger.info(
-      `Found ${matchingPrefs.length} users for daily summary at ${currentHour}:xx`
-    );
+    logger.info(`Found ${matchingPrefs.length} users for daily summary at ${currentHour}:xx`);
 
     let sentCount = 0;
 
     for (const prefs of matchingPrefs) {
       await step.run(`send-summary-${prefs.userId}`, async () => {
         const today = now.toISOString().split("T")[0];
-        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0];
+        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
-        const tasksResponse = await databases.listDocuments(
-          DATABASE_ID,
-          TASKS_COLLECTION_ID,
-          [
-            Query.equal("userId", prefs.userId),
-            Query.isNull("deletedAt"),
-            Query.notEqual("status", "completed"),
-            Query.lessThanEqual("dueDate", tomorrow),
-            Query.orderAsc("dueDate"),
-            Query.limit(20),
-          ]
-        );
+        const tasksResponse = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", prefs.userId),
+          Query.isNull("deletedAt"),
+          Query.notEqual("status", "completed"),
+          Query.lessThanEqual("dueDate", tomorrow),
+          Query.orderAsc("dueDate"),
+          Query.limit(20),
+        ]);
 
         if (tasksResponse.documents.length === 0) return;
 

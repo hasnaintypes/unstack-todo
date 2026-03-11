@@ -1,9 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
 import { SHORTCUT_REGISTRY, type ShortcutEntry } from "@/shared/hooks/use-keyboard-shortcuts";
 
 interface KeyboardShortcutsDialogProps {

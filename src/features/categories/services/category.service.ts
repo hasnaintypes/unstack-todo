@@ -27,22 +27,15 @@ function documentToCategory(doc: any): Category {
 
 export const categoryService = {
   async getAllCategories(userId: string): Promise<Category[]> {
-    const response = await databases.listDocuments(
-      DATABASE_ID,
-      CATEGORIES_COLLECTION_ID,
-      [
-        Query.equal("userId", userId),
-        Query.orderAsc("name"),
-        Query.limit(100),
-      ]
-    );
+    const response = await databases.listDocuments(DATABASE_ID, CATEGORIES_COLLECTION_ID, [
+      Query.equal("userId", userId),
+      Query.orderAsc("name"),
+      Query.limit(100),
+    ]);
     return response.documents.map(documentToCategory);
   },
 
-  async createCategory(
-    data: { name: string; color?: string },
-    userId: string
-  ): Promise<Category> {
+  async createCategory(data: { name: string; color?: string }, userId: string): Promise<Category> {
     const doc = await databases.createDocument(
       DATABASE_ID,
       CATEGORIES_COLLECTION_ID,
@@ -83,10 +76,6 @@ export const categoryService = {
   },
 
   async deleteCategory(categoryId: string): Promise<void> {
-    await databases.deleteDocument(
-      DATABASE_ID,
-      CATEGORIES_COLLECTION_ID,
-      categoryId
-    );
+    await databases.deleteDocument(DATABASE_ID, CATEGORIES_COLLECTION_ID, categoryId);
   },
 };

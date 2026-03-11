@@ -92,11 +92,10 @@ export default async ({ req, res, log, error }) => {
       const discordUser = await userResponse.json();
 
       // Update user preferences with Discord user ID
-      const prefsResponse = await databases.listDocuments(
-        DATABASE_ID,
-        PREFERENCES_COLLECTION_ID,
-        [Query.equal("userId", userId), Query.limit(1)]
-      );
+      const prefsResponse = await databases.listDocuments(DATABASE_ID, PREFERENCES_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.limit(1),
+      ]);
 
       if (prefsResponse.documents.length > 0) {
         await databases.updateDocument(
@@ -119,11 +118,10 @@ export default async ({ req, res, log, error }) => {
       const { userId } = JSON.parse(req.body || "{}");
       if (!userId) return res.json({ error: "userId required" }, 400);
 
-      const prefsResponse = await databases.listDocuments(
-        DATABASE_ID,
-        PREFERENCES_COLLECTION_ID,
-        [Query.equal("userId", userId), Query.limit(1)]
-      );
+      const prefsResponse = await databases.listDocuments(DATABASE_ID, PREFERENCES_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.limit(1),
+      ]);
 
       if (prefsResponse.documents.length > 0) {
         await databases.updateDocument(
