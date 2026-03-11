@@ -248,6 +248,18 @@ export function TaskItem({
             </span>
           )}
 
+          {/* Tags */}
+          {task.tags && task.tags.length > 0 &&
+            task.tags.map((tag, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 font-medium"
+              >
+                <Tag className="h-3 w-3" />
+                {tag}
+              </span>
+            ))}
+
           {/* AI Generated tag */}
           {task.description?.includes("[AI Generated]") && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#e44232]/10 text-[#e44232] font-medium">

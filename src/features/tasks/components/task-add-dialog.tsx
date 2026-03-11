@@ -122,6 +122,8 @@ export function TaskAddDialog({
   const [reminderBefore, setReminderBefore] = React.useState<ReminderBefore>(
     task?.reminderBefore ?? "1h"
   );
+  const [tags, setTags] = React.useState<string[]>(task?.tags || []);
+  const [tagInput, setTagInput] = React.useState("");
   const [recurrence, setRecurrence] = React.useState<Recurrence | "">(task?.recurrence || "");
 
   // Update form when task changes
@@ -134,6 +136,7 @@ export function TaskAddDialog({
       setCategory(task.category || "");
       setProject(task.project || "");
       setSubtasks(task.subtasks || []);
+      setTags(task.tags || []);
       setReminderEnabled(task.reminderEnabled ?? false);
       setReminderBefore(task.reminderBefore ?? "1h");
       setRecurrence(task.recurrence || "");
@@ -157,6 +160,8 @@ export function TaskAddDialog({
     setSubtasks([]);
     setIsAddingSubtask(false);
     setAiPrioritySet(false);
+    setTags([]);
+    setTagInput("");
     setReminderEnabled(false);
     setReminderBefore("1h");
     setRecurrence("");
@@ -239,6 +244,7 @@ export function TaskAddDialog({
         priority,
         category: category.trim() || undefined,
         project: project.trim() || undefined,
+        tags: tags.length > 0 ? tags : undefined,
         status: task?.status || "todo",
         reminderEnabled: date ? reminderEnabled : false,
         reminderBefore: reminderEnabled && date ? reminderBefore : undefined,
@@ -486,6 +492,53 @@ export function TaskAddDialog({
               ]}
               onValueChange={(val) => setRecurrence(val as Recurrence | "")}
             />
+          </div>
+
+          {/* Tags Section */}
+          <div className="border-t pt-4 space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {tags.map((tag, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-xs font-medium"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => setTags(tags.filter((_, idx) => idx !== i))}
+                    className="hover:text-indigo-700"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <Tag className="h-4 w-4 text-muted-foreground/60 shrink-0" />
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+                    e.preventDefault();
+                    const newTag = tagInput.trim().replace(/,$/, "");
+                    if (newTag && !tags.includes(newTag)) {
+                      setTags([...tags, newTag]);
+                    }
+                    setTagInput("");
+                  }
+                }}
+                onBlur={() => {
+                  const newTag = tagInput.trim().replace(/,$/, "");
+                  if (newTag && !tags.includes(newTag)) {
+                    setTags([...tags, newTag]);
+                  }
+                  setTagInput("");
+                }}
+                placeholder="Add tags (press Enter or comma)"
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
+              />
+            </div>
           </div>
         </div>
 

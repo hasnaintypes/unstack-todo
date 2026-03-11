@@ -78,12 +78,23 @@ function taskToDocument(task: Omit<CalendarTask, "id">, userId: string) {
     reminderEnabled: task.reminderEnabled ?? false,
     reminderBefore: task.reminderBefore || null,
   };
+  if (task.tags && task.tags.length > 0) doc.tags = JSON.stringify(task.tags);
   // Only include these if they have values — avoids "Unknown attribute" errors
   // if the collection hasn't been updated with these fields yet
   if (task.recurrence) doc.recurrence = task.recurrence;
   if (task.attachments && task.attachments.length > 0)
     doc.attachments = JSON.stringify(task.attachments);
   return doc;
+}
+
+function safeParseArray(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is string => typeof item === "string");
+  } catch {
+    return [];
+  }
 }
 
 function safeParseSubtasks(raw: string): Subtask[] {
@@ -127,6 +138,7 @@ function documentToTask(doc: any): CalendarTask {
     subtasks: doc.subtasks ? safeParseSubtasks(doc.subtasks) : undefined,
     reminderEnabled: doc.reminderEnabled ?? false,
     reminderBefore: (doc.reminderBefore as ReminderBefore) || undefined,
+    tags: doc.tags ? safeParseArray(doc.tags) : undefined,
     recurrence: (doc.recurrence as Recurrence) || null,
     attachments: doc.attachments ? safeParseAttachments(doc.attachments) : undefined,
   };
@@ -223,6 +235,10 @@ export const taskService = {
       }
       if (updates.reminderBefore !== undefined) {
         updatePayload.reminderBefore = updates.reminderBefore || null;
+      }
+      if (updates.tags !== undefined) {
+        updatePayload.tags =
+          updates.tags && updates.tags.length > 0 ? JSON.stringify(updates.tags) : null;
       }
       if (updates.recurrence !== undefined && updates.recurrence) {
         updatePayload.recurrence = updates.recurrence;
@@ -422,6 +438,7 @@ export const taskService = {
         endTime: task.endTime,
         priority: task.priority,
         category: task.category,
+        tags: task.tags,
         project: task.project,
         status: "todo",
         subtasks: task.subtasks?.map((s) => ({ ...s, completed: false })),

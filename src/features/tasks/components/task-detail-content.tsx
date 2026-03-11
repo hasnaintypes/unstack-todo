@@ -115,6 +115,23 @@ export function TaskDetailContent({
           </PropertyRow>
         )}
 
+        {/* Tags */}
+        {task.tags && task.tags.length > 0 && (
+          <PropertyRow icon={<Tag className="size-4 text-indigo-500" />} label="Tags">
+            <div className="flex flex-wrap gap-1">
+              {task.tags.map((tag, i) => (
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="text-xs font-medium bg-indigo-500/10 border-indigo-500/20 text-indigo-500"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </PropertyRow>
+        )}
+
         {/* Recurrence */}
         {task.recurrence && (
           <PropertyRow icon={<Repeat className="size-4 text-[#e44232]" />} label="Repeats">
