@@ -1,5 +1,5 @@
 import { Client, Databases, Query, Messaging } from "node-appwrite";
-import { inngest } from "../client";
+import { inngest } from "../client.js";
 
 const REMINDER_WINDOWS: Record<string, number> = {
   "1d": 24 * 60,
