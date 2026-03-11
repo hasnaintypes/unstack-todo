@@ -3,27 +3,7 @@ import { toast } from "sonner";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 import { taskService } from "@/features/tasks/services/task.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-
-interface TaskContextValue {
-  tasks: CalendarTask[];
-  isLoading: boolean;
-  error: string | null;
-  selectedTask: CalendarTask | null;
-  setSelectedTask: (task: CalendarTask | null) => void;
-  addTask: (task: Omit<CalendarTask, "id">) => Promise<void>;
-  updateTask: (id: string, updates: Partial<CalendarTask>) => Promise<void>;
-  deleteTask: (id: string) => Promise<void>;
-  toggleTaskComplete: (id: string) => Promise<void>;
-  moveToTrash: (id: string) => Promise<void>;
-  restoreFromTrash: (id: string) => Promise<void>;
-  permanentlyDelete: (id: string) => Promise<void>;
-  clearCompleted: () => Promise<void>;
-  emptyTrash: () => Promise<void>;
-  restoreAllFromTrash: () => Promise<void>;
-  refreshTasks: () => Promise<void>;
-}
-
-const TaskContext = React.createContext<TaskContextValue | undefined>(undefined);
+import { TaskContext, type TaskContextValue } from "@/app/context/task-context";
 
 export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [tasks, setTasks] = React.useState<CalendarTask[]>([]);
@@ -31,6 +11,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = React.useState<string | null>(null);
   const [selectedTask, setSelectedTask] = React.useState<CalendarTask | null>(null);
   const { user } = useAuth();
+
+  const moveToTrashRef = React.useRef<(id: string) => Promise<void>>(null!);
+  const restoreFromTrashRef = React.useRef<(id: string) => Promise<void>>(null!);
 
   // Load tasks from Appwrite when user is authenticated
   React.useEffect(() => {
@@ -68,7 +51,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       setTasks((prev) => [newTask, ...prev]);
       toast.success(`"${newTask.title}" added to your tasks`, {
         description: newTask.dueDate ? `Due ${newTask.dueDate}` : "No due date set",
-        action: { label: "Undo", onClick: () => moveToTrash(newTask.id) },
+        action: { label: "Undo", onClick: () => moveToTrashRef.current(newTask.id) },
       });
     } catch (err) {
       console.error("Error adding task:", err);
@@ -145,7 +128,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       setTasks((prev) => prev.filter((task) => task.id !== id));
       toast.success("Moved to trash", {
         description: "Task will be permanently deleted after 30 days.",
-        action: { label: "Undo", onClick: () => restoreFromTrash(id) },
+        action: { label: "Undo", onClick: () => restoreFromTrashRef.current(id) },
       });
     } catch (err) {
       console.error("Error moving to trash:", err);
@@ -163,7 +146,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       setTasks((prev) => [restoredTask, ...prev]);
       toast.success("Task restored", {
         description: `"${restoredTask.title}" is back in your tasks.`,
-        action: { label: "Undo", onClick: () => moveToTrash(id) },
+        action: { label: "Undo", onClick: () => moveToTrashRef.current(id) },
       });
     } catch (err) {
       console.error("Error restoring task:", err);
@@ -174,6 +157,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       throw err;
     }
   }, []);
+
+  moveToTrashRef.current = moveToTrash;
+  restoreFromTrashRef.current = restoreFromTrash;
 
   const permanentlyDelete = React.useCallback(async (id: string) => {
     try {
@@ -294,12 +280,4 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
-}
-
-export function useTasks() {
-  const context = React.useContext(TaskContext);
-  if (!context) {
-    throw new Error("useTasks must be used within a TaskProvider");
-  }
-  return context;
 }

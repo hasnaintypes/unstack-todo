@@ -3,17 +3,7 @@ import { toast } from "sonner";
 import type { Category } from "@/features/categories/types/category.types";
 import { categoryService } from "@/features/categories/services/category.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-
-interface CategoryContextValue {
-  categories: Category[];
-  isLoading: boolean;
-  addCategory: (data: { name: string; color?: string }) => Promise<Category>;
-  updateCategory: (id: string, updates: Partial<Pick<Category, "name" | "color">>) => Promise<void>;
-  deleteCategory: (id: string) => Promise<void>;
-  refreshCategories: () => Promise<void>;
-}
-
-const CategoryContext = React.createContext<CategoryContextValue | undefined>(undefined);
+import { CategoryContext, type CategoryContextValue } from "@/app/context/category-context";
 
 export function CategoryProvider({ children }: { children: React.ReactNode }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
@@ -76,12 +66,4 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
   };
 
   return <CategoryContext.Provider value={value}>{children}</CategoryContext.Provider>;
-}
-
-export function useCategories() {
-  const context = React.useContext(CategoryContext);
-  if (!context) {
-    throw new Error("useCategories must be used within a CategoryProvider");
-  }
-  return context;
 }
