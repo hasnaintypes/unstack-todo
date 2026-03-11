@@ -6,6 +6,7 @@ import {
   Pencil,
   MoreVertical,
   Trash2,
+  BookmarkPlus,
   Calendar as CalendarIcon,
   Flag,
   Tag,
@@ -31,6 +32,8 @@ import { TaskDetailContent } from "./task-detail-content";
 import { useProjects } from "@/shared/hooks/use-projects";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { cn } from "@/shared/lib/utils";
+import { SaveAsTemplate } from "@/features/templates";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import type { CalendarTask, Subtask, TaskPriority } from "@/features/tasks/types/task.types";
 
 interface TaskDetailSheetProps {
@@ -58,6 +61,8 @@ export function TaskDetailSheet({
   onDelete,
 }: TaskDetailSheetProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const { user } = useAuth();
   const { projects: appProjects } = useProjects();
   const { categories: appCategories } = useCategories();
 
@@ -180,6 +185,12 @@ export function TaskDetailSheet({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        {user?.$id && (
+                          <DropdownMenuItem onClick={() => setSaveTemplateOpen(true)}>
+                            <BookmarkPlus className="size-4 mr-2" />
+                            Save as Template
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem
                           onClick={() => {
                             onDelete(task.id);
@@ -413,12 +424,24 @@ export function TaskDetailSheet({
                   onUpdateSubtasks={(subtasks) => {
                     if (onEdit) onEdit(task.id, { subtasks });
                   }}
+                  onUpdateAttachments={(attachments) => {
+                    if (onEdit) onEdit(task.id, { attachments });
+                  }}
                 />
               </div>
             )}
           </>
         )}
       </SheetContent>
+
+      {task && user?.$id && (
+        <SaveAsTemplate
+          task={task}
+          userId={user.$id}
+          open={isSaveTemplateOpen}
+          onOpenChange={setSaveTemplateOpen}
+        />
+      )}
     </Sheet>
   );
 }
