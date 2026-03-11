@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sparkles, Loader2, Check, Plus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { useProjects } from "@/app/providers/project-provider";
+import { useProjects } from "@/shared/hooks/use-projects";
 import { PROJECT_COLORS } from "@/features/projects/utils/colors";
 import {
   Dialog,

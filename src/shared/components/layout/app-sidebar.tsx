@@ -23,8 +23,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { logo } from "@/assets";
 import { cn } from "@/shared/lib/utils";
-import { useProjects } from "@/app/providers/project-provider";
-import { useTasks } from "@/app/providers/task-provider";
+import { useProjects } from "@/shared/hooks/use-projects";
+import { useTasks } from "@/shared/hooks/use-tasks";
 import { getColorClass } from "@/features/projects/utils/colors";
 import { CreateProjectDialog } from "@/features/projects/components/create-project-dialog";
 

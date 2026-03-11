@@ -15,7 +15,7 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import { ArchiveRestore } from "lucide-react";
 import { useCompletedTasks } from "@/features/tasks/hooks/use-task-filters";
-import { useTasks } from "@/app/providers/task-provider";
+import { useTasks } from "@/shared/hooks/use-tasks";
 import { completedTaskEmptyState } from "@/assets";
 
 export const Route = createFileRoute("/_protected/completed/")({

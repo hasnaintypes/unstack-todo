@@ -15,7 +15,7 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import { RotateCcw, Trash2 } from "lucide-react";
 import { useTrashTasks } from "@/features/tasks/hooks/use-task-filters";
-import { useTasks } from "@/app/providers/task-provider";
+import { useTasks } from "@/shared/hooks/use-tasks";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 import { projectTaskEmptyState } from "@/assets";
 

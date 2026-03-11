@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo, useCallback } from "react";
-import { useProjects } from "@/app/providers/project-provider";
-import { useTasks } from "@/app/providers/task-provider";
+import { useProjects } from "@/shared/hooks/use-projects";
+import { useTasks } from "@/shared/hooks/use-tasks";
 import { TaskItem } from "@/features/tasks/components/task-item";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
 import { TaskEmptyState } from "@/features/tasks/components/empty-state";

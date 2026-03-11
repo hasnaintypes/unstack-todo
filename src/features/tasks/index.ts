@@ -14,7 +14,7 @@ export { AddItemDialog, type AddItemDialogProps } from "./components/add-item-di
 export { TaskItem, type TaskItemProps } from "./components/task-item";
 export { TaskList, type TaskListProps } from "./components/task-list";
 export { TaskEmptyState } from "./components/empty-state";
-export { useTasks } from "@/app/providers/task-provider";
+export { useTasks } from "@/shared/hooks/use-tasks";
 export {
   useInboxTasks,
   useTodayTasks,

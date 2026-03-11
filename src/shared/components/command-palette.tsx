@@ -21,8 +21,8 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/shared/components/ui/command";
-import { useTasks } from "@/app/providers/task-provider";
-import { useProjects } from "@/app/providers/project-provider";
+import { useTasks } from "@/shared/hooks/use-tasks";
+import { useProjects } from "@/shared/hooks/use-projects";
 import { getPriorityConfig } from "@/features/tasks/utils/task-helpers";
 import { cn } from "@/shared/lib/utils";
 import { PROJECT_COLOR_MAP } from "@/features/projects/utils/colors";

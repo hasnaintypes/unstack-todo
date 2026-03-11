@@ -33,8 +33,8 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { TaskDropdownMenu } from "./task-dropdown-menu";
 import { TaskDetailContent } from "./task-detail-content";
-import { useProjects } from "@/app/providers/project-provider";
-import { useCategories } from "@/app/providers/category-provider";
+import { useProjects } from "@/shared/hooks/use-projects";
+import { useCategories } from "@/shared/hooks/use-categories";
 import { cn } from "@/shared/lib/utils";
 import type { CalendarTask, Subtask, TaskPriority } from "@/features/tasks/types/task.types";
 

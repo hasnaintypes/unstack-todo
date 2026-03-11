@@ -8,7 +8,7 @@ import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
 import { QuickAddFAB } from "@/shared/components/quick-add-fab";
 import { KeyboardShortcutsDialog } from "@/shared/components/keyboard-shortcuts-dialog";
 import { useKeyboardShortcuts, type Shortcut } from "@/shared/hooks/use-keyboard-shortcuts";
-import { useTasks } from "@/app/providers/task-provider";
+import { useTasks } from "@/shared/hooks/use-tasks";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ context }) => {
