@@ -33,6 +33,7 @@ export interface CalendarTask {
   subtasks?: Subtask[];
   reminderEnabled?: boolean;
   reminderBefore?: ReminderBefore;
+  tags?: string[];
   recurrence?: Recurrence | null;
   attachments?: Attachment[];
 }

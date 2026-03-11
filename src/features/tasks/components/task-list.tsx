@@ -1,10 +1,19 @@
 import * as React from "react";
-import { Plus } from "lucide-react";
+import { Plus, ArrowUpDown, Check } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import { TaskItem } from "@/features/tasks/components/task-item";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
+
+export type SortBy = "default" | "dueDate" | "priority" | "alphabetical";
 
 export interface TaskListProps {
   title?: string;
@@ -23,6 +32,7 @@ export interface TaskListProps {
   className?: string;
   loading?: boolean;
   groupBy?: "none" | "priority" | "dueDate" | "project" | "category";
+  defaultSortBy?: SortBy;
 }
 
 const groupTasks = (tasks: CalendarTask[], groupBy: string): [string, CalendarTask[]][] => {
@@ -98,6 +108,33 @@ const groupTasks = (tasks: CalendarTask[], groupBy: string): [string, CalendarTa
   });
 };
 
+const sortTasks = (tasks: CalendarTask[], sortBy: SortBy): CalendarTask[] => {
+  if (sortBy === "default") return tasks;
+  return [...tasks].sort((a, b) => {
+    switch (sortBy) {
+      case "dueDate": {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      }
+      case "priority":
+        return b.priority - a.priority;
+      case "alphabetical":
+        return a.title.localeCompare(b.title);
+      default:
+        return 0;
+    }
+  });
+};
+
+const sortLabels: Record<SortBy, string> = {
+  default: "Default",
+  dueDate: "Due Date",
+  priority: "Priority",
+  alphabetical: "A-Z",
+};
+
 export function TaskList({
   title,
   tasks,
@@ -115,10 +152,14 @@ export function TaskList({
   className,
   loading = false,
   groupBy = "none",
+  defaultSortBy = "default",
 }: TaskListProps) {
+  const [sortBy, setSortBy] = React.useState<SortBy>(defaultSortBy);
+
   const groupedTasks = React.useMemo(() => {
-    return groupTasks(tasks, groupBy);
-  }, [tasks, groupBy]);
+    const groups = groupTasks(tasks, groupBy);
+    return groups.map(([name, groupItems]) => [name, sortTasks(groupItems, sortBy)] as [string, CalendarTask[]]);
+  }, [tasks, groupBy, sortBy]);
 
   const isEmpty = tasks.length === 0;
 
@@ -130,6 +171,22 @@ export function TaskList({
           {title && <h1 className="text-2xl font-bold">{title}</h1>}
           <div className="flex items-center gap-2">
             {headerActions}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <ArrowUpDown className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{sortLabels[sortBy]}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {(Object.keys(sortLabels) as SortBy[]).map((key) => (
+                  <DropdownMenuItem key={key} onClick={() => setSortBy(key)}>
+                    <Check className={cn("h-3.5 w-3.5 mr-2", sortBy === key ? "opacity-100" : "opacity-0")} />
+                    {sortLabels[key]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             {onAddTask && (
               <Button
                 onClick={onAddTask}
@@ -156,13 +213,25 @@ export function TaskList({
       <ScrollArea className="flex-1">
         <div className="p-6">
           {loading ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="h-14 rounded-lg bg-muted animate-pulse"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                />
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg"
+                  style={{ opacity: 1 - i * 0.15 }}
+                >
+                  {/* Checkbox circle */}
+                  <Skeleton className="h-5 w-5 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    {/* Title */}
+                    <Skeleton className="h-4 rounded" style={{ width: `${65 - i * 8}%` }} />
+                    {/* Metadata row */}
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3 w-16 rounded" />
+                      <Skeleton className="h-3 w-20 rounded" />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           ) : isEmpty ? (

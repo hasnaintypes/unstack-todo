@@ -1,5 +1,5 @@
 import { Client, Databases, Query, Messaging } from "node-appwrite";
-import { inngest } from "../client";
+import { inngest } from "../client.js";
 
 interface TaskDocument {
   $id: string;

@@ -24,7 +24,7 @@ export function TaskEmptyState({
 }: TaskEmptyStateProps) {
   if (!showAddButton || !onAddTask) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] px-4">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] px-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="mb-8">
           <img src={image} alt={imageAlt} className="w-64 h-64 object-contain" />
         </div>

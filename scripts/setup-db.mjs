@@ -220,6 +220,7 @@ const TASKS = {
       elements: ["daily", "weekly", "monthly", "weekdays"],
       required: false,
     },
+    { key: "tags", type: "text", required: false },
     { key: "attachments", type: "text", required: false },
   ],
   indexes: [
