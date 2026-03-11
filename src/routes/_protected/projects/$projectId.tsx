@@ -7,7 +7,8 @@ import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
 import { TaskEmptyState } from "@/features/tasks/components/empty-state";
 import { KanbanBoard } from "@/features/tasks/components/kanban";
 import { projectTaskEmptyState } from "@/assets";
-import { ProjectHeader, type ViewMode } from "@/features/projects/components/project-header";
+import { ProjectHeader } from "@/features/projects/components/project-header";
+import { ViewToggle, type ViewMode } from "@/shared/components/view-toggle";
 import { ProjectStatCards, ProjectCharts } from "@/features/projects/components/project-stats";
 import { ProjectNotFound } from "@/features/projects/components/project-not-found";
 import { DeleteProjectDialog } from "@/features/projects/components/delete-project-dialog";
@@ -132,8 +133,6 @@ function ProjectDetailPage() {
         onAddTask={() => setIsAddDialogOpen(true)}
         onDelete={() => setIsDeleteDialogOpen(true)}
         onUpdate={handleUpdateProject}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
       />
 
       <ProjectStatCards tasks={projectTasks} />
@@ -142,11 +141,16 @@ function ProjectDetailPage() {
       {/* Tasks */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Tasks</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold">Tasks</h2>
+            {projectTasks.length > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {projectTasks.length} task{projectTasks.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
           {projectTasks.length > 0 && (
-            <span className="text-xs text-muted-foreground">
-              {projectTasks.length} task{projectTasks.length !== 1 ? "s" : ""}
-            </span>
+            <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           )}
         </div>
 

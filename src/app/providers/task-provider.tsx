@@ -102,28 +102,48 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const toggleTaskComplete = React.useCallback(async (id: string) => {
-    try {
-      const updatedTask = await taskService.toggleTaskComplete(id);
-      setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
-      toast.success(
-        updatedTask.status === "completed"
-          ? `"${updatedTask.title}" completed`
-          : `"${updatedTask.title}" reopened`,
-        {
-          description:
+  const toggleTaskComplete = React.useCallback(
+    async (id: string) => {
+      try {
+        const updatedTask = await taskService.toggleTaskComplete(id);
+        setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
+
+        // Auto-create next occurrence for recurring tasks
+        if (updatedTask.status === "completed" && updatedTask.recurrence && user?.$id) {
+          try {
+            const nextTask = await taskService.createNextOccurrence(updatedTask, user.$id);
+            setTasks((prev) => [nextTask, ...prev]);
+            toast.success(`"${updatedTask.title}" completed`, {
+              description: `Next occurrence created for ${nextTask.dueDate}`,
+              action: { label: "Undo", onClick: () => toggleTaskComplete(id) },
+            });
+          } catch {
+            toast.success(`"${updatedTask.title}" completed`, {
+              description: "Failed to create next occurrence.",
+            });
+          }
+        } else {
+          toast.success(
             updatedTask.status === "completed"
-              ? "Great job! Keep up the momentum."
-              : "Task is back on your active list.",
-          action: { label: "Undo", onClick: () => toggleTaskComplete(id) },
+              ? `"${updatedTask.title}" completed`
+              : `"${updatedTask.title}" reopened`,
+            {
+              description:
+                updatedTask.status === "completed"
+                  ? "Great job! Keep up the momentum."
+                  : "Task is back on your active list.",
+              action: { label: "Undo", onClick: () => toggleTaskComplete(id) },
+            }
+          );
         }
-      );
-    } catch (err) {
-      console.error("Error toggling task:", err);
-      setError("Failed to toggle task");
-      throw err;
-    }
-  }, []);
+      } catch (err) {
+        console.error("Error toggling task:", err);
+        setError("Failed to toggle task");
+        throw err;
+      }
+    },
+    [user?.$id]
+  );
 
   const moveToTrash = React.useCallback(async (id: string) => {
     try {

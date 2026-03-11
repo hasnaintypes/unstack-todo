@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { User, Mail, Camera } from "lucide-react";
+import { useState, useRef } from "react";
+import { User, Mail, Camera, Loader2 } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Label } from "@/shared/components/ui/label";
@@ -12,6 +12,9 @@ import {
 } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
 import { useProfile } from "@/features/profile/hooks/use-profile";
+import { storageService } from "@/shared/services/storage.service";
+import { account } from "@/config/appwrite";
+import { toast } from "sonner";
 
 export function PersonalInfoCard() {
   const { user, isUpdating, updateName } = useProfile();
@@ -19,6 +22,32 @@ export function PersonalInfoCard() {
   const nameParts = (user?.name || "").split(" ");
   const [firstName, setFirstName] = useState(nameParts[0] || "");
   const [lastName, setLastName] = useState(nameParts.slice(1).join(" ") || "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File size must be under 2MB");
+      return;
+    }
+    setIsUploadingAvatar(true);
+    try {
+      const result = await storageService.uploadTaskAttachment(file);
+      const url = storageService.getFileDownloadUrl(result.$id);
+      await account.updatePrefs({ avatarFileId: result.$id });
+      setAvatarUrl(url.toString());
+      toast.success("Profile picture updated");
+    } catch (err) {
+      console.error("Avatar upload error:", err);
+      toast.error("Failed to upload profile picture");
+    } finally {
+      setIsUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
 
   const initials = user?.name
     ? user.name
@@ -54,11 +83,20 @@ export function PersonalInfoCard() {
         {/* Avatar Section */}
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
           <div className="relative group">
-            <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white text-xl font-bold shadow-md">
-              {initials}
-            </div>
-            <button className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              <Camera className="text-white w-5 h-5" />
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Avatar" className="w-20 h-20 rounded-full object-cover shadow-md" />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center text-white text-xl font-bold shadow-md">
+                {initials}
+              </div>
+            )}
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingAvatar}
+              className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              {isUploadingAvatar ? <Loader2 className="text-white w-5 h-5 animate-spin" /> : <Camera className="text-white w-5 h-5" />}
             </button>
           </div>
 

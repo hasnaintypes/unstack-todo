@@ -3,9 +3,11 @@ import { Permission, Role } from "appwrite";
 import type {
   CalendarTask,
   Subtask,
+  Attachment,
   TaskStatus,
   TaskPriority,
   ReminderBefore,
+  Recurrence,
 } from "@/features/tasks/types/task.types";
 // Note: color is no longer stored — it's derived from priority in the UI.
 
@@ -60,7 +62,7 @@ if (!DATABASE_ID) {
  * Convert CalendarTask to Appwrite document format
  */
 function taskToDocument(task: Omit<CalendarTask, "id">, userId: string) {
-  return {
+  const doc: Record<string, unknown> = {
     title: task.title,
     description: task.description || null,
     dueDate: task.dueDate || null,
@@ -76,6 +78,12 @@ function taskToDocument(task: Omit<CalendarTask, "id">, userId: string) {
     reminderEnabled: task.reminderEnabled ?? false,
     reminderBefore: task.reminderBefore || null,
   };
+  // Only include these if they have values — avoids "Unknown attribute" errors
+  // if the collection hasn't been updated with these fields yet
+  if (task.recurrence) doc.recurrence = task.recurrence;
+  if (task.attachments && task.attachments.length > 0)
+    doc.attachments = JSON.stringify(task.attachments);
+  return doc;
 }
 
 function safeParseSubtasks(raw: string): Subtask[] {
@@ -85,6 +93,16 @@ function safeParseSubtasks(raw: string): Subtask[] {
     return parsed.map((item: unknown) =>
       typeof item === "string" ? { title: item, completed: false } : (item as Subtask)
     );
+  } catch {
+    return [];
+  }
+}
+
+function safeParseAttachments(raw: string): Attachment[] {
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed as Attachment[];
   } catch {
     return [];
   }
@@ -109,6 +127,8 @@ function documentToTask(doc: any): CalendarTask {
     subtasks: doc.subtasks ? safeParseSubtasks(doc.subtasks) : undefined,
     reminderEnabled: doc.reminderEnabled ?? false,
     reminderBefore: (doc.reminderBefore as ReminderBefore) || undefined,
+    recurrence: (doc.recurrence as Recurrence) || null,
+    attachments: doc.attachments ? safeParseAttachments(doc.attachments) : undefined,
   };
 }
 
@@ -203,6 +223,15 @@ export const taskService = {
       }
       if (updates.reminderBefore !== undefined) {
         updatePayload.reminderBefore = updates.reminderBefore || null;
+      }
+      if (updates.recurrence !== undefined && updates.recurrence) {
+        updatePayload.recurrence = updates.recurrence;
+      }
+      if (updates.attachments !== undefined) {
+        updatePayload.attachments =
+          updates.attachments && updates.attachments.length > 0
+            ? JSON.stringify(updates.attachments)
+            : null;
       }
 
       const doc = await databases.updateDocument(
@@ -352,6 +381,106 @@ export const taskService = {
       console.error("Error emptying trash:", error);
       throw new Error("Failed to empty trash");
     }
+  },
+
+  /**
+   * Create next occurrence of a recurring task
+   */
+  async createNextOccurrence(task: CalendarTask, userId: string): Promise<CalendarTask> {
+    const getNextDate = (dateStr: string, recurrence: Recurrence): string => {
+      const date = new Date(dateStr);
+      switch (recurrence) {
+        case "daily":
+          date.setDate(date.getDate() + 1);
+          break;
+        case "weekly":
+          date.setDate(date.getDate() + 7);
+          break;
+        case "monthly":
+          date.setMonth(date.getMonth() + 1);
+          break;
+        case "weekdays": {
+          do {
+            date.setDate(date.getDate() + 1);
+          } while (date.getDay() === 0 || date.getDay() === 6);
+          break;
+        }
+      }
+      return date.toISOString().split("T")[0];
+    };
+
+    const nextDueDate = task.dueDate
+      ? getNextDate(task.dueDate, task.recurrence!)
+      : new Date().toISOString().split("T")[0];
+
+    return this.createTask(
+      {
+        title: task.title,
+        description: task.description,
+        dueDate: nextDueDate,
+        startTime: task.startTime,
+        endTime: task.endTime,
+        priority: task.priority,
+        category: task.category,
+        project: task.project,
+        status: "todo",
+        subtasks: task.subtasks?.map((s) => ({ ...s, completed: false })),
+        reminderEnabled: task.reminderEnabled,
+        reminderBefore: task.reminderBefore,
+        recurrence: task.recurrence,
+      },
+      userId
+    );
+  },
+
+  /**
+   * Export all tasks for the user as JSON
+   */
+  async exportTasksJSON(userId: string): Promise<string> {
+    const tasks = await this.getAllTasks(userId);
+    return JSON.stringify(tasks, null, 2);
+  },
+
+  /**
+   * Export all tasks for the user as CSV
+   */
+  async exportTasksCSV(userId: string): Promise<string> {
+    const tasks = await this.getAllTasks(userId);
+    const headers = [
+      "title",
+      "description",
+      "dueDate",
+      "priority",
+      "status",
+      "category",
+      "project",
+      "recurrence",
+    ];
+    const csvRows = [headers.join(",")];
+    for (const task of tasks) {
+      const row = headers.map((h) => {
+        const val = task[h as keyof CalendarTask];
+        const str = val != null ? String(val) : "";
+        return `"${str.replace(/"/g, '""')}"`;
+      });
+      csvRows.push(row.join(","));
+    }
+    return csvRows.join("\n");
+  },
+
+  /**
+   * Import tasks from JSON array
+   */
+  async importTasks(
+    tasksData: Omit<CalendarTask, "id">[],
+    userId: string
+  ): Promise<CalendarTask[]> {
+    const created: CalendarTask[] = [];
+    for (const taskData of tasksData) {
+      const task = await this.createTask(taskData, userId);
+      created.push(task);
+    }
+    return created;
   },
 
   /**

@@ -78,20 +78,48 @@ export const checkReminders = inngest.createFunction(
           if (
             prefs?.discordEnabled &&
             prefs?.discordUserId &&
-            process.env.DISCORD_BOT_WEBHOOK_URL
+            process.env.DISCORD_BOT_TOKEN
           ) {
             try {
-              await fetch(process.env.DISCORD_BOT_WEBHOOK_URL, {
+              // Step 1: Create/open a DM channel with the user
+              const dmChannelRes = await fetch("https://discord.com/api/v10/users/@me/channels", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  userId: prefs.discordUserId,
-                  message: `**Task Reminder** \n${task.title}\nDue: ${task.dueDate}`,
-                }),
+                headers: {
+                  Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ recipient_id: prefs.discordUserId }),
               });
-              logger.info(`Discord notification sent for task: ${task.title}`);
+
+              if (!dmChannelRes.ok) {
+                throw new Error(`Failed to open DM channel: ${dmChannelRes.status}`);
+              }
+
+              const dmChannel = (await dmChannelRes.json()) as { id: string };
+
+              // Step 2: Send the reminder message
+              const dueLabel = reminderBefore === "on_due" ? "now" : `in ${reminderBefore}`;
+              const msgRes = await fetch(
+                `https://discord.com/api/v10/channels/${dmChannel.id}/messages`,
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    content: `⏰ **Task Reminder**\n\n**${task.title}**\nDue: ${task.dueDate} (${dueLabel})`,
+                  }),
+                }
+              );
+
+              if (!msgRes.ok) {
+                throw new Error(`Failed to send DM: ${msgRes.status}`);
+              }
+
+              logger.info(`Discord DM sent for task: ${task.title}`);
             } catch (discordErr) {
-              logger.error(`Failed to send Discord notification: ${(discordErr as Error).message}`);
+              logger.error(`Failed to send Discord DM: ${(discordErr as Error).message}`);
             }
           }
         });

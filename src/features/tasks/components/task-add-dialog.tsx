@@ -12,6 +12,8 @@ import {
   FolderKanban,
   Sparkles,
   Loader2,
+  Repeat,
+  FileText,
 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -32,8 +34,12 @@ import type {
   Subtask,
   TaskPriority,
   ReminderBefore,
+  Recurrence,
 } from "@/features/tasks/types/task.types";
 import { TaskReminderToggle } from "@/features/reminders/components/task-reminder-toggle";
+import { TemplatePicker } from "@/features/templates";
+import type { TaskTemplate } from "@/features/templates";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useProjects } from "@/shared/hooks/use-projects";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { autoSetPriority, generateDescription, hasAiKey } from "@/shared/services/ai.service";
@@ -82,7 +88,9 @@ export function TaskAddDialog({
   defaultDate,
 }: TaskAddDialogProps) {
   const isEditMode = !!task;
+  const { user } = useAuth();
   const { projects: appProjects, addProject } = useProjects();
+  const [isTemplatePickerOpen, setTemplatePickerOpen] = React.useState(false);
   const { categories: appCategories, addCategory } = useCategories();
 
   // Build project options from real data
@@ -106,6 +114,7 @@ export function TaskAddDialog({
   const [project, setProject] = React.useState(task?.project || "");
   const [subtasks, setSubtasks] = React.useState<Subtask[]>(task?.subtasks || []);
   const [newSubtask, setNewSubtask] = React.useState("");
+  const [newSubtaskDesc, setNewSubtaskDesc] = React.useState("");
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false);
   const [aiPrioritySet, setAiPrioritySet] = React.useState(false);
   const [isGeneratingDesc, setIsGeneratingDesc] = React.useState(false);
@@ -113,6 +122,7 @@ export function TaskAddDialog({
   const [reminderBefore, setReminderBefore] = React.useState<ReminderBefore>(
     task?.reminderBefore ?? "1h"
   );
+  const [recurrence, setRecurrence] = React.useState<Recurrence | "">(task?.recurrence || "");
 
   // Update form when task changes
   React.useEffect(() => {
@@ -126,6 +136,7 @@ export function TaskAddDialog({
       setSubtasks(task.subtasks || []);
       setReminderEnabled(task.reminderEnabled ?? false);
       setReminderBefore(task.reminderBefore ?? "1h");
+      setRecurrence(task.recurrence || "");
     }
   }, [task]);
 
@@ -148,6 +159,7 @@ export function TaskAddDialog({
     setAiPrioritySet(false);
     setReminderEnabled(false);
     setReminderBefore("1h");
+    setRecurrence("");
   };
 
   const handleTitleBlur = async () => {
@@ -181,6 +193,15 @@ export function TaskAddDialog({
     } catch (err) {
       console.error("Error creating category:", err);
     }
+  };
+
+  const handleSelectTemplate = (template: TaskTemplate) => {
+    setTitle(template.title);
+    setDescription(template.description || "");
+    setPriority(template.priority);
+    setCategory(template.category || "");
+    setProject(template.project || "");
+    setSubtasks(template.subtasks?.map((s) => ({ ...s, completed: false })) || []);
   };
 
   const handleAddProject = async (label: string) => {
@@ -221,6 +242,7 @@ export function TaskAddDialog({
         status: task?.status || "todo",
         reminderEnabled: date ? reminderEnabled : false,
         reminderBefore: reminderEnabled && date ? reminderBefore : undefined,
+        recurrence: recurrence || null,
       };
       onSave(taskData);
     }
@@ -234,8 +256,16 @@ export function TaskAddDialog({
 
   const handleAddSubtask = () => {
     if (newSubtask.trim()) {
-      setSubtasks([...subtasks, { title: newSubtask.trim(), completed: false }]);
+      setSubtasks([
+        ...subtasks,
+        {
+          title: newSubtask.trim(),
+          description: newSubtaskDesc.trim() || undefined,
+          completed: false,
+        },
+      ]);
       setNewSubtask("");
+      setNewSubtaskDesc("");
     }
   };
 
@@ -297,9 +327,14 @@ export function TaskAddDialog({
           {/* Sub-tasks Section */}
           <div className="space-y-2">
             {subtasks.map((subtask, index) => (
-              <div key={index} className="group flex items-center gap-3 pl-8 text-sm">
-                <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0" />
-                <span className="flex-1 text-foreground/80">{subtask.title}</span>
+              <div key={index} className="group flex items-start gap-3 pl-8 text-sm">
+                <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <span className="text-foreground/80">{subtask.title}</span>
+                  {subtask.description && (
+                    <p className="text-xs text-muted-foreground">{subtask.description}</p>
+                  )}
+                </div>
                 <button onClick={() => setSubtasks(subtasks.filter((_, i) => i !== index))}>
                   <X className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
@@ -307,26 +342,45 @@ export function TaskAddDialog({
             ))}
 
             {isAddingSubtask ? (
-              <div className="flex items-center gap-3 pl-8">
-                <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0" />
+              <div className="pl-8 space-y-1">
+                <div className="flex items-center gap-3">
+                  <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0" />
+                  <input
+                    autoFocus
+                    className="flex-1 bg-transparent text-sm outline-none"
+                    placeholder="Subtask title"
+                    value={newSubtask}
+                    onChange={(e) => setNewSubtask(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleAddSubtask();
+                      } else if (e.key === "Escape") {
+                        setIsAddingSubtask(false);
+                        setNewSubtask("");
+                        setNewSubtaskDesc("");
+                      }
+                    }}
+                  />
+                </div>
                 <input
-                  autoFocus
-                  className="flex-1 bg-transparent text-sm outline-none"
-                  value={newSubtask}
-                  onChange={(e) => setNewSubtask(e.target.value)}
+                  className="flex-1 bg-transparent text-xs text-muted-foreground outline-none pl-7 w-full"
+                  placeholder="Description (optional)"
+                  value={newSubtaskDesc}
+                  onChange={(e) => setNewSubtaskDesc(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleAddSubtask();
-                    } else if (e.key === "Escape") {
+                    if (e.key === "Enter") handleAddSubtask();
+                    else if (e.key === "Escape") {
                       setIsAddingSubtask(false);
                       setNewSubtask("");
+                      setNewSubtaskDesc("");
                     }
                   }}
                   onBlur={() => {
-                    if (newSubtask.trim()) {
-                      handleAddSubtask();
+                    if (newSubtask.trim()) handleAddSubtask();
+                    else {
+                      setIsAddingSubtask(false);
+                      setNewSubtaskDesc("");
                     }
-                    setIsAddingSubtask(false);
                   }}
                 />
               </div>
@@ -416,11 +470,40 @@ export function TaskAddDialog({
               addDialogTitle="Create New Category"
               addDialogDescription="Add a new category to group your tasks."
             />
+
+            <Separator orientation="vertical" className="h-6" />
+
+            <TaskDropdownMenu
+              icon={<Repeat className={cn("h-4 w-4", recurrence && "text-[#e44232]")} />}
+              placeholder="Repeat"
+              value={recurrence}
+              options={[
+                { value: "", label: "No repeat" },
+                { value: "daily", label: "Daily" },
+                { value: "weekly", label: "Weekly" },
+                { value: "monthly", label: "Monthly" },
+                { value: "weekdays", label: "Weekdays" },
+              ]}
+              onValueChange={(val) => setRecurrence(val as Recurrence | "")}
+            />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border/40 px-5 py-3 flex items-center justify-end bg-muted/20">
+        <div className="border-t border-border/40 px-5 py-3 flex items-center justify-between bg-muted/20">
+          {!isEditMode && user?.$id ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 px-3 text-sm text-muted-foreground gap-1.5"
+              onClick={() => setTemplatePickerOpen(true)}
+            >
+              <FileText className="h-4 w-4" />
+              Use Template
+            </Button>
+          ) : (
+            <div />
+          )}
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -440,6 +523,15 @@ export function TaskAddDialog({
             </Button>
           </div>
         </div>
+
+        {user?.$id && (
+          <TemplatePicker
+            open={isTemplatePickerOpen}
+            onOpenChange={setTemplatePickerOpen}
+            userId={user.$id}
+            onSelect={handleSelectTemplate}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -56,8 +56,12 @@ export function KanbanCard({
         <div className="flex-1 min-w-0">
           {/* Title */}
           <button
-            onClick={() => onTaskClick(task)}
-            className="text-sm font-medium leading-snug text-left w-full truncate hover:text-primary transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onTaskClick(task);
+            }}
+            className="text-sm font-medium leading-snug text-left w-full truncate hover:text-primary transition-colors cursor-pointer"
           >
             {task.title}
           </button>
