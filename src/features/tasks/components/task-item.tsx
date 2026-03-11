@@ -9,6 +9,7 @@ import {
   Tag,
   RotateCcw,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
@@ -58,8 +59,8 @@ const formatDueDate = (dueDate: string): { text: string; color: string; isPastDu
 
     if (isPast(taskDate) && taskDate < now) {
       return {
-        text: format(date, "MMM d"),
-        color: "text-red-500 bg-red-500/10",
+        text: `Overdue \u00b7 ${format(date, "MMM d")}`,
+        color: "text-red-500 bg-red-500/10 font-semibold",
         isPastDue: true,
       };
     }
@@ -222,7 +223,11 @@ export function TaskItem({
                 dueDateInfo.color
               )}
             >
-              <Calendar className="h-3 w-3" />
+              {dueDateInfo.isPastDue ? (
+                <AlertCircle className="h-3 w-3" />
+              ) : (
+                <Calendar className="h-3 w-3" />
+              )}
               {dueDateInfo.text}
             </span>
           )}

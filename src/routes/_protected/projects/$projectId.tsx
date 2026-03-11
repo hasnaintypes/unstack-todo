@@ -135,6 +135,28 @@ function ProjectDetailPage() {
         onUpdate={handleUpdateProject}
       />
 
+      {/* Progress Bar */}
+      {projectTasks.length > 0 && (() => {
+        const completed = projectTasks.filter((t) => t.status === "completed").length;
+        const total = projectTasks.length;
+        const percent = Math.round((completed / total) * 100);
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                {completed} of {total} task{total !== 1 ? "s" : ""} completed ({percent}%)
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[#e44232] transition-all duration-500 ease-out"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+          </div>
+        );
+      })()}
+
       <ProjectStatCards tasks={projectTasks} />
       <ProjectCharts tasks={projectTasks} />
 
