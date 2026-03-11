@@ -27,13 +27,23 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Separator } from "@/shared/components/ui/separator";
 import { TaskDropdownMenu } from "@/features/tasks/components/task-dropdown-menu";
-import type { CalendarTask, Subtask, TaskPriority, ReminderBefore } from "@/features/tasks/types/task.types";
+import type {
+  CalendarTask,
+  Subtask,
+  TaskPriority,
+  ReminderBefore,
+} from "@/features/tasks/types/task.types";
 import { TaskReminderToggle } from "@/features/reminders/components/task-reminder-toggle";
-import { useProjects } from "@/app/providers/project-provider";
-import { useCategories } from "@/app/providers/category-provider";
+import { useProjects } from "@/shared/hooks/use-projects";
+import { useCategories } from "@/shared/hooks/use-categories";
 import { autoSetPriority, generateDescription, hasAiKey } from "@/shared/services/ai.service";
 import { cn } from "@/shared/lib/utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 
 export interface EmptyStateTaskInput {
   title: string;
@@ -61,7 +71,6 @@ const PRIORITIES: { value: TaskPriority; label: string }[] = [
   { value: 3, label: "High" },
   { value: 4, label: "Urgent" },
 ];
-
 
 export function TaskAddDialog({
   task,
@@ -101,7 +110,9 @@ export function TaskAddDialog({
   const [aiPrioritySet, setAiPrioritySet] = React.useState(false);
   const [isGeneratingDesc, setIsGeneratingDesc] = React.useState(false);
   const [reminderEnabled, setReminderEnabled] = React.useState(task?.reminderEnabled ?? false);
-  const [reminderBefore, setReminderBefore] = React.useState<ReminderBefore>(task?.reminderBefore ?? "1h");
+  const [reminderBefore, setReminderBefore] = React.useState<ReminderBefore>(
+    task?.reminderBefore ?? "1h"
+  );
 
   // Update form when task changes
   React.useEffect(() => {

@@ -14,12 +14,7 @@ import {
   Plus,
   X,
 } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/shared/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/shared/components/ui/sheet";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
@@ -33,8 +28,8 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { TaskDropdownMenu } from "./task-dropdown-menu";
 import { TaskDetailContent } from "./task-detail-content";
-import { useProjects } from "@/app/providers/project-provider";
-import { useCategories } from "@/app/providers/category-provider";
+import { useProjects } from "@/shared/hooks/use-projects";
+import { useCategories } from "@/shared/hooks/use-categories";
 import { cn } from "@/shared/lib/utils";
 import type { CalendarTask, Subtask, TaskPriority } from "@/features/tasks/types/task.types";
 
@@ -168,7 +163,12 @@ export function TaskDetailSheet({
 
                 <div className="flex items-center gap-1">
                   {onEdit && !isEditing && (
-                    <Button variant="ghost" size="icon" className="size-7" onClick={handleStartEdit}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7"
+                      onClick={handleStartEdit}
+                    >
                       <Pencil className="size-3.5" />
                     </Button>
                   )}
@@ -247,13 +247,21 @@ export function TaskDetailSheet({
                   </label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal h-9">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal h-9"
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {editDate ? format(editDate, "MMM dd, yyyy") : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={editDate} onSelect={setEditDate} initialFocus />
+                      <Calendar
+                        mode="single"
+                        selected={editDate}
+                        onSelect={setEditDate}
+                        initialFocus
+                      />
                     </PopoverContent>
                   </Popover>
                   {editDate && (
@@ -400,12 +408,12 @@ export function TaskDetailSheet({
             ) : (
               /* ========== READ MODE ========== */
               <div className="px-5 pb-5">
-              <TaskDetailContent
-                task={task}
-                onUpdateSubtasks={(subtasks) => {
-                  if (onEdit) onEdit(task.id, { subtasks });
-                }}
-              />
+                <TaskDetailContent
+                  task={task}
+                  onUpdateSubtasks={(subtasks) => {
+                    if (onEdit) onEdit(task.id, { subtasks });
+                  }}
+                />
               </div>
             )}
           </>

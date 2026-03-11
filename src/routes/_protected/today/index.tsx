@@ -4,7 +4,7 @@ import { TaskEmptyState } from "@/features/tasks/components/empty-state";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
 import { useTodayTasks } from "@/features/tasks/hooks/use-task-filters";
-import { useTasks } from "@/app/providers/task-provider";
+import { useTasks } from "@/shared/hooks/use-tasks";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 import { todayTaskEmptyState } from "@/assets";
 

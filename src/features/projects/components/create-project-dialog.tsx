@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sparkles, Loader2, Check, Plus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { useProjects } from "@/app/providers/project-provider";
+import { useProjects } from "@/shared/hooks/use-projects";
 import { PROJECT_COLORS } from "@/features/projects/utils/colors";
 import {
   Dialog,
@@ -59,16 +59,17 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => {
-      if (!val) resetForm();
-      onOpenChange(val);
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        if (!val) resetForm();
+        onOpenChange(val);
+      }}
+    >
       <DialogContent className="sm:max-w-[440px] gap-0 p-0 overflow-hidden outline-none">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-xl">New Project</DialogTitle>
-          <DialogDescription>
-            Organize your tasks into a dedicated project space.
-          </DialogDescription>
+          <DialogDescription>Organize your tasks into a dedicated project space.</DialogDescription>
         </DialogHeader>
 
         <div className="p-6 pt-2 space-y-6">
@@ -128,17 +129,23 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
           </div>
 
           {/* AI Task Generation Toggle */}
-          <div className={cn(
-            "flex items-center justify-between rounded-xl border p-4 transition-all duration-300",
-            generateWithAi 
-              ? "bg-primary/5 border-primary/30 ring-1 ring-primary/10 shadow-sm" 
-              : "bg-muted/30 border-transparent"
-          )}>
+          <div
+            className={cn(
+              "flex items-center justify-between rounded-xl border p-4 transition-all duration-300",
+              generateWithAi
+                ? "bg-primary/5 border-primary/30 ring-1 ring-primary/10 shadow-sm"
+                : "bg-muted/30 border-transparent"
+            )}
+          >
             <div className="flex items-center gap-4">
-              <div className={cn(
-                "flex size-10 items-center justify-center rounded-lg transition-colors",
-                generateWithAi ? "bg-[#e44232] text-white shadow-md shadow-primary/20" : "bg-background text-muted-foreground border"
-              )}>
+              <div
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-lg transition-colors",
+                  generateWithAi
+                    ? "bg-[#e44232] text-white shadow-md shadow-primary/20"
+                    : "bg-background text-muted-foreground border"
+                )}
+              >
                 <Sparkles className={cn("size-5", generateWithAi && "animate-pulse")} />
               </div>
               <div className="space-y-0.5">
@@ -150,17 +157,13 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
                 </p>
               </div>
             </div>
-            <Switch
-              id="ai-toggle"
-              checked={generateWithAi}
-              onCheckedChange={setGenerateWithAi}
-            />
+            <Switch id="ai-toggle" checked={generateWithAi} onCheckedChange={setGenerateWithAi} />
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-3 p-4 px-6 bg-muted/30 border-t">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
             className="h-9 px-4"

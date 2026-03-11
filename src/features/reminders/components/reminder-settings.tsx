@@ -48,10 +48,15 @@ export function ReminderSettings() {
         setIsLoading(false);
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [user?.$id]);
 
-  const updatePref = async (key: keyof Omit<UserReminderPreferences, "id" | "userId">, value: unknown) => {
+  const updatePref = async (
+    key: keyof Omit<UserReminderPreferences, "id" | "userId">,
+    value: unknown
+  ) => {
     if (!prefs?.id) return;
     try {
       const updated = await reminderService.updatePreferences(prefs.id, { [key]: value });
@@ -82,9 +87,7 @@ export function ReminderSettings() {
           <Bell className="size-4 text-muted-foreground" />
           <h2 className="text-base font-semibold">Notifications</h2>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Control how you receive task reminders
-        </p>
+        <p className="text-xs text-muted-foreground">Control how you receive task reminders</p>
       </div>
       <Separator />
       <div className="p-6 space-y-5">

@@ -8,316 +8,314 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as PublicRouteImport } from './routes/_public'
-import { Route as ProtectedRouteImport } from './routes/_protected'
-import { Route as PublicMarketingRouteImport } from './routes/_public/_marketing'
-import { Route as PublicMarketingIndexRouteImport } from './routes/_public/_marketing/index'
-import { Route as ProtectedUpcomingIndexRouteImport } from './routes/_protected/upcoming/index'
-import { Route as ProtectedTrashIndexRouteImport } from './routes/_protected/trash/index'
-import { Route as ProtectedTodayIndexRouteImport } from './routes/_protected/today/index'
-import { Route as ProtectedSettingsIndexRouteImport } from './routes/_protected/settings/index'
-import { Route as ProtectedProfileIndexRouteImport } from './routes/_protected/profile/index'
-import { Route as ProtectedInboxIndexRouteImport } from './routes/_protected/inbox/index'
-import { Route as ProtectedCompletedIndexRouteImport } from './routes/_protected/completed/index'
-import { Route as ProtectedProjectsProjectIdRouteImport } from './routes/_protected/projects/$projectId'
-import { Route as PublicAuthSignUpIndexRouteImport } from './routes/_public/auth/sign-up/index'
-import { Route as PublicAuthSignInIndexRouteImport } from './routes/_public/auth/sign-in/index'
-import { Route as PublicMarketingAboutIndexRouteImport } from './routes/_public/_marketing/about/index'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as PublicRouteImport } from "./routes/_public";
+import { Route as ProtectedRouteImport } from "./routes/_protected";
+import { Route as PublicMarketingRouteImport } from "./routes/_public/_marketing";
+import { Route as PublicMarketingIndexRouteImport } from "./routes/_public/_marketing/index";
+import { Route as ProtectedUpcomingIndexRouteImport } from "./routes/_protected/upcoming/index";
+import { Route as ProtectedTrashIndexRouteImport } from "./routes/_protected/trash/index";
+import { Route as ProtectedTodayIndexRouteImport } from "./routes/_protected/today/index";
+import { Route as ProtectedSettingsIndexRouteImport } from "./routes/_protected/settings/index";
+import { Route as ProtectedProfileIndexRouteImport } from "./routes/_protected/profile/index";
+import { Route as ProtectedInboxIndexRouteImport } from "./routes/_protected/inbox/index";
+import { Route as ProtectedCompletedIndexRouteImport } from "./routes/_protected/completed/index";
+import { Route as ProtectedProjectsProjectIdRouteImport } from "./routes/_protected/projects/$projectId";
+import { Route as PublicAuthSignUpIndexRouteImport } from "./routes/_public/auth/sign-up/index";
+import { Route as PublicAuthSignInIndexRouteImport } from "./routes/_public/auth/sign-in/index";
+import { Route as PublicMarketingAboutIndexRouteImport } from "./routes/_public/_marketing/about/index";
 
 const PublicRoute = PublicRouteImport.update({
-  id: '/_public',
+  id: "/_public",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProtectedRoute = ProtectedRouteImport.update({
-  id: '/_protected',
+  id: "/_protected",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const PublicMarketingRoute = PublicMarketingRouteImport.update({
-  id: '/_marketing',
+  id: "/_marketing",
   getParentRoute: () => PublicRoute,
-} as any)
+} as any);
 const PublicMarketingIndexRoute = PublicMarketingIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => PublicMarketingRoute,
-} as any)
+} as any);
 const ProtectedUpcomingIndexRoute = ProtectedUpcomingIndexRouteImport.update({
-  id: '/upcoming/',
-  path: '/upcoming/',
+  id: "/upcoming/",
+  path: "/upcoming/",
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any);
 const ProtectedTrashIndexRoute = ProtectedTrashIndexRouteImport.update({
-  id: '/trash/',
-  path: '/trash/',
+  id: "/trash/",
+  path: "/trash/",
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any);
 const ProtectedTodayIndexRoute = ProtectedTodayIndexRouteImport.update({
-  id: '/today/',
-  path: '/today/',
+  id: "/today/",
+  path: "/today/",
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any);
 const ProtectedSettingsIndexRoute = ProtectedSettingsIndexRouteImport.update({
-  id: '/settings/',
-  path: '/settings/',
+  id: "/settings/",
+  path: "/settings/",
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any);
 const ProtectedProfileIndexRoute = ProtectedProfileIndexRouteImport.update({
-  id: '/profile/',
-  path: '/profile/',
+  id: "/profile/",
+  path: "/profile/",
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any);
 const ProtectedInboxIndexRoute = ProtectedInboxIndexRouteImport.update({
-  id: '/inbox/',
-  path: '/inbox/',
+  id: "/inbox/",
+  path: "/inbox/",
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any);
 const ProtectedCompletedIndexRoute = ProtectedCompletedIndexRouteImport.update({
-  id: '/completed/',
-  path: '/completed/',
+  id: "/completed/",
+  path: "/completed/",
   getParentRoute: () => ProtectedRoute,
-} as any)
-const ProtectedProjectsProjectIdRoute =
-  ProtectedProjectsProjectIdRouteImport.update({
-    id: '/projects/$projectId',
-    path: '/projects/$projectId',
-    getParentRoute: () => ProtectedRoute,
-  } as any)
+} as any);
+const ProtectedProjectsProjectIdRoute = ProtectedProjectsProjectIdRouteImport.update({
+  id: "/projects/$projectId",
+  path: "/projects/$projectId",
+  getParentRoute: () => ProtectedRoute,
+} as any);
 const PublicAuthSignUpIndexRoute = PublicAuthSignUpIndexRouteImport.update({
-  id: '/auth/sign-up/',
-  path: '/auth/sign-up/',
+  id: "/auth/sign-up/",
+  path: "/auth/sign-up/",
   getParentRoute: () => PublicRoute,
-} as any)
+} as any);
 const PublicAuthSignInIndexRoute = PublicAuthSignInIndexRouteImport.update({
-  id: '/auth/sign-in/',
-  path: '/auth/sign-in/',
+  id: "/auth/sign-in/",
+  path: "/auth/sign-in/",
   getParentRoute: () => PublicRoute,
-} as any)
-const PublicMarketingAboutIndexRoute =
-  PublicMarketingAboutIndexRouteImport.update({
-    id: '/about/',
-    path: '/about/',
-    getParentRoute: () => PublicMarketingRoute,
-  } as any)
+} as any);
+const PublicMarketingAboutIndexRoute = PublicMarketingAboutIndexRouteImport.update({
+  id: "/about/",
+  path: "/about/",
+  getParentRoute: () => PublicMarketingRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof PublicMarketingIndexRoute
-  '/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/completed/': typeof ProtectedCompletedIndexRoute
-  '/inbox/': typeof ProtectedInboxIndexRoute
-  '/profile/': typeof ProtectedProfileIndexRoute
-  '/settings/': typeof ProtectedSettingsIndexRoute
-  '/today/': typeof ProtectedTodayIndexRoute
-  '/trash/': typeof ProtectedTrashIndexRoute
-  '/upcoming/': typeof ProtectedUpcomingIndexRoute
-  '/about/': typeof PublicMarketingAboutIndexRoute
-  '/auth/sign-in/': typeof PublicAuthSignInIndexRoute
-  '/auth/sign-up/': typeof PublicAuthSignUpIndexRoute
+  "/": typeof PublicMarketingIndexRoute;
+  "/projects/$projectId": typeof ProtectedProjectsProjectIdRoute;
+  "/completed/": typeof ProtectedCompletedIndexRoute;
+  "/inbox/": typeof ProtectedInboxIndexRoute;
+  "/profile/": typeof ProtectedProfileIndexRoute;
+  "/settings/": typeof ProtectedSettingsIndexRoute;
+  "/today/": typeof ProtectedTodayIndexRoute;
+  "/trash/": typeof ProtectedTrashIndexRoute;
+  "/upcoming/": typeof ProtectedUpcomingIndexRoute;
+  "/about/": typeof PublicMarketingAboutIndexRoute;
+  "/auth/sign-in/": typeof PublicAuthSignInIndexRoute;
+  "/auth/sign-up/": typeof PublicAuthSignUpIndexRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof PublicMarketingIndexRoute
-  '/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/completed': typeof ProtectedCompletedIndexRoute
-  '/inbox': typeof ProtectedInboxIndexRoute
-  '/profile': typeof ProtectedProfileIndexRoute
-  '/settings': typeof ProtectedSettingsIndexRoute
-  '/today': typeof ProtectedTodayIndexRoute
-  '/trash': typeof ProtectedTrashIndexRoute
-  '/upcoming': typeof ProtectedUpcomingIndexRoute
-  '/about': typeof PublicMarketingAboutIndexRoute
-  '/auth/sign-in': typeof PublicAuthSignInIndexRoute
-  '/auth/sign-up': typeof PublicAuthSignUpIndexRoute
+  "/": typeof PublicMarketingIndexRoute;
+  "/projects/$projectId": typeof ProtectedProjectsProjectIdRoute;
+  "/completed": typeof ProtectedCompletedIndexRoute;
+  "/inbox": typeof ProtectedInboxIndexRoute;
+  "/profile": typeof ProtectedProfileIndexRoute;
+  "/settings": typeof ProtectedSettingsIndexRoute;
+  "/today": typeof ProtectedTodayIndexRoute;
+  "/trash": typeof ProtectedTrashIndexRoute;
+  "/upcoming": typeof ProtectedUpcomingIndexRoute;
+  "/about": typeof PublicMarketingAboutIndexRoute;
+  "/auth/sign-in": typeof PublicAuthSignInIndexRoute;
+  "/auth/sign-up": typeof PublicAuthSignUpIndexRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/_protected': typeof ProtectedRouteWithChildren
-  '/_public': typeof PublicRouteWithChildren
-  '/_public/_marketing': typeof PublicMarketingRouteWithChildren
-  '/_protected/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/_protected/completed/': typeof ProtectedCompletedIndexRoute
-  '/_protected/inbox/': typeof ProtectedInboxIndexRoute
-  '/_protected/profile/': typeof ProtectedProfileIndexRoute
-  '/_protected/settings/': typeof ProtectedSettingsIndexRoute
-  '/_protected/today/': typeof ProtectedTodayIndexRoute
-  '/_protected/trash/': typeof ProtectedTrashIndexRoute
-  '/_protected/upcoming/': typeof ProtectedUpcomingIndexRoute
-  '/_public/_marketing/': typeof PublicMarketingIndexRoute
-  '/_public/_marketing/about/': typeof PublicMarketingAboutIndexRoute
-  '/_public/auth/sign-in/': typeof PublicAuthSignInIndexRoute
-  '/_public/auth/sign-up/': typeof PublicAuthSignUpIndexRoute
+  __root__: typeof rootRouteImport;
+  "/_protected": typeof ProtectedRouteWithChildren;
+  "/_public": typeof PublicRouteWithChildren;
+  "/_public/_marketing": typeof PublicMarketingRouteWithChildren;
+  "/_protected/projects/$projectId": typeof ProtectedProjectsProjectIdRoute;
+  "/_protected/completed/": typeof ProtectedCompletedIndexRoute;
+  "/_protected/inbox/": typeof ProtectedInboxIndexRoute;
+  "/_protected/profile/": typeof ProtectedProfileIndexRoute;
+  "/_protected/settings/": typeof ProtectedSettingsIndexRoute;
+  "/_protected/today/": typeof ProtectedTodayIndexRoute;
+  "/_protected/trash/": typeof ProtectedTrashIndexRoute;
+  "/_protected/upcoming/": typeof ProtectedUpcomingIndexRoute;
+  "/_public/_marketing/": typeof PublicMarketingIndexRoute;
+  "/_public/_marketing/about/": typeof PublicMarketingAboutIndexRoute;
+  "/_public/auth/sign-in/": typeof PublicAuthSignInIndexRoute;
+  "/_public/auth/sign-up/": typeof PublicAuthSignUpIndexRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/projects/$projectId'
-    | '/completed/'
-    | '/inbox/'
-    | '/profile/'
-    | '/settings/'
-    | '/today/'
-    | '/trash/'
-    | '/upcoming/'
-    | '/about/'
-    | '/auth/sign-in/'
-    | '/auth/sign-up/'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/projects/$projectId"
+    | "/completed/"
+    | "/inbox/"
+    | "/profile/"
+    | "/settings/"
+    | "/today/"
+    | "/trash/"
+    | "/upcoming/"
+    | "/about/"
+    | "/auth/sign-in/"
+    | "/auth/sign-up/";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/projects/$projectId'
-    | '/completed'
-    | '/inbox'
-    | '/profile'
-    | '/settings'
-    | '/today'
-    | '/trash'
-    | '/upcoming'
-    | '/about'
-    | '/auth/sign-in'
-    | '/auth/sign-up'
+    | "/"
+    | "/projects/$projectId"
+    | "/completed"
+    | "/inbox"
+    | "/profile"
+    | "/settings"
+    | "/today"
+    | "/trash"
+    | "/upcoming"
+    | "/about"
+    | "/auth/sign-in"
+    | "/auth/sign-up";
   id:
-    | '__root__'
-    | '/_protected'
-    | '/_public'
-    | '/_public/_marketing'
-    | '/_protected/projects/$projectId'
-    | '/_protected/completed/'
-    | '/_protected/inbox/'
-    | '/_protected/profile/'
-    | '/_protected/settings/'
-    | '/_protected/today/'
-    | '/_protected/trash/'
-    | '/_protected/upcoming/'
-    | '/_public/_marketing/'
-    | '/_public/_marketing/about/'
-    | '/_public/auth/sign-in/'
-    | '/_public/auth/sign-up/'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/_protected"
+    | "/_public"
+    | "/_public/_marketing"
+    | "/_protected/projects/$projectId"
+    | "/_protected/completed/"
+    | "/_protected/inbox/"
+    | "/_protected/profile/"
+    | "/_protected/settings/"
+    | "/_protected/today/"
+    | "/_protected/trash/"
+    | "/_protected/upcoming/"
+    | "/_public/_marketing/"
+    | "/_public/_marketing/about/"
+    | "/_public/auth/sign-in/"
+    | "/_public/auth/sign-up/";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  ProtectedRoute: typeof ProtectedRouteWithChildren
-  PublicRoute: typeof PublicRouteWithChildren
+  ProtectedRoute: typeof ProtectedRouteWithChildren;
+  PublicRoute: typeof PublicRouteWithChildren;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/_public': {
-      id: '/_public'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof PublicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected': {
-      id: '/_protected'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof ProtectedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_public/_marketing': {
-      id: '/_public/_marketing'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof PublicMarketingRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/_marketing/': {
-      id: '/_public/_marketing/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof PublicMarketingIndexRouteImport
-      parentRoute: typeof PublicMarketingRoute
-    }
-    '/_protected/upcoming/': {
-      id: '/_protected/upcoming/'
-      path: '/upcoming'
-      fullPath: '/upcoming/'
-      preLoaderRoute: typeof ProtectedUpcomingIndexRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/trash/': {
-      id: '/_protected/trash/'
-      path: '/trash'
-      fullPath: '/trash/'
-      preLoaderRoute: typeof ProtectedTrashIndexRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/today/': {
-      id: '/_protected/today/'
-      path: '/today'
-      fullPath: '/today/'
-      preLoaderRoute: typeof ProtectedTodayIndexRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/settings/': {
-      id: '/_protected/settings/'
-      path: '/settings'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof ProtectedSettingsIndexRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/profile/': {
-      id: '/_protected/profile/'
-      path: '/profile'
-      fullPath: '/profile/'
-      preLoaderRoute: typeof ProtectedProfileIndexRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/inbox/': {
-      id: '/_protected/inbox/'
-      path: '/inbox'
-      fullPath: '/inbox/'
-      preLoaderRoute: typeof ProtectedInboxIndexRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/completed/': {
-      id: '/_protected/completed/'
-      path: '/completed'
-      fullPath: '/completed/'
-      preLoaderRoute: typeof ProtectedCompletedIndexRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/projects/$projectId': {
-      id: '/_protected/projects/$projectId'
-      path: '/projects/$projectId'
-      fullPath: '/projects/$projectId'
-      preLoaderRoute: typeof ProtectedProjectsProjectIdRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_public/auth/sign-up/': {
-      id: '/_public/auth/sign-up/'
-      path: '/auth/sign-up'
-      fullPath: '/auth/sign-up/'
-      preLoaderRoute: typeof PublicAuthSignUpIndexRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/auth/sign-in/': {
-      id: '/_public/auth/sign-in/'
-      path: '/auth/sign-in'
-      fullPath: '/auth/sign-in/'
-      preLoaderRoute: typeof PublicAuthSignInIndexRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/_marketing/about/': {
-      id: '/_public/_marketing/about/'
-      path: '/about'
-      fullPath: '/about/'
-      preLoaderRoute: typeof PublicMarketingAboutIndexRouteImport
-      parentRoute: typeof PublicMarketingRoute
-    }
+    "/_public": {
+      id: "/_public";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof PublicRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected": {
+      id: "/_protected";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof ProtectedRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_public/_marketing": {
+      id: "/_public/_marketing";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof PublicMarketingRouteImport;
+      parentRoute: typeof PublicRoute;
+    };
+    "/_public/_marketing/": {
+      id: "/_public/_marketing/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof PublicMarketingIndexRouteImport;
+      parentRoute: typeof PublicMarketingRoute;
+    };
+    "/_protected/upcoming/": {
+      id: "/_protected/upcoming/";
+      path: "/upcoming";
+      fullPath: "/upcoming/";
+      preLoaderRoute: typeof ProtectedUpcomingIndexRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_protected/trash/": {
+      id: "/_protected/trash/";
+      path: "/trash";
+      fullPath: "/trash/";
+      preLoaderRoute: typeof ProtectedTrashIndexRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_protected/today/": {
+      id: "/_protected/today/";
+      path: "/today";
+      fullPath: "/today/";
+      preLoaderRoute: typeof ProtectedTodayIndexRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_protected/settings/": {
+      id: "/_protected/settings/";
+      path: "/settings";
+      fullPath: "/settings/";
+      preLoaderRoute: typeof ProtectedSettingsIndexRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_protected/profile/": {
+      id: "/_protected/profile/";
+      path: "/profile";
+      fullPath: "/profile/";
+      preLoaderRoute: typeof ProtectedProfileIndexRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_protected/inbox/": {
+      id: "/_protected/inbox/";
+      path: "/inbox";
+      fullPath: "/inbox/";
+      preLoaderRoute: typeof ProtectedInboxIndexRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_protected/completed/": {
+      id: "/_protected/completed/";
+      path: "/completed";
+      fullPath: "/completed/";
+      preLoaderRoute: typeof ProtectedCompletedIndexRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_protected/projects/$projectId": {
+      id: "/_protected/projects/$projectId";
+      path: "/projects/$projectId";
+      fullPath: "/projects/$projectId";
+      preLoaderRoute: typeof ProtectedProjectsProjectIdRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_public/auth/sign-up/": {
+      id: "/_public/auth/sign-up/";
+      path: "/auth/sign-up";
+      fullPath: "/auth/sign-up/";
+      preLoaderRoute: typeof PublicAuthSignUpIndexRouteImport;
+      parentRoute: typeof PublicRoute;
+    };
+    "/_public/auth/sign-in/": {
+      id: "/_public/auth/sign-in/";
+      path: "/auth/sign-in";
+      fullPath: "/auth/sign-in/";
+      preLoaderRoute: typeof PublicAuthSignInIndexRouteImport;
+      parentRoute: typeof PublicRoute;
+    };
+    "/_public/_marketing/about/": {
+      id: "/_public/_marketing/about/";
+      path: "/about";
+      fullPath: "/about/";
+      preLoaderRoute: typeof PublicMarketingAboutIndexRouteImport;
+      parentRoute: typeof PublicMarketingRoute;
+    };
   }
 }
 
 interface ProtectedRouteChildren {
-  ProtectedProjectsProjectIdRoute: typeof ProtectedProjectsProjectIdRoute
-  ProtectedCompletedIndexRoute: typeof ProtectedCompletedIndexRoute
-  ProtectedInboxIndexRoute: typeof ProtectedInboxIndexRoute
-  ProtectedProfileIndexRoute: typeof ProtectedProfileIndexRoute
-  ProtectedSettingsIndexRoute: typeof ProtectedSettingsIndexRoute
-  ProtectedTodayIndexRoute: typeof ProtectedTodayIndexRoute
-  ProtectedTrashIndexRoute: typeof ProtectedTrashIndexRoute
-  ProtectedUpcomingIndexRoute: typeof ProtectedUpcomingIndexRoute
+  ProtectedProjectsProjectIdRoute: typeof ProtectedProjectsProjectIdRoute;
+  ProtectedCompletedIndexRoute: typeof ProtectedCompletedIndexRoute;
+  ProtectedInboxIndexRoute: typeof ProtectedInboxIndexRoute;
+  ProtectedProfileIndexRoute: typeof ProtectedProfileIndexRoute;
+  ProtectedSettingsIndexRoute: typeof ProtectedSettingsIndexRoute;
+  ProtectedTodayIndexRoute: typeof ProtectedTodayIndexRoute;
+  ProtectedTrashIndexRoute: typeof ProtectedTrashIndexRoute;
+  ProtectedUpcomingIndexRoute: typeof ProtectedUpcomingIndexRoute;
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
@@ -329,45 +327,42 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedTodayIndexRoute: ProtectedTodayIndexRoute,
   ProtectedTrashIndexRoute: ProtectedTrashIndexRoute,
   ProtectedUpcomingIndexRoute: ProtectedUpcomingIndexRoute,
-}
+};
 
-const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
-  ProtectedRouteChildren,
-)
+const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(ProtectedRouteChildren);
 
 interface PublicMarketingRouteChildren {
-  PublicMarketingIndexRoute: typeof PublicMarketingIndexRoute
-  PublicMarketingAboutIndexRoute: typeof PublicMarketingAboutIndexRoute
+  PublicMarketingIndexRoute: typeof PublicMarketingIndexRoute;
+  PublicMarketingAboutIndexRoute: typeof PublicMarketingAboutIndexRoute;
 }
 
 const PublicMarketingRouteChildren: PublicMarketingRouteChildren = {
   PublicMarketingIndexRoute: PublicMarketingIndexRoute,
   PublicMarketingAboutIndexRoute: PublicMarketingAboutIndexRoute,
-}
+};
 
 const PublicMarketingRouteWithChildren = PublicMarketingRoute._addFileChildren(
-  PublicMarketingRouteChildren,
-)
+  PublicMarketingRouteChildren
+);
 
 interface PublicRouteChildren {
-  PublicMarketingRoute: typeof PublicMarketingRouteWithChildren
-  PublicAuthSignInIndexRoute: typeof PublicAuthSignInIndexRoute
-  PublicAuthSignUpIndexRoute: typeof PublicAuthSignUpIndexRoute
+  PublicMarketingRoute: typeof PublicMarketingRouteWithChildren;
+  PublicAuthSignInIndexRoute: typeof PublicAuthSignInIndexRoute;
+  PublicAuthSignUpIndexRoute: typeof PublicAuthSignUpIndexRoute;
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicMarketingRoute: PublicMarketingRouteWithChildren,
   PublicAuthSignInIndexRoute: PublicAuthSignInIndexRoute,
   PublicAuthSignUpIndexRoute: PublicAuthSignUpIndexRoute,
-}
+};
 
-const PublicRouteWithChildren =
-  PublicRoute._addFileChildren(PublicRouteChildren)
+const PublicRouteWithChildren = PublicRoute._addFileChildren(PublicRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

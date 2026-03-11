@@ -2,20 +2,7 @@ import * as React from "react";
 import type { Project } from "@/features/projects/types/project.types";
 import { projectService } from "@/features/projects/services/project.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-
-interface ProjectContextValue {
-  projects: Project[];
-  isLoading: boolean;
-  addProject: (data: { name: string; description?: string; color?: string; icon?: string }) => Promise<Project>;
-  updateProject: (
-    id: string,
-    updates: Partial<Pick<Project, "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
-  ) => Promise<void>;
-  deleteProject: (id: string) => Promise<void>;
-  refreshProjects: () => Promise<void>;
-}
-
-const ProjectContext = React.createContext<ProjectContextValue | undefined>(undefined);
+import { ProjectContext, type ProjectContextValue } from "@/app/context/project-context";
 
 export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const [projects, setProjects] = React.useState<Project[]>([]);
@@ -57,7 +44,12 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const updateProject = React.useCallback(
     async (
       id: string,
-      updates: Partial<Pick<Project, "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
+      updates: Partial<
+        Pick<
+          Project,
+          "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order"
+        >
+      >
     ) => {
       const updated = await projectService.updateProject(id, updates);
       setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));
@@ -80,12 +72,4 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   };
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
-}
-
-export function useProjects() {
-  const context = React.useContext(ProjectContext);
-  if (!context) {
-    throw new Error("useProjects must be used within a ProjectProvider");
-  }
-  return context;
 }

@@ -1,6 +1,12 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role } from "appwrite";
-import type { CalendarTask, Subtask, TaskStatus, TaskPriority, ReminderBefore } from "@/features/tasks/types/task.types";
+import type {
+  CalendarTask,
+  Subtask,
+  TaskStatus,
+  TaskPriority,
+  ReminderBefore,
+} from "@/features/tasks/types/task.types";
 // Note: color is no longer stored — it's derived from priority in the UI.
 
 /**
@@ -77,9 +83,7 @@ function safeParseSubtasks(raw: string): Subtask[] {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed.map((item: unknown) =>
-      typeof item === "string"
-        ? { title: item, completed: false }
-        : (item as Subtask)
+      typeof item === "string" ? { title: item, completed: false } : (item as Subtask)
     );
   } catch {
     return [];
@@ -114,16 +118,12 @@ export const taskService = {
    */
   async getAllTasks(userId: string): Promise<CalendarTask[]> {
     try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        [
-          Query.equal("userId", userId),
-          Query.isNull("deletedAt"),
-          Query.orderDesc("$createdAt"),
-          Query.limit(1000), // Adjust based on your needs
-        ]
-      );
+      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.isNull("deletedAt"),
+        Query.orderDesc("$createdAt"),
+        Query.limit(1000), // Adjust based on your needs
+      ]);
 
       return response.documents.map(documentToTask);
     } catch (error) {
@@ -137,11 +137,7 @@ export const taskService = {
    */
   async getTask(taskId: string): Promise<CalendarTask> {
     try {
-      const doc = await databases.getDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        taskId
-      );
+      const doc = await databases.getDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
 
       return documentToTask(doc);
     } catch (error) {
@@ -153,10 +149,7 @@ export const taskService = {
   /**
    * Create a new task
    */
-  async createTask(
-    task: Omit<CalendarTask, "id">,
-    userId: string
-  ): Promise<CalendarTask> {
+  async createTask(task: Omit<CalendarTask, "id">, userId: string): Promise<CalendarTask> {
     try {
       const doc = await databases.createDocument(
         DATABASE_ID,
@@ -180,16 +173,14 @@ export const taskService = {
   /**
    * Update an existing task
    */
-  async updateTask(
-    taskId: string,
-    updates: Partial<CalendarTask>
-  ): Promise<CalendarTask> {
+  async updateTask(taskId: string, updates: Partial<CalendarTask>): Promise<CalendarTask> {
     try {
       // Prepare the update payload
       const updatePayload: Record<string, unknown> = {};
 
       if (updates.title !== undefined) updatePayload.title = updates.title;
-      if (updates.description !== undefined) updatePayload.description = updates.description || null;
+      if (updates.description !== undefined)
+        updatePayload.description = updates.description || null;
       if (updates.dueDate !== undefined) updatePayload.dueDate = updates.dueDate || null;
       if (updates.startTime !== undefined) updatePayload.startTime = updates.startTime || null;
       if (updates.endTime !== undefined) updatePayload.endTime = updates.endTime || null;
@@ -234,23 +225,14 @@ export const taskService = {
   async toggleTaskComplete(taskId: string): Promise<CalendarTask> {
     try {
       // First get the current task
-      const currentTask = await databases.getDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        taskId
-      );
+      const currentTask = await databases.getDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
 
       const newStatus = currentTask.status === "completed" ? "todo" : "completed";
 
-      const doc = await databases.updateDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        taskId,
-        {
-          status: newStatus,
-          completedAt: newStatus === "completed" ? new Date().toISOString() : null,
-        }
-      );
+      const doc = await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+        status: newStatus,
+        completedAt: newStatus === "completed" ? new Date().toISOString() : null,
+      });
 
       return documentToTask(doc);
     } catch (error) {
@@ -264,14 +246,9 @@ export const taskService = {
    */
   async moveToTrash(taskId: string): Promise<void> {
     try {
-      await databases.updateDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        taskId,
-        {
-          deletedAt: new Date().toISOString(),
-        }
-      );
+      await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+        deletedAt: new Date().toISOString(),
+      });
     } catch (error) {
       console.error("Error moving task to trash:", error);
       throw new Error("Failed to move task to trash");
@@ -283,14 +260,9 @@ export const taskService = {
    */
   async restoreFromTrash(taskId: string): Promise<CalendarTask> {
     try {
-      const doc = await databases.updateDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        taskId,
-        {
-          deletedAt: null,
-        }
-      );
+      const doc = await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+        deletedAt: null,
+      });
 
       return documentToTask(doc);
     } catch (error) {
@@ -304,11 +276,7 @@ export const taskService = {
    */
   async permanentlyDelete(taskId: string): Promise<void> {
     try {
-      await databases.deleteDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        taskId
-      );
+      await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
     } catch (error) {
       console.error("Error deleting task:", error);
       throw new Error("Failed to delete task");
@@ -320,21 +288,20 @@ export const taskService = {
    */
   async getTrashTasks(userId: string): Promise<CalendarTask[]> {
     try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        [
-          Query.equal("userId", userId),
-          Query.isNotNull("deletedAt"),
-          Query.orderDesc("deletedAt"),
-          Query.limit(100),
-        ]
-      );
+      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.isNotNull("deletedAt"),
+        Query.orderDesc("deletedAt"),
+        Query.limit(100),
+      ]);
 
-      return response.documents.map(doc => ({
-        ...documentToTask(doc),
-        deletedAt: doc.deletedAt,
-      } as CalendarTask & { deletedAt: string }));
+      return response.documents.map(
+        (doc) =>
+          ({
+            ...documentToTask(doc),
+            deletedAt: doc.deletedAt,
+          }) as CalendarTask & { deletedAt: string }
+      );
     } catch (error) {
       console.error("Error fetching trash:", error);
       throw new Error("Failed to fetch trash");
@@ -346,25 +313,18 @@ export const taskService = {
    */
   async clearCompleted(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        [
-          Query.equal("userId", userId),
-          Query.equal("status", "completed"),
-          Query.isNull("deletedAt"),
-        ]
-      );
+      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.equal("status", "completed"),
+        Query.isNull("deletedAt"),
+      ]);
 
       // Move all completed tasks to trash
       await Promise.all(
         response.documents.map((doc) =>
-          databases.updateDocument(
-            DATABASE_ID,
-            TASKS_COLLECTION_ID,
-            doc.$id,
-            { deletedAt: new Date().toISOString() }
-          )
+          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+            deletedAt: new Date().toISOString(),
+          })
         )
       );
     } catch (error) {
@@ -378,22 +338,14 @@ export const taskService = {
    */
   async emptyTrash(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        [
-          Query.equal("userId", userId),
-          Query.isNotNull("deletedAt"),
-        ]
-      );
+      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.isNotNull("deletedAt"),
+      ]);
 
       await Promise.all(
         response.documents.map((doc) =>
-          databases.deleteDocument(
-            DATABASE_ID,
-            TASKS_COLLECTION_ID,
-            doc.$id
-          )
+          databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id)
         )
       );
     } catch (error) {
@@ -407,23 +359,14 @@ export const taskService = {
    */
   async restoreAllFromTrash(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        [
-          Query.equal("userId", userId),
-          Query.isNotNull("deletedAt"),
-        ]
-      );
+      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.isNotNull("deletedAt"),
+      ]);
 
       await Promise.all(
         response.documents.map((doc) =>
-          databases.updateDocument(
-            DATABASE_ID,
-            TASKS_COLLECTION_ID,
-            doc.$id,
-            { deletedAt: null }
-          )
+          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
         )
       );
     } catch (error) {

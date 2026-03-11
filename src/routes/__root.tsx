@@ -42,20 +42,20 @@ function RootComponent() {
       <TaskProvider>
         <ProjectProvider>
           <CategoryProvider>
-          <div className="flex flex-col min-h-screen font-sans antialiased text-foreground bg-background">
-            {!isMinimalLayout && <Header />}
-            <main
-              className={cn(
-                "flex-1 flex flex-col mx-auto w-full",
-                !isMinimalLayout && "container max-w-screen-2xl px-4 py-6"
-              )}
-            >
-              <Outlet />
-            </main>
-            {!isMinimalLayout && <Footer />}
-            <Toaster />
-            <TanStackRouterDevtools />
-          </div>
+            <div className="flex flex-col min-h-screen font-sans antialiased text-foreground bg-background">
+              {!isMinimalLayout && <Header />}
+              <main
+                className={cn(
+                  "flex-1 flex flex-col mx-auto w-full",
+                  !isMinimalLayout && "container max-w-screen-2xl px-4 py-6"
+                )}
+              >
+                <Outlet />
+              </main>
+              {!isMinimalLayout && <Footer />}
+              <Toaster />
+              <TanStackRouterDevtools />
+            </div>
           </CategoryProvider>
         </ProjectProvider>
       </TaskProvider>

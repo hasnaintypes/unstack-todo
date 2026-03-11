@@ -3,7 +3,8 @@ import { Permission, Role } from "appwrite";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PROFILES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROFILES_COLLECTION_ID || "profiles";
-const PREFERENCES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREFERENCES_COLLECTION_ID || "user_preferences";
+const PREFERENCES_COLLECTION_ID =
+  import.meta.env.VITE_APPWRITE_PREFERENCES_COLLECTION_ID || "user_preferences";
 
 export const authService = {
   async getCurrentUser() {
@@ -91,15 +92,12 @@ export const authService = {
 
     for (const collectionId of collections) {
       try {
-        const docs = await databases.listDocuments(
-          DATABASE_ID,
-          collectionId,
-          [Query.equal("userId", userId), Query.limit(500)]
-        );
+        const docs = await databases.listDocuments(DATABASE_ID, collectionId, [
+          Query.equal("userId", userId),
+          Query.limit(500),
+        ]);
         await Promise.all(
-          docs.documents.map((doc) =>
-            databases.deleteDocument(DATABASE_ID, collectionId, doc.$id)
-          )
+          docs.documents.map((doc) => databases.deleteDocument(DATABASE_ID, collectionId, doc.$id))
         );
       } catch {
         // Collection may not exist or no docs, continue

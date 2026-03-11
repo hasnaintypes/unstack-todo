@@ -85,9 +85,7 @@ export function TaskDropdownMenu({
               className="flex items-center justify-between cursor-pointer"
             >
               <span className="flex items-center gap-2">
-                {option.color && (
-                  <div className={cn("h-2 w-2 rounded-full", option.color)} />
-                )}
+                {option.color && <div className={cn("h-2 w-2 rounded-full", option.color)} />}
                 {option.label}
               </span>
               {value === option.value && <Check className="h-4 w-4" />}

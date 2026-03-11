@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { isToday, isFuture, startOfDay } from "date-fns";
-import { useTasks } from "@/app/providers/task-provider";
+import { useTasks } from "@/shared/hooks/use-tasks";
 import { taskService } from "@/features/tasks/services/task.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import type { CalendarTask } from "@/features/tasks/types/task.types";

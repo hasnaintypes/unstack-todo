@@ -1,9 +1,23 @@
 import * as React from "react";
 import { format, isToday, isTomorrow, isPast, isThisWeek } from "date-fns";
-import { Calendar, Pencil, Trash2, Flag, FolderKanban, Tag, RotateCcw, Sparkles } from "lucide-react";
+import {
+  Calendar,
+  Pencil,
+  Trash2,
+  Flag,
+  FolderKanban,
+  Tag,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 
 export interface TaskItemProps {
@@ -186,7 +200,9 @@ export function TaskItem({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Flag className={cn("h-3.5 w-3.5 fill-current", getPriorityColor(task.priority))} />
+                  <Flag
+                    className={cn("h-3.5 w-3.5 fill-current", getPriorityColor(task.priority))}
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Priority: {task.priority === 4 ? "Urgent" : "High"}</p>
@@ -238,7 +254,8 @@ export function TaskItem({
           {/* Subtasks count */}
           {task.subtasks && task.subtasks.length > 0 && (
             <span className="text-muted-foreground">
-              {task.subtasks.filter((s) => s.completed).length}/{task.subtasks.length} subtask{task.subtasks.length !== 1 ? "s" : ""}
+              {task.subtasks.filter((s) => s.completed).length}/{task.subtasks.length} subtask
+              {task.subtasks.length !== 1 ? "s" : ""}
             </span>
           )}
         </div>
@@ -286,7 +303,9 @@ export function TaskItem({
                     onClick={handleDeleteClick}
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">{showRestore ? "Delete permanently" : "Delete task"}</span>
+                    <span className="sr-only">
+                      {showRestore ? "Delete permanently" : "Delete task"}
+                    </span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

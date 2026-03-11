@@ -20,7 +20,10 @@ export function getPriorityConfig(priority: TaskPriority): {
   iconClass: string;
   bgClass: string;
 } {
-  const config: Record<TaskPriority, { label: string; badgeClass: string; iconClass: string; bgClass: string }> = {
+  const config: Record<
+    TaskPriority,
+    { label: string; badgeClass: string; iconClass: string; bgClass: string }
+  > = {
     1: {
       label: "Low",
       badgeClass: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",

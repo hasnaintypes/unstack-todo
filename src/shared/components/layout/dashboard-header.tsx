@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  User,
-  LogOut,
-  Settings,
-  Search,
-} from "lucide-react";
+import { User, LogOut, Settings, Search } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
@@ -139,10 +134,7 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
       </div>
 
       {/* Command Palette */}
-      <CommandPalette
-        open={searchOpen ?? false}
-        onOpenChange={onSearchOpenChange ?? (() => {})}
-      />
+      <CommandPalette open={searchOpen ?? false} onOpenChange={onSearchOpenChange ?? (() => {})} />
     </header>
   );
 }

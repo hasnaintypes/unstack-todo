@@ -25,10 +25,7 @@ export interface TaskListProps {
   groupBy?: "none" | "priority" | "dueDate" | "project" | "category";
 }
 
-const groupTasks = (
-  tasks: CalendarTask[],
-  groupBy: string
-): [string, CalendarTask[]][] => {
+const groupTasks = (tasks: CalendarTask[], groupBy: string): [string, CalendarTask[]][] => {
   if (groupBy === "none") {
     return [["All", tasks]];
   }
@@ -151,9 +148,7 @@ export function TaskList({
       {showHeader && isEmpty && headerActions && (
         <div className="flex items-center justify-between px-6 py-4 border-b">
           {title && <h1 className="text-2xl font-bold">{title}</h1>}
-          <div className="flex items-center gap-2">
-            {headerActions}
-          </div>
+          <div className="flex items-center gap-2">{headerActions}</div>
         </div>
       )}
 

@@ -23,11 +23,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { logo } from "@/assets";
 import { cn } from "@/shared/lib/utils";
-import { useProjects } from "@/app/providers/project-provider";
-import { useTasks } from "@/app/providers/task-provider";
+import { useProjects } from "@/shared/hooks/use-projects";
+import { useTasks } from "@/shared/hooks/use-tasks";
 import { getColorClass } from "@/features/projects/utils/colors";
 import { CreateProjectDialog } from "@/features/projects/components/create-project-dialog";
-
 
 import {
   Sidebar,
@@ -41,9 +40,18 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/shared/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/shared/components/ui/collapsible";
 import { Link } from "@tanstack/react-router";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -155,15 +163,15 @@ export function AppSidebar() {
       <SidebarHeader
         className={cn(
           "flex flex-row items-center border-b",
-          state === "expanded"
-            ? "p-4 justify-between gap-2"
-            : "p-2 justify-center"
+          state === "expanded" ? "p-4 justify-between gap-2" : "p-2 justify-center"
         )}
       >
-        <div className={cn(
-          "flex items-center",
-          state === "expanded" ? "gap-3 px-1" : "justify-center"
-        )}>
+        <div
+          className={cn(
+            "flex items-center",
+            state === "expanded" ? "gap-3 px-1" : "justify-center"
+          )}
+        >
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 p-1 shrink-0">
             <img src={logo} alt="UnStack Todo" className="size-full" />
           </div>
@@ -173,10 +181,9 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className={cn(
-        "flex flex-col overflow-hidden",
-        state === "expanded" ? "px-2" : "px-0"
-      )}>
+      <SidebarContent
+        className={cn("flex flex-col overflow-hidden", state === "expanded" ? "px-2" : "px-0")}
+      >
         <SidebarGroup className="shrink-0">
           <SidebarMenu>
             {navItems.map((item) => (
@@ -216,10 +223,7 @@ export function AppSidebar() {
           {state === "expanded" ? (
             <div className="flex-1 flex flex-col min-h-0 overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {/* Active Projects */}
-              <Collapsible
-                open={isProjectsExpanded}
-                onOpenChange={setIsProjectsExpanded}
-              >
+              <Collapsible open={isProjectsExpanded} onOpenChange={setIsProjectsExpanded}>
                 <div className="flex items-center justify-between px-2 py-1.5 shrink-0">
                   <CollapsibleTrigger asChild>
                     <button className="flex items-center gap-1.5 cursor-pointer hover:bg-accent/50 rounded-md px-0 py-1 transition-colors flex-1">
@@ -303,12 +307,20 @@ export function AppSidebar() {
                                         />
                                       </button>
                                     </CollapsibleTrigger>
-                                    <SidebarMenuButton asChild className="hover:bg-accent/50 px-2 cursor-pointer flex-1 justify-start">
+                                    <SidebarMenuButton
+                                      asChild
+                                      className="hover:bg-accent/50 px-2 cursor-pointer flex-1 justify-start"
+                                    >
                                       <Link
                                         to="/projects/$projectId"
                                         params={{ projectId: project.id }}
                                       >
-                                        <Hash className={cn("size-4 shrink-0", getColorClass(project.color).replace("bg-", "text-"))} />
+                                        <Hash
+                                          className={cn(
+                                            "size-4 shrink-0",
+                                            getColorClass(project.color).replace("bg-", "text-")
+                                          )}
+                                        />
                                         <span className="flex-1 font-medium text-foreground/90 text-left truncate">
                                           {project.name}
                                         </span>
@@ -330,7 +342,9 @@ export function AppSidebar() {
                                           <Pencil className="size-3.5 mr-2" />
                                           Rename
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleArchiveProject(project.id)}>
+                                        <DropdownMenuItem
+                                          onClick={() => handleArchiveProject(project.id)}
+                                        >
                                           <Archive className="size-3.5 mr-2" />
                                           Archive
                                         </DropdownMenuItem>
@@ -351,7 +365,10 @@ export function AppSidebar() {
                                         <div className="absolute left-2 top-0 h-full w-px bg-border/50" />
                                         <SidebarMenu className="gap-2">
                                           {projectTasks.slice(0, MAX_VISIBLE_TASKS).map((task) => (
-                                            <SidebarMenuItem key={task.id} className="relative z-10 pl-3 cursor-pointer">
+                                            <SidebarMenuItem
+                                              key={task.id}
+                                              className="relative z-10 pl-3 cursor-pointer"
+                                            >
                                               <SidebarMenuButton
                                                 asChild
                                                 className="group h-7 px-0 hover:bg-transparent justify-start"
@@ -391,7 +408,10 @@ export function AppSidebar() {
                                           ))}
                                           {projectTasks.length > MAX_VISIBLE_TASKS && (
                                             <SidebarMenuItem className="pl-3">
-                                              <SidebarMenuButton asChild className="h-7 px-0 hover:bg-transparent">
+                                              <SidebarMenuButton
+                                                asChild
+                                                className="h-7 px-0 hover:bg-transparent"
+                                              >
                                                 <Link
                                                   to="/projects/$projectId"
                                                   params={{ projectId: project.id }}
@@ -405,7 +425,9 @@ export function AppSidebar() {
                                         </SidebarMenu>
                                       </div>
                                     ) : (
-                                      <p className="ml-8 mt-1 text-xs text-muted-foreground/50 py-1">No active tasks</p>
+                                      <p className="ml-8 mt-1 text-xs text-muted-foreground/50 py-1">
+                                        No active tasks
+                                      </p>
                                     )}
                                   </CollapsibleContent>
                                 </SidebarMenuItem>
@@ -423,10 +445,7 @@ export function AppSidebar() {
               {archivedProjects.length > 0 && (
                 <>
                   <SidebarSeparator className="mx-0 my-2" />
-                  <Collapsible
-                    open={isArchivedExpanded}
-                    onOpenChange={setIsArchivedExpanded}
-                  >
+                  <Collapsible open={isArchivedExpanded} onOpenChange={setIsArchivedExpanded}>
                     <div className="flex items-center px-2 py-1.5 shrink-0">
                       <CollapsibleTrigger asChild>
                         <button className="flex items-center gap-1.5 cursor-pointer hover:bg-accent/50 rounded-md px-0 py-1 transition-colors flex-1">
@@ -437,7 +456,9 @@ export function AppSidebar() {
                             )}
                           />
                           <Archive className="size-3 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground font-semibold">Archived</span>
+                          <span className="text-sm text-muted-foreground font-semibold">
+                            Archived
+                          </span>
                           <span className="ml-auto text-[10px] font-medium text-muted-foreground tabular-nums">
                             {archivedProjects.length}
                           </span>
@@ -460,7 +481,12 @@ export function AppSidebar() {
                                     params={{ projectId: project.id }}
                                     className="flex items-center gap-2 w-full"
                                   >
-                                    <Hash className={cn("size-3.5 shrink-0", getColorClass(project.color).replace("bg-", "text-"))} />
+                                    <Hash
+                                      className={cn(
+                                        "size-3.5 shrink-0",
+                                        getColorClass(project.color).replace("bg-", "text-")
+                                      )}
+                                    />
                                     <span className="flex-1 font-medium text-foreground/70 truncate">
                                       {project.name}
                                     </span>
@@ -513,7 +539,12 @@ export function AppSidebar() {
                       <TooltipTrigger asChild>
                         <SidebarMenuButton asChild className="justify-center">
                           <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                            <Hash className={cn("size-4", getColorClass(project.color).replace("bg-", "text-"))} />
+                            <Hash
+                              className={cn(
+                                "size-4",
+                                getColorClass(project.color).replace("bg-", "text-")
+                              )}
+                            />
                           </Link>
                         </SidebarMenuButton>
                       </TooltipTrigger>

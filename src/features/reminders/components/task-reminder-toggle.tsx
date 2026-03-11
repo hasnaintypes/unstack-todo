@@ -1,10 +1,6 @@
 import { Bell, BellOff } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/shared/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
 import { cn } from "@/shared/lib/utils";
 import type { ReminderBefore } from "@/features/tasks/types/task.types";
 
@@ -41,7 +37,9 @@ export function TaskReminderToggle({
           )}
         >
           {enabled ? <Bell className="size-4" /> : <BellOff className="size-4" />}
-          {enabled ? REMINDER_OPTIONS.find((o) => o.value === reminderBefore)?.label || "Reminder" : "Reminder"}
+          {enabled
+            ? REMINDER_OPTIONS.find((o) => o.value === reminderBefore)?.label || "Reminder"
+            : "Reminder"}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-2" align="start">

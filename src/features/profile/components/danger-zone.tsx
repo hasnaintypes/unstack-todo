@@ -64,8 +64,8 @@ export function DangerZone() {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your account,
-                all tasks, projects, categories, and preferences.
+                This action cannot be undone. This will permanently delete your account, all tasks,
+                projects, categories, and preferences.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

@@ -3,11 +3,15 @@ import { Permission, Role } from "appwrite";
 import type { Project } from "@/features/projects/types/project.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
-const PROJECTS_COLLECTION_ID =
-  import.meta.env.VITE_APPWRITE_PROJECTS_COLLECTION_ID || "projects";
+const PROJECTS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROJECTS_COLLECTION_ID || "projects";
 
 function generateSlug(name: string): string {
-  return name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,15 +31,11 @@ function documentToProject(doc: any): Project {
 
 export const projectService = {
   async getAllProjects(userId: string): Promise<Project[]> {
-    const response = await databases.listDocuments(
-      DATABASE_ID,
-      PROJECTS_COLLECTION_ID,
-      [
-        Query.equal("userId", userId),
-        Query.orderAsc("$createdAt"),
-        Query.limit(100),
-      ]
-    );
+    const response = await databases.listDocuments(DATABASE_ID, PROJECTS_COLLECTION_ID, [
+      Query.equal("userId", userId),
+      Query.orderAsc("$createdAt"),
+      Query.limit(100),
+    ]);
     return response.documents.map(documentToProject);
   },
 
@@ -67,7 +67,12 @@ export const projectService = {
 
   async updateProject(
     projectId: string,
-    updates: Partial<Pick<Project, "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order">>
+    updates: Partial<
+      Pick<
+        Project,
+        "name" | "description" | "color" | "icon" | "isFavorite" | "isArchived" | "order"
+      >
+    >
   ): Promise<Project> {
     const payload: Record<string, unknown> = {};
     if (updates.name !== undefined) {
@@ -89,10 +94,6 @@ export const projectService = {
   },
 
   async deleteProject(projectId: string): Promise<void> {
-    await databases.deleteDocument(
-      DATABASE_ID,
-      PROJECTS_COLLECTION_ID,
-      projectId
-    );
+    await databases.deleteDocument(DATABASE_ID, PROJECTS_COLLECTION_ID, projectId);
   },
 };

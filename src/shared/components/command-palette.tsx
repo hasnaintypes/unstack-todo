@@ -21,8 +21,8 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/shared/components/ui/command";
-import { useTasks } from "@/app/providers/task-provider";
-import { useProjects } from "@/app/providers/project-provider";
+import { useTasks } from "@/shared/hooks/use-tasks";
+import { useProjects } from "@/shared/hooks/use-projects";
 import { getPriorityConfig } from "@/features/tasks/utils/task-helpers";
 import { cn } from "@/shared/lib/utils";
 import { PROJECT_COLOR_MAP } from "@/features/projects/utils/colors";
@@ -39,29 +39,20 @@ export function CommandPalette({ open, onOpenChange, onCreateTask }: CommandPale
   const { projects } = useProjects();
   const [search, setSearch] = useState("");
 
-  const activeTasks = useMemo(
-    () => tasks.filter((t) => t.status !== "completed"),
-    [tasks]
-  );
+  const activeTasks = useMemo(() => tasks.filter((t) => t.status !== "completed"), [tasks]);
 
   const filteredTasks = useMemo(() => {
     if (!search.trim()) return activeTasks.slice(0, 8);
     const q = search.toLowerCase();
     return activeTasks
-      .filter(
-        (t) =>
-          t.title.toLowerCase().includes(q) ||
-          t.description?.toLowerCase().includes(q)
-      )
+      .filter((t) => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q))
       .slice(0, 10);
   }, [activeTasks, search]);
 
   const filteredProjects = useMemo(() => {
     if (!search.trim()) return projects.slice(0, 5);
     const q = search.toLowerCase();
-    return projects
-      .filter((p) => p.name.toLowerCase().includes(q))
-      .slice(0, 5);
+    return projects.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 5);
   }, [projects, search]);
 
   const handleSelect = (action: () => void) => {
@@ -71,7 +62,13 @@ export function CommandPalette({ open, onOpenChange, onCreateTask }: CommandPale
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={(val) => { onOpenChange(val); if (!val) setSearch(""); }}>
+    <CommandDialog
+      open={open}
+      onOpenChange={(val) => {
+        onOpenChange(val);
+        if (!val) setSearch("");
+      }}
+    >
       <CommandInput
         placeholder="Search tasks, projects, or type a command..."
         value={search}
@@ -129,11 +126,18 @@ export function CommandPalette({ open, onOpenChange, onCreateTask }: CommandPale
                   key={project.id}
                   value={`project-${project.id}-${project.name}`}
                   onSelect={() =>
-                    handleSelect(() => navigate({ to: "/projects/$projectId", params: { projectId: project.id } }))
+                    handleSelect(() =>
+                      navigate({ to: "/projects/$projectId", params: { projectId: project.id } })
+                    )
                   }
                   className="flex items-center gap-3"
                 >
-                  <div className={cn("size-3 rounded-full shrink-0", PROJECT_COLOR_MAP[project.color] || "bg-blue-500")} />
+                  <div
+                    className={cn(
+                      "size-3 rounded-full shrink-0",
+                      PROJECT_COLOR_MAP[project.color] || "bg-blue-500"
+                    )}
+                  />
                   <span className="flex-1 truncate">{project.name}</span>
                   <FolderKanban className="size-3.5 text-muted-foreground" />
                 </CommandItem>

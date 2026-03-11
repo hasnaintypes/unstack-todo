@@ -64,9 +64,7 @@ export function PersonalInfoCard() {
 
           <div className="flex-1 space-y-1">
             <h4 className="text-sm font-medium">Profile Picture</h4>
-            <p className="text-xs text-muted-foreground">
-              JPG, GIF or PNG. Max size of 2MB.
-            </p>
+            <p className="text-xs text-muted-foreground">JPG, GIF or PNG. Max size of 2MB.</p>
           </div>
         </div>
 
@@ -85,11 +83,7 @@ export function PersonalInfoCard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
+              <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
           </div>
 
@@ -98,12 +92,7 @@ export function PersonalInfoCard() {
               <Mail className="w-3.5 h-3.5" />
               Email Address
             </Label>
-            <Input
-              id="email"
-              type="email"
-              value={user?.email || ""}
-              disabled
-            />
+            <Input id="email" type="email" value={user?.email || ""} disabled />
             <p className="text-xs text-muted-foreground">
               Email changes require password verification. Contact support to update.
             </p>
