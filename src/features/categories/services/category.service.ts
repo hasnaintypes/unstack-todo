@@ -5,6 +5,7 @@ import type { Category } from "@/features/categories/types/category.types";
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const CATEGORIES_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_CATEGORIES_COLLECTION_ID || "categories";
+const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
 
 function generateSlug(name: string): string {
   return name
@@ -75,7 +76,33 @@ export const categoryService = {
     return documentToCategory(doc);
   },
 
-  async deleteCategory(categoryId: string): Promise<void> {
+  async deleteCategory(categoryId: string, userId: string): Promise<void> {
+    // Get category name to find associated tasks
+    const categoryDoc = await databases.getDocument(
+      DATABASE_ID,
+      CATEGORIES_COLLECTION_ID,
+      categoryId
+    );
+    const categoryName = categoryDoc.name;
+
+    // Unassign category from all tasks that use it
+    try {
+      const tasks = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.equal("categoryId", categoryName),
+        Query.limit(500),
+      ]);
+      await Promise.all(
+        tasks.documents.map((doc) =>
+          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+            categoryId: null,
+          })
+        )
+      );
+    } catch {
+      // Tasks collection may not exist or no tasks, continue
+    }
+
     await databases.deleteDocument(DATABASE_ID, CATEGORIES_COLLECTION_ID, categoryId);
   },
 };

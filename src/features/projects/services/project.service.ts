@@ -4,6 +4,7 @@ import type { Project } from "@/features/projects/types/project.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PROJECTS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROJECTS_COLLECTION_ID || "projects";
+const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
 
 function generateSlug(name: string): string {
   return name
@@ -93,7 +94,29 @@ export const projectService = {
     return documentToProject(doc);
   },
 
-  async deleteProject(projectId: string): Promise<void> {
+  async deleteProject(projectId: string, userId: string): Promise<void> {
+    // Get project name to find associated tasks
+    const projectDoc = await databases.getDocument(DATABASE_ID, PROJECTS_COLLECTION_ID, projectId);
+    const projectName = projectDoc.name;
+
+    // Unassign all tasks that belong to this project (move to inbox)
+    try {
+      const tasks = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.equal("projectId", projectName),
+        Query.limit(500),
+      ]);
+      await Promise.all(
+        tasks.documents.map((doc) =>
+          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+            projectId: null,
+          })
+        )
+      );
+    } catch {
+      // Tasks collection may not exist or no tasks, continue
+    }
+
     await databases.deleteDocument(DATABASE_ID, PROJECTS_COLLECTION_ID, projectId);
   },
 };

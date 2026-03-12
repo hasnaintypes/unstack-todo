@@ -52,9 +52,10 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const deleteCategory = React.useCallback(async (id: string) => {
-    await categoryService.deleteCategory(id);
+    if (!user?.$id) throw new Error("User not authenticated");
+    await categoryService.deleteCategory(id, user.$id);
     setCategories((prev) => prev.filter((c) => c.id !== id));
-  }, []);
+  }, [user?.$id]);
 
   const value: CategoryContextValue = {
     categories,

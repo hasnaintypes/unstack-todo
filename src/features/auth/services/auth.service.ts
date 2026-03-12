@@ -41,6 +41,7 @@ export const authService = {
           defaultProjectId: null,
           weekStartsOn: 1,
           defaultPriority: 2,
+          onboardingCompleted: false,
         },
         userPermissions
       );
@@ -86,6 +87,8 @@ export const authService = {
       import.meta.env.VITE_APPWRITE_PROJECTS_COLLECTION_ID || "projects",
       import.meta.env.VITE_APPWRITE_CATEGORIES_COLLECTION_ID || "categories",
       import.meta.env.VITE_APPWRITE_SUBTASKS_COLLECTION_ID || "subtasks",
+      import.meta.env.VITE_APPWRITE_TASK_COMMENTS_COLLECTION_ID || "task_comments",
+      import.meta.env.VITE_APPWRITE_TASK_TEMPLATES_COLLECTION_ID || "task_templates",
       PROFILES_COLLECTION_ID,
       PREFERENCES_COLLECTION_ID,
     ];

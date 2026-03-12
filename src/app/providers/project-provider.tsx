@@ -58,9 +58,10 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   );
 
   const deleteProject = React.useCallback(async (id: string) => {
-    await projectService.deleteProject(id);
+    if (!user?.$id) throw new Error("User not authenticated");
+    await projectService.deleteProject(id, user.$id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
-  }, []);
+  }, [user?.$id]);
 
   const value: ProjectContextValue = {
     projects,
