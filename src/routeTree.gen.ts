@@ -46,43 +46,59 @@ const ProtectedUpcomingIndexRoute = ProtectedUpcomingIndexRouteImport.update({
   id: '/upcoming/',
   path: '/upcoming/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/upcoming/index.lazy').then((d) => d.Route),
+)
 const ProtectedTrashIndexRoute = ProtectedTrashIndexRouteImport.update({
   id: '/trash/',
   path: '/trash/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/trash/index.lazy').then((d) => d.Route),
+)
 const ProtectedTodayIndexRoute = ProtectedTodayIndexRouteImport.update({
   id: '/today/',
   path: '/today/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/today/index.lazy').then((d) => d.Route),
+)
 const ProtectedSettingsIndexRoute = ProtectedSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/settings/index.lazy').then((d) => d.Route),
+)
 const ProtectedProfileIndexRoute = ProtectedProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/profile/index.lazy').then((d) => d.Route),
+)
 const ProtectedInboxIndexRoute = ProtectedInboxIndexRouteImport.update({
   id: '/inbox/',
   path: '/inbox/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/inbox/index.lazy').then((d) => d.Route),
+)
 const ProtectedCompletedIndexRoute = ProtectedCompletedIndexRouteImport.update({
   id: '/completed/',
   path: '/completed/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/completed/index.lazy').then((d) => d.Route),
+)
 const ProtectedProjectsProjectIdRoute =
   ProtectedProjectsProjectIdRouteImport.update({
     id: '/projects/$projectId',
     path: '/projects/$projectId',
     getParentRoute: () => ProtectedRoute,
-  } as any)
+  } as any).lazy(() =>
+    import('./routes/_protected/projects/$projectId.lazy').then((d) => d.Route),
+  )
 const PublicAuthSignUpIndexRoute = PublicAuthSignUpIndexRouteImport.update({
   id: '/auth/sign-up/',
   path: '/auth/sign-up/',
