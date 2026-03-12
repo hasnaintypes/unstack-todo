@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { User, LogOut, Settings, Search } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -66,6 +66,11 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
     }
   }, [avatarFileId]);
 
+  const fallbackAvatarUrl = useMemo(
+    () => `https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || "User"}`,
+    [user?.name]
+  );
+
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -110,7 +115,7 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
             <button className="flex items-center gap-3 rounded-full outline-none transition-transform active:scale-95">
               <Avatar className="size-9 border border-border transition-colors hover:border-primary/50">
                 <AvatarImage
-                  src={avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || "User"}`}
+                  src={avatarUrl || fallbackAvatarUrl}
                 />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                   {initials}
