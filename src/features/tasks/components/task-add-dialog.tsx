@@ -63,7 +63,7 @@ export interface EmptyStateTaskInput {
 
 export interface TaskAddDialogProps {
   task?: CalendarTask;
-  onSave?: (task: Partial<CalendarTask>) => void;
+  onSave?: (task: Partial<CalendarTask>) => void | Promise<void>;
   onAddTask?: (task: EmptyStateTaskInput) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -218,45 +218,49 @@ export function TaskAddDialog({
     }
   };
 
-  const handleSave = () => {
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const handleSave = async () => {
     if (!title.trim()) return;
+    setIsSaving(true);
 
-    if (onAddTask) {
-      // For empty state components using EmptyStateTaskInput
-      const emptyStateTask: EmptyStateTaskInput = {
-        title: title.trim(),
-        description: description.trim() || undefined,
-        subtasks: subtasks.length > 0 ? subtasks : undefined,
-        dueDate: date ? format(date, "PPP") : undefined,
-        priority: priority.toString(),
-        category: category.trim() || undefined,
-        project: project.trim() || undefined,
-      };
-      onAddTask(emptyStateTask);
-    } else if (onSave) {
-      // For calendar components using CalendarTask
-      const taskData: Partial<CalendarTask> = {
-        ...(isEditMode && { id: task.id }),
-        title: title.trim(),
-        description: description.trim() || undefined,
-        subtasks: subtasks.length > 0 ? subtasks : undefined,
-        dueDate: date ? format(date, "yyyy-MM-dd") : undefined,
-        priority,
-        category: category.trim() || undefined,
-        project: project.trim() || undefined,
-        tags: tags.length > 0 ? tags : undefined,
-        status: task?.status || "todo",
-        reminderEnabled: date ? reminderEnabled : false,
-        reminderBefore: reminderEnabled && date ? reminderBefore : undefined,
-        recurrence: recurrence || null,
-      };
-      onSave(taskData);
-    }
+    try {
+      if (onAddTask) {
+        const emptyStateTask: EmptyStateTaskInput = {
+          title: title.trim(),
+          description: description.trim() || undefined,
+          subtasks: subtasks.length > 0 ? subtasks : undefined,
+          dueDate: date ? format(date, "PPP") : undefined,
+          priority: priority.toString(),
+          category: category.trim() || undefined,
+          project: project.trim() || undefined,
+        };
+        onAddTask(emptyStateTask);
+      } else if (onSave) {
+        const taskData: Partial<CalendarTask> = {
+          ...(isEditMode && { id: task.id }),
+          title: title.trim(),
+          description: description.trim() || undefined,
+          subtasks: subtasks.length > 0 ? subtasks : undefined,
+          dueDate: date ? format(date, "yyyy-MM-dd") : undefined,
+          priority,
+          category: category.trim() || undefined,
+          project: project.trim() || undefined,
+          tags: tags.length > 0 ? tags : undefined,
+          status: task?.status || "todo",
+          reminderEnabled: date ? reminderEnabled : false,
+          reminderBefore: reminderEnabled && date ? reminderBefore : undefined,
+          recurrence: recurrence || null,
+        };
+        await onSave(taskData);
+      }
 
-    if (isEditMode) {
-      onOpenChange?.(false);
-    } else {
       resetForm();
+      onOpenChange?.(false);
+    } catch (err) {
+      console.error("Error saving task:", err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -306,7 +310,7 @@ export function TaskAddDialog({
                         type="button"
                         onClick={handleGenerateDescription}
                         disabled={!title.trim() || isGeneratingDesc}
-                        className="flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground/60 hover:text-[#e44232] hover:bg-[#e44232]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground/60 hover:text-brand hover:bg-brand/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         {isGeneratingDesc ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -393,7 +397,7 @@ export function TaskAddDialog({
             ) : (
               <button
                 onClick={() => setIsAddingSubtask(true)}
-                className="flex items-center gap-2 pl-8 text-xs font-medium text-muted-foreground/60 hover:text-[#e44232] transition-colors"
+                className="flex items-center gap-2 pl-8 text-xs font-medium text-muted-foreground/60 hover:text-brand transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Add sub-task
@@ -448,7 +452,7 @@ export function TaskAddDialog({
 
             <div className="relative">
               <TaskDropdownMenu
-                icon={<Flag className={cn("h-4 w-4", aiPrioritySet && "text-[#e44232]")} />}
+                icon={<Flag className={cn("h-4 w-4", aiPrioritySet && "text-brand")} />}
                 placeholder="Priority"
                 value={priority.toString()}
                 options={PRIORITIES.map((p) => ({ value: p.value.toString(), label: p.label }))}
@@ -458,7 +462,7 @@ export function TaskAddDialog({
                 }}
               />
               {aiPrioritySet && (
-                <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-[#e44232]" />
+                <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-brand" />
               )}
             </div>
 
@@ -480,7 +484,7 @@ export function TaskAddDialog({
             <Separator orientation="vertical" className="h-6" />
 
             <TaskDropdownMenu
-              icon={<Repeat className={cn("h-4 w-4", recurrence && "text-[#e44232]")} />}
+              icon={<Repeat className={cn("h-4 w-4", recurrence && "text-brand")} />}
               placeholder="Repeat"
               value={recurrence}
               options={[
@@ -568,11 +572,11 @@ export function TaskAddDialog({
             </Button>
             <Button
               size="sm"
-              disabled={!title.trim()}
+              disabled={!title.trim() || isSaving}
               onClick={handleSave}
-              className="h-9 px-4 text-sm font-semibold bg-[#e44232] hover:bg-[#c3392b] text-white"
+              className="h-9 px-4 text-sm font-semibold bg-brand hover:bg-brand-hover text-white"
             >
-              {isEditMode ? "Save changes" : "Add task"}
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : isEditMode ? "Save changes" : "Add task"}
             </Button>
           </div>
         </div>

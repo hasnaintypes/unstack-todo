@@ -159,7 +159,7 @@ function SettingsPage() {
                 className={cn(
                   "flex flex-col items-center gap-2.5 rounded-xl border-2 p-4 transition-all cursor-pointer",
                   theme === t.value
-                    ? "border-[#e44232] bg-[#e44232]/5"
+                    ? "border-brand bg-brand/5"
                     : "border-border hover:border-muted-foreground/30 hover:bg-accent/50"
                 )}
               >
@@ -167,7 +167,7 @@ function SettingsPage() {
                   className={cn(
                     "flex size-10 items-center justify-center rounded-full transition-colors",
                     theme === t.value
-                      ? "bg-[#e44232]/10 text-[#e44232]"
+                      ? "bg-brand/10 text-brand"
                       : "bg-muted text-muted-foreground"
                   )}
                 >
@@ -176,7 +176,7 @@ function SettingsPage() {
                 <span
                   className={cn(
                     "text-sm font-medium",
-                    theme === t.value ? "text-[#e44232]" : "text-foreground"
+                    theme === t.value ? "text-brand" : "text-foreground"
                   )}
                 >
                   {t.label}

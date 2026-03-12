@@ -132,7 +132,7 @@ export function ProjectHeader({
             size="sm"
             onClick={handleSave}
             disabled={!editName.trim()}
-            className="bg-[#e44232] hover:bg-[#c3392b] text-white gap-1.5"
+            className="bg-brand hover:bg-brand-hover text-white gap-1.5"
           >
             <Check className="size-3.5" />
             Save
@@ -207,7 +207,7 @@ export function ProjectHeader({
         <Button
           size="sm"
           onClick={onAddTask}
-          className="bg-[#e44232] hover:bg-[#c3392b] text-white gap-1.5"
+          className="bg-brand hover:bg-brand-hover text-white gap-1.5"
         >
           <Plus className="size-3.5" />
           Add task

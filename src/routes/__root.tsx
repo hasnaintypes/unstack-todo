@@ -22,6 +22,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootComponent() {
+  const showRouterDevtools =
+    import.meta.env.DEV && import.meta.env.VITE_SHOW_ROUTER_DEVTOOLS !== "false";
   const location = useLocation();
   const isAuthRoute = location.pathname.startsWith("/auth/");
   const isProtectedRoute =
@@ -54,7 +56,7 @@ function RootComponent() {
               </main>
               {!isMinimalLayout && <Footer />}
               <Toaster />
-              {import.meta.env.DEV && <TanStackRouterDevtools />}
+              {showRouterDevtools && <TanStackRouterDevtools />}
             </div>
           </CategoryProvider>
         </ProjectProvider>

@@ -45,7 +45,7 @@ export function TaskEmptyState({
           variant="ghost"
           size="sm"
           onClick={onAddTask}
-          className="text-[#e44232] hover:bg-[#e44232]/5 hover:text-[#c3392b] font-semibold gap-1.5 cursor-pointer"
+          className="text-brand hover:bg-brand/5 hover:text-brand-hover font-semibold gap-1.5 cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Add task
@@ -66,7 +66,7 @@ export function TaskEmptyState({
 
           <Button
             onClick={onAddTask}
-            className="bg-[#e44232] hover:bg-[#c3392b] text-white font-semibold px-6"
+            className="bg-brand hover:bg-brand-hover text-white font-semibold px-6"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add your first task

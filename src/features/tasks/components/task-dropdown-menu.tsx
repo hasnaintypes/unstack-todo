@@ -97,7 +97,7 @@ export function TaskDropdownMenu({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleAddClick}
-                className="cursor-pointer text-[#e44232] hover:text-[#e44232]"
+                className="cursor-pointer text-brand hover:text-brand"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 {addOptionLabel}

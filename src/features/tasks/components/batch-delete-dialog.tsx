@@ -31,7 +31,7 @@ export function BatchDeleteDialog({ open, onOpenChange, count, onConfirm }: Batc
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+            className="bg-brand hover:bg-brand-hover text-white"
           >
             Move to trash
           </AlertDialogAction>

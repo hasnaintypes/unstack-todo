@@ -1,5 +1,6 @@
-import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
+import { Loader2 } from "lucide-react";
 import { SidebarProvider, SidebarInset } from "@/shared/components/ui/sidebar";
 import { AppSidebar } from "@/shared/components/layout/app-sidebar";
 import { DashboardHeader } from "@/shared/components/layout/dashboard-header";
@@ -25,8 +26,9 @@ export const Route = createFileRoute("/_protected")({
 
 function ProtectedLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isCalendarPage = location.pathname === "/calendar";
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { selectedTask, setSelectedTask, updateTask, toggleTaskComplete, moveToTrash, addTask } =
     useTasks();
 
@@ -35,6 +37,13 @@ function ProtectedLayout() {
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [profileDocId, setProfileDocId] = useState<string | null>(null);
+
+  // Redirect to sign-in once auth check completes with no user
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({ to: "/auth/sign-in" });
+    }
+  }, [authLoading, user, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -88,6 +97,15 @@ function ProtectedLayout() {
       attachments: taskData.attachments,
     });
   };
+
+  // Show loading screen while auth is initializing — after all hooks
+  if (authLoading) {
+    return (
+      <div className="flex h-svh w-full items-center justify-center bg-background">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>

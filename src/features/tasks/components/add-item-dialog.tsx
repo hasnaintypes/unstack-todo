@@ -71,7 +71,7 @@ export function AddItemDialog({
             <Button
               type="submit"
               disabled={!name.trim()}
-              className="bg-[#e44232] hover:bg-[#c3392b]"
+              className="bg-brand hover:bg-brand-hover"
             >
               Add
             </Button>

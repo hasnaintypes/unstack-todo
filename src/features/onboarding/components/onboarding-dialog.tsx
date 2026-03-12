@@ -54,8 +54,8 @@ export function OnboardingDialog({ open, onComplete }: OnboardingDialogProps) {
           <div className="grid gap-3 py-4">
             {current.features.map((f) => (
               <div key={f.label} className="flex items-start gap-3 rounded-lg border p-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#e44232]/10">
-                  <f.icon className="h-4 w-4 text-[#e44232]" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand/10">
+                  <f.icon className="h-4 w-4 text-brand" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">{f.label}</p>
@@ -68,7 +68,7 @@ export function OnboardingDialog({ open, onComplete }: OnboardingDialogProps) {
 
         {isLast && (
           <div className="flex justify-center py-4">
-            <Rocket className="h-12 w-12 text-[#e44232]" />
+            <Rocket className="h-12 w-12 text-brand" />
           </div>
         )}
 
@@ -78,7 +78,7 @@ export function OnboardingDialog({ open, onComplete }: OnboardingDialogProps) {
               <div
                 key={i}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === step ? "w-6 bg-[#e44232]" : "w-1.5 bg-muted-foreground/30"
+                  i === step ? "w-6 bg-brand" : "w-1.5 bg-muted-foreground/30"
                 }`}
               />
             ))}
@@ -91,12 +91,12 @@ export function OnboardingDialog({ open, onComplete }: OnboardingDialogProps) {
               </Button>
             )}
             {isLast ? (
-              <Button size="sm" onClick={onComplete} className="bg-[#e44232] hover:bg-[#c3392b] text-white">
+              <Button size="sm" onClick={onComplete} className="bg-brand hover:bg-brand-hover text-white">
                 Get Started
                 <Rocket className="h-4 w-4 ml-1" />
               </Button>
             ) : (
-              <Button size="sm" onClick={() => setStep(step + 1)} className="bg-[#e44232] hover:bg-[#c3392b] text-white">
+              <Button size="sm" onClick={() => setStep(step + 1)} className="bg-brand hover:bg-brand-hover text-white">
                 Next
                 <ArrowRight className="h-4 w-4 ml-1" />
               </Button>

@@ -70,7 +70,7 @@ export function AiTaskGenerator({
     <div className="overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/30">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-[#e44232]" />
+          <Sparkles className="size-4 text-brand" />
           <span className="text-sm font-semibold">AI Task Suggestions</span>
         </div>
         <Button variant="ghost" size="icon" className="size-7" onClick={onClose}>
@@ -80,7 +80,7 @@ export function AiTaskGenerator({
       <div className="p-5">
         {isGenerating ? (
           <div className="flex flex-col items-center py-8 gap-3">
-            <Loader2 className="size-6 animate-spin text-[#e44232]" />
+            <Loader2 className="size-6 animate-spin text-brand" />
             <p className="text-sm text-muted-foreground">
               Generating tasks for &quot;{project.name}&quot;...
             </p>
@@ -95,7 +95,7 @@ export function AiTaskGenerator({
                   className={cn(
                     "flex items-start gap-3 w-full text-left p-3 rounded-lg border transition-all",
                     selectedSuggestions.has(i)
-                      ? "border-[#e44232]/30 bg-[#e44232]/5"
+                      ? "border-brand/30 bg-brand/5"
                       : "border-transparent hover:bg-accent/50"
                   )}
                 >
@@ -103,7 +103,7 @@ export function AiTaskGenerator({
                     className={cn(
                       "flex size-5 items-center justify-center rounded border-2 shrink-0 mt-0.5 transition-colors",
                       selectedSuggestions.has(i)
-                        ? "bg-[#e44232] border-[#e44232]"
+                        ? "bg-brand border-brand"
                         : "border-muted-foreground/30"
                     )}
                   >
@@ -140,7 +140,7 @@ export function AiTaskGenerator({
                   size="sm"
                   onClick={handleAddSelected}
                   disabled={selectedSuggestions.size === 0 || isAdding}
-                  className="bg-[#e44232] hover:bg-[#c3392b] text-white gap-1.5"
+                  className="bg-brand hover:bg-brand-hover text-white gap-1.5"
                 >
                   {isAdding ? (
                     <Loader2 className="size-3.5 animate-spin" />
@@ -161,7 +161,7 @@ export function AiTaskGenerator({
             <Button
               size="sm"
               onClick={handleGenerate}
-              className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+              className="bg-brand hover:bg-brand-hover text-white"
             >
               Generate Tasks
             </Button>

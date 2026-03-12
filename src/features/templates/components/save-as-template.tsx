@@ -79,7 +79,7 @@ export function SaveAsTemplate({ task, userId, open, onOpenChange }: SaveAsTempl
             size="sm"
             disabled={!name.trim() || isSaving}
             onClick={handleSave}
-            className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+            className="bg-brand hover:bg-brand-hover text-white"
           >
             {isSaving && <Loader2 className="size-4 mr-2 animate-spin" />}
             Save

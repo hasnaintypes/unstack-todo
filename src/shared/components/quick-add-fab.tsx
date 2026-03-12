@@ -18,7 +18,7 @@ export function QuickAddFAB({ onClick }: QuickAddFABProps) {
           <button
             onClick={onClick}
             aria-label="Add new task"
-            className="fixed bottom-6 right-6 z-40 flex size-14 items-center justify-center rounded-full bg-[#e44232] text-white shadow-lg transition-all hover:bg-[#c3392b] hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#e44232]/50 focus:ring-offset-2"
+            className="fixed bottom-6 right-6 z-40 flex size-14 items-center justify-center rounded-full bg-brand text-white shadow-lg transition-all hover:bg-brand-hover hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand/50 focus:ring-offset-2"
           >
             <Plus className="size-6" />
           </button>

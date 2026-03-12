@@ -92,7 +92,7 @@ function CompletedPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => clearCompleted()}
-              className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+              className="bg-brand hover:bg-brand-hover text-white"
             >
               Clear all
             </AlertDialogAction>

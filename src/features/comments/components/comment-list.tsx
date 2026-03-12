@@ -143,7 +143,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="size-6 text-[#e44232]"
+                        className="size-6 text-brand"
                         disabled={!editContent.trim()}
                         onClick={handleSaveEdit}
                       >

@@ -142,7 +142,7 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
                 className={cn(
                   "flex size-10 items-center justify-center rounded-lg transition-colors",
                   generateWithAi
-                    ? "bg-[#e44232] text-white shadow-md shadow-primary/20"
+                    ? "bg-brand text-white shadow-md shadow-primary/20"
                     : "bg-background text-muted-foreground border"
                 )}
               >
@@ -173,7 +173,7 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
           <Button
             onClick={handleCreate}
             disabled={!name.trim() || isSubmitting}
-            className="h-9 px-6 bg-[#e44232] hover:bg-[#c3392b] text-white shadow-sm transition-all active:scale-95"
+            className="h-9 px-6 bg-brand hover:bg-brand-hover text-white shadow-sm transition-all active:scale-95"
           >
             {isSubmitting ? (
               <>
