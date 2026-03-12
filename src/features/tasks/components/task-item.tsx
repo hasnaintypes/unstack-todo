@@ -108,7 +108,7 @@ const formatDueDate = (dueDate: string): { text: string; color: string; isPastDu
   }
 };
 
-export function TaskItem({
+function TaskItemInner({
   task,
   onToggleComplete,
   onEdit,
@@ -439,3 +439,5 @@ export function TaskItem({
     </div>
   );
 }
+
+export const TaskItem = React.memo(TaskItemInner);

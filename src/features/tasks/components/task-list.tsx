@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { TaskItem } from "@/features/tasks/components/task-item";
+import { VirtualizedTaskList } from "@/features/tasks/components/virtualized-task-list";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 
 export type SortBy = "default" | "dueDate" | "priority" | "alphabetical";
@@ -348,40 +349,57 @@ export function TaskList({
               )}
             </div>
           ) : groupBy === "none" && groupedTasks.length === 1 ? (
-            <motion.div
-              className="space-y-2"
-              initial="hidden"
-              animate="show"
-              variants={{
-                hidden: {},
-                show: { transition: { staggerChildren: 0.04 } },
-              }}
-            >
-              {groupedTasks[0][1].map((task) => (
-                <motion.div
-                  key={task.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 8 },
-                    show: { opacity: 1, y: 0 },
-                  }}
-                >
-                  <TaskItem
-                    task={task}
-                    onToggleComplete={onToggleComplete}
-                    onEdit={onEdit}
-                    onRestore={onRestore}
-                    onDelete={onDelete}
-                    onClick={onTaskClick}
-                    showProject={showProject}
-                    showCategory={showCategory}
-                    showRestore={showRestore}
-                    selectMode={selectMode}
-                    selected={selectedIds.has(task.id)}
-                    onSelect={toggleSelect}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
+            tasks.length > 50 ? (
+              <VirtualizedTaskList
+                tasks={groupedTasks[0][1]}
+                onToggleComplete={onToggleComplete}
+                onEdit={onEdit}
+                onRestore={onRestore}
+                onDelete={onDelete}
+                onTaskClick={onTaskClick}
+                showProject={showProject}
+                showCategory={showCategory}
+                showRestore={showRestore}
+                selectMode={selectMode}
+                selectedIds={selectedIds}
+                onSelect={toggleSelect}
+              />
+            ) : (
+              <motion.div
+                className="space-y-2"
+                initial="hidden"
+                animate="show"
+                variants={{
+                  hidden: {},
+                  show: { transition: { staggerChildren: 0.04 } },
+                }}
+              >
+                {groupedTasks[0][1].map((task) => (
+                  <motion.div
+                    key={task.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 8 },
+                      show: { opacity: 1, y: 0 },
+                    }}
+                  >
+                    <TaskItem
+                      task={task}
+                      onToggleComplete={onToggleComplete}
+                      onEdit={onEdit}
+                      onRestore={onRestore}
+                      onDelete={onDelete}
+                      onClick={onTaskClick}
+                      showProject={showProject}
+                      showCategory={showCategory}
+                      showRestore={showRestore}
+                      selectMode={selectMode}
+                      selected={selectedIds.has(task.id)}
+                      onSelect={toggleSelect}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )
           ) : (
             <motion.div
               className="space-y-7"
