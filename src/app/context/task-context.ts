@@ -8,6 +8,7 @@ export interface TaskContextValue {
   selectedTask: CalendarTask | null;
   setSelectedTask: (task: CalendarTask | null) => void;
   addTask: (task: Omit<CalendarTask, "id">) => Promise<void>;
+  addTasksBatch: (tasks: Omit<CalendarTask, "id">[]) => Promise<CalendarTask[]>;
   updateTask: (id: string, updates: Partial<CalendarTask>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   toggleTaskComplete: (id: string) => Promise<void>;

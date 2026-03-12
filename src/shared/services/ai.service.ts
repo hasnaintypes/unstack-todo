@@ -8,6 +8,9 @@ export interface TaskSuggestion {
 }
 
 // --- Gemini setup ---
+// WARNING: VITE_GEMINI_API_KEY is bundled into client-side JS and visible in browser DevTools.
+// For production, proxy Gemini calls through an Appwrite Function or backend endpoint.
+// In Google AI Studio, restrict this key to your domain(s) to limit abuse.
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 const model = genAI?.getGenerativeModel({ model: "gemini-2.5-flash" });

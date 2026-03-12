@@ -67,7 +67,7 @@ export function AiTaskGenerator({
   };
 
   return (
-    <div className="rounded-xl border bg-card overflow-hidden">
+    <div className="overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/30">
         <div className="flex items-center gap-2">
           <Sparkles className="size-4 text-[#e44232]" />

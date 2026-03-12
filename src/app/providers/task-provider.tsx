@@ -66,6 +66,29 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     [user?.$id]
   );
 
+  const addTasksBatch = React.useCallback(
+    async (taskDataList: Omit<CalendarTask, "id">[]): Promise<CalendarTask[]> => {
+      if (!user?.$id) {
+        setError("User not authenticated");
+        throw new Error("User not authenticated");
+      }
+
+      try {
+        const newTasks = await taskService.createTasksBatch(taskDataList, user.$id);
+        setTasks((prev) => [...newTasks, ...prev]);
+        return newTasks;
+      } catch (err) {
+        console.error("Error adding tasks batch:", err);
+        setError("Failed to add tasks");
+        toast.error("Couldn't create tasks", {
+          description: "Please check your connection and try again.",
+        });
+        throw err;
+      }
+    },
+    [user?.$id]
+  );
+
   const updateTask = React.useCallback(
     async (id: string, updates: Partial<CalendarTask>) => {
       if (!user?.$id) {
@@ -76,6 +99,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       try {
         const updatedTask = await taskService.updateTask(id, updates);
         setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
+        setSelectedTask((prev) => (prev?.id === id ? updatedTask : prev));
         toast.success("Changes saved", {
           description: `"${updatedTask.title}" has been updated.`,
         });
@@ -307,6 +331,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     selectedTask,
     setSelectedTask,
     addTask,
+    addTasksBatch,
     updateTask,
     deleteTask,
     toggleTaskComplete,

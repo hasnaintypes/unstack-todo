@@ -12,8 +12,10 @@ import { ViewToggle, type ViewMode } from "@/shared/components/view-toggle";
 import { ProjectStatCards, ProjectCharts } from "@/features/projects/components/project-stats";
 import { ProjectNotFound } from "@/features/projects/components/project-not-found";
 import { DeleteProjectDialog } from "@/features/projects/components/delete-project-dialog";
+import { AiTaskGenerator } from "@/features/projects/components/ai-task-generator";
+import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
-import { generateTaskSuggestions } from "@/shared/services/ai.service";
+import type { TaskSuggestion } from "@/shared/services/ai.service";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_protected/projects/$projectId")({
@@ -24,12 +26,12 @@ function ProjectDetailPage() {
   const { projectId } = Route.useParams();
   const navigate = useNavigate();
   const { projects, updateProject, deleteProject } = useProjects();
-  const { tasks, addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } =
+  const { tasks, addTask, addTasksBatch, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } =
     useTasks();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<CalendarTask | undefined>();
-  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [showAiGenerator, setShowAiGenerator] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -41,31 +43,26 @@ function ProjectDetailPage() {
     [tasks, project?.name]
   );
 
-  const handleAiGenerate = useCallback(async () => {
-    if (!project || isAiGenerating) return;
-    setIsAiGenerating(true);
-    try {
-      const suggestions = await generateTaskSuggestions(project.name, project.description || "");
-      for (const s of suggestions) {
-        await addTask({
-          title: s.title,
-          description: s.description + " [AI Generated]",
-          dueDate: "",
-          priority: s.priority,
-          project: project.name,
-          status: "todo",
-        });
-      }
-      toast.success(`${suggestions.length} tasks generated`, {
-        description: `AI tasks added to "${project.name}"`,
-      });
-    } catch (err) {
-      console.error("Error generating AI tasks:", err);
-      toast.error("Failed to generate tasks");
-    } finally {
-      setIsAiGenerating(false);
-    }
-  }, [addTask, project, isAiGenerating]);
+  const handleAiGenerate = useCallback(() => {
+    setShowAiGenerator(true);
+  }, []);
+
+  const handleAiAddTasks = useCallback(async (suggestions: TaskSuggestion[]) => {
+    if (!project) return;
+    const taskDataList = suggestions.map((s) => ({
+      title: s.title,
+      description: s.description + " [AI Generated]",
+      dueDate: "",
+      priority: s.priority,
+      project: project.name,
+      status: "todo" as const,
+    }));
+    await addTasksBatch(taskDataList);
+    toast.success(`${suggestions.length} task${suggestions.length !== 1 ? "s" : ""} added`, {
+      description: `AI tasks added to "${project.name}"`,
+    });
+  }, [addTasksBatch, project]);
+
 
   const handleAddTask = (taskData: Partial<CalendarTask>) => {
     addTask({
@@ -129,11 +126,24 @@ function ProjectDetailPage() {
       <ProjectHeader
         project={project}
         onAiGenerate={handleAiGenerate}
-        isAiGenerating={isAiGenerating}
+        isAiGenerating={showAiGenerator}
         onAddTask={() => setIsAddDialogOpen(true)}
         onDelete={() => setIsDeleteDialogOpen(true)}
         onUpdate={handleUpdateProject}
       />
+
+      <Dialog open={showAiGenerator} onOpenChange={setShowAiGenerator}>
+        <DialogContent className="p-0 gap-0 max-w-lg">
+          {project && (
+            <AiTaskGenerator
+              project={project}
+              onClose={() => setShowAiGenerator(false)}
+              onAddTasks={handleAiAddTasks}
+              autoGenerate
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <ProjectStatCards tasks={projectTasks} />
       <ProjectCharts tasks={projectTasks} />

@@ -51,6 +51,8 @@ import type {
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
+const COMMENTS_COLLECTION_ID =
+  import.meta.env.VITE_APPWRITE_TASK_COMMENTS_COLLECTION_ID || "task_comments";
 
 if (!DATABASE_ID) {
   console.error(
@@ -203,6 +205,36 @@ export const taskService = {
   },
 
   /**
+   * Create multiple tasks in parallel (batch)
+   */
+  async createTasksBatch(
+    tasks: Omit<CalendarTask, "id">[],
+    userId: string
+  ): Promise<CalendarTask[]> {
+    try {
+      const docs = await Promise.all(
+        tasks.map((task) =>
+          databases.createDocument(
+            DATABASE_ID,
+            TASKS_COLLECTION_ID,
+            ID.unique(),
+            taskToDocument(task, userId),
+            [
+              Permission.read(Role.user(userId)),
+              Permission.update(Role.user(userId)),
+              Permission.delete(Role.user(userId)),
+            ]
+          )
+        )
+      );
+      return docs.map(documentToTask);
+    } catch (error) {
+      console.error("Error creating tasks batch:", error);
+      throw new Error("Failed to create tasks");
+    }
+  },
+
+  /**
    * Update an existing task
    */
   async updateTask(taskId: string, updates: Partial<CalendarTask>): Promise<CalendarTask> {
@@ -317,10 +349,30 @@ export const taskService = {
   },
 
   /**
-   * Permanently delete a task
+   * Delete all comments associated with a task
+   */
+  async deleteTaskComments(taskId: string): Promise<void> {
+    try {
+      const comments = await databases.listDocuments(DATABASE_ID, COMMENTS_COLLECTION_ID, [
+        Query.equal("taskId", taskId),
+        Query.limit(500),
+      ]);
+      await Promise.all(
+        comments.documents.map((doc) =>
+          databases.deleteDocument(DATABASE_ID, COMMENTS_COLLECTION_ID, doc.$id)
+        )
+      );
+    } catch {
+      // Comments collection may not exist or no comments, continue
+    }
+  },
+
+  /**
+   * Permanently delete a task and its associated comments
    */
   async permanentlyDelete(taskId: string): Promise<void> {
     try {
+      await this.deleteTaskComments(taskId);
       await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
     } catch (error) {
       console.error("Error deleting task:", error);
@@ -379,7 +431,7 @@ export const taskService = {
   },
 
   /**
-   * Empty trash - permanently delete all trashed tasks
+   * Empty trash - permanently delete all trashed tasks and their comments
    */
   async emptyTrash(userId: string): Promise<void> {
     try {
@@ -389,9 +441,10 @@ export const taskService = {
       ]);
 
       await Promise.all(
-        response.documents.map((doc) =>
-          databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id)
-        )
+        response.documents.map(async (doc) => {
+          await this.deleteTaskComments(doc.$id);
+          await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id);
+        })
       );
     } catch (error) {
       console.error("Error emptying trash:", error);
@@ -467,17 +520,29 @@ export const taskService = {
       "title",
       "description",
       "dueDate",
+      "startTime",
+      "endTime",
       "priority",
       "status",
       "category",
       "project",
+      "tags",
       "recurrence",
+      "reminderEnabled",
+      "reminderBefore",
     ];
     const csvRows = [headers.join(",")];
     for (const task of tasks) {
       const row = headers.map((h) => {
         const val = task[h as keyof CalendarTask];
-        const str = val != null ? String(val) : "";
+        let str: string;
+        if (val == null) {
+          str = "";
+        } else if (Array.isArray(val)) {
+          str = val.join("; ");
+        } else {
+          str = String(val);
+        }
         return `"${str.replace(/"/g, '""')}"`;
       });
       csvRows.push(row.join(","));
