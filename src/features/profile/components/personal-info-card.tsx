@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { User, Mail, Camera, Loader2 } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
@@ -25,6 +25,14 @@ export function PersonalInfoCard() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load existing avatar from account prefs on mount
+  const avatarFileId = (user?.prefs as Record<string, string> | undefined)?.avatarFileId;
+  useEffect(() => {
+    if (avatarFileId) {
+      setAvatarUrl(storageService.getFileDownloadUrl(avatarFileId).toString());
+    }
+  }, [avatarFileId]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -129,7 +129,14 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const toggleTaskComplete = React.useCallback(
     async (id: string) => {
       try {
-        const updatedTask = await taskService.toggleTaskComplete(id);
+        let updatedTask = await taskService.toggleTaskComplete(id);
+
+        // Auto-complete all subtasks when task is marked completed
+        if (updatedTask.status === "completed" && updatedTask.subtasks?.length) {
+          const allComplete = updatedTask.subtasks.map((s) => ({ ...s, completed: true }));
+          updatedTask = await taskService.updateTask(id, { subtasks: allComplete });
+        }
+
         setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
 
         // Auto-create next occurrence for recurring tasks

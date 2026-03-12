@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Plus, ArrowUpDown, Check, Trash2, X } from "lucide-react";
+import { Plus, ArrowUpDown, Check, Trash2, X, CheckSquare, ClipboardList } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
@@ -19,7 +20,8 @@ export interface TaskListProps {
   title?: string;
   tasks: CalendarTask[];
   onToggleComplete?: (taskId: string) => void;
-  onEdit?: (task: CalendarTask) => void;
+  onEdit?: (taskId: string, updates: Partial<CalendarTask>) => void;
+  onRestore?: (task: CalendarTask) => void;
   onDelete?: (taskId: string) => void;
   onTaskClick?: (task: CalendarTask) => void;
   onAddTask?: () => void;
@@ -143,6 +145,7 @@ export function TaskList({
   tasks,
   onToggleComplete,
   onEdit,
+  onRestore,
   onDelete,
   onTaskClick,
   onAddTask,
@@ -168,6 +171,7 @@ export function TaskList({
     return defaultSortBy;
   });
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = React.useState(false);
 
   React.useEffect(() => {
     if (persistKey) {
@@ -189,7 +193,10 @@ export function TaskList({
     });
   }, []);
 
-  const clearSelection = React.useCallback(() => setSelectedIds(new Set()), []);
+  const clearSelection = React.useCallback(() => {
+    setSelectedIds(new Set());
+    setSelectMode(false);
+  }, []);
 
   const handleBatchDelete = React.useCallback(() => {
     if (onBatchDelete && selectedIds.size > 0) {
@@ -205,16 +212,42 @@ export function TaskList({
   const isEmpty = tasks.length === 0;
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div
+      className={cn(
+        "flex h-full flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40",
+        className
+      )}
+    >
       {/* Selection Bar */}
-      {selectable && selectedIds.size > 0 && (
-        <div className="flex items-center justify-between px-6 py-2 border-b bg-[#e44232]/5">
-          <span className="text-sm font-medium">
-            {selectedIds.size} selected
-          </span>
+      {selectMode && (
+        <div className="flex items-center justify-between border-b border-brand/15 bg-linear-to-r from-brand/10 via-brand/5 to-transparent px-6 py-2.5">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (selectedIds.size === tasks.length) setSelectedIds(new Set());
+                else setSelectedIds(new Set(tasks.map((t) => t.id)));
+              }}
+              className={cn(
+                "flex items-center justify-center h-5 w-5 rounded border-2 transition-all",
+                selectedIds.size === tasks.length && tasks.length > 0
+                  ? "bg-brand border-brand"
+                  : "border-muted-foreground/30 hover:border-brand"
+              )}
+              aria-label="Select all"
+            >
+              {selectedIds.size === tasks.length && tasks.length > 0 && (
+                <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
+            </button>
+            <span className="text-sm font-medium tracking-tight">
+              {selectedIds.size} of {tasks.length} selected
+            </span>
+          </div>
           <div className="flex items-center gap-2">
-            {onBatchDelete && (
-              <Button variant="outline" size="sm" onClick={handleBatchDelete} className="text-red-600 hover:text-red-700 gap-1.5">
+            {onBatchDelete && selectedIds.size > 0 && (
+              <Button variant="outline" size="sm" onClick={handleBatchDelete} className="gap-1.5 border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-red-900/40 dark:hover:bg-red-900/20">
                 <Trash2 className="h-3.5 w-3.5" />
                 Delete
               </Button>
@@ -229,13 +262,13 @@ export function TaskList({
 
       {/* Header - only show when we have tasks or when explicitly showing header with actions */}
       {showHeader && !isEmpty && (title || headerActions || onAddTask) && (
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          {title && <h1 className="text-2xl font-bold">{title}</h1>}
+        <div className="flex items-center justify-between border-b bg-background/60 px-6 py-4 backdrop-blur">
+          {title && <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>}
           <div className="flex items-center gap-2">
             {headerActions}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5">
+                <Button variant="outline" size="sm" className="gap-1.5 shadow-sm">
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">{sortLabels[sortBy]}</span>
                 </Button>
@@ -249,11 +282,17 @@ export function TaskList({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            {selectable && !selectMode && (
+              <Button variant="outline" size="sm" onClick={() => setSelectMode(true)} className="gap-1.5 shadow-sm">
+                <CheckSquare className="h-3.5 w-3.5" />
+                Select
+              </Button>
+            )}
             {onAddTask && (
               <Button
                 onClick={onAddTask}
                 size="sm"
-                className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+                className="bg-brand text-white shadow-sm hover:bg-brand-hover"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add task
@@ -265,8 +304,8 @@ export function TaskList({
 
       {/* Header for pages that need actions even when empty (like Completed/Trash) */}
       {showHeader && isEmpty && headerActions && (
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          {title && <h1 className="text-2xl font-bold">{title}</h1>}
+        <div className="flex items-center justify-between border-b bg-background/60 px-6 py-4 backdrop-blur">
+          {title && <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>}
           <div className="flex items-center gap-2">{headerActions}</div>
         </div>
       )}
@@ -275,11 +314,11 @@ export function TaskList({
       <ScrollArea className="flex-1">
         <div className="p-6">
           {loading ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg"
+                  className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-4 py-3"
                   style={{ opacity: 1 - i * 0.15 }}
                 >
                   {/* Checkbox circle */}
@@ -299,70 +338,112 @@ export function TaskList({
           ) : isEmpty ? (
             <div className="flex items-center justify-center h-full min-h-80">
               {emptyState || (
-                <div className="text-center text-muted-foreground">
-                  <p className="text-lg font-medium mb-2">No tasks yet</p>
+                <div className="mx-auto max-w-sm rounded-2xl border border-dashed border-border/70 bg-background/70 px-8 py-10 text-center text-muted-foreground shadow-sm">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                    <ClipboardList className="h-5 w-5" />
+                  </div>
+                  <p className="mb-1 text-lg font-semibold text-foreground">No tasks yet</p>
                   <p className="text-sm">Create your first task to get started</p>
                 </div>
               )}
             </div>
           ) : groupBy === "none" && groupedTasks.length === 1 ? (
-            <div className="space-y-2">
+            <motion.div
+              className="space-y-2"
+              initial="hidden"
+              animate="show"
+              variants={{
+                hidden: {},
+                show: { transition: { staggerChildren: 0.04 } },
+              }}
+            >
               {groupedTasks[0][1].map((task) => (
-                <TaskItem
+                <motion.div
                   key={task.id}
-                  task={task}
-                  onToggleComplete={onToggleComplete}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onClick={onTaskClick}
-                  showProject={showProject}
-                  showCategory={showCategory}
-                  showRestore={showRestore}
-                  selectable={selectable}
-                  selected={selectedIds.has(task.id)}
-                  onSelect={toggleSelect}
-                />
+                  variants={{
+                    hidden: { opacity: 0, y: 8 },
+                    show: { opacity: 1, y: 0 },
+                  }}
+                >
+                  <TaskItem
+                    task={task}
+                    onToggleComplete={onToggleComplete}
+                    onEdit={onEdit}
+                    onRestore={onRestore}
+                    onDelete={onDelete}
+                    onClick={onTaskClick}
+                    showProject={showProject}
+                    showCategory={showCategory}
+                    showRestore={showRestore}
+                    selectMode={selectMode}
+                    selected={selectedIds.has(task.id)}
+                    onSelect={toggleSelect}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
-            <div className="space-y-6">
+            <motion.div
+              className="space-y-7"
+              initial="hidden"
+              animate="show"
+              variants={{
+                hidden: {},
+                show: { transition: { staggerChildren: 0.06 } },
+              }}
+            >
               {groupedTasks.map(([groupName, groupTasks]) => (
-                <div key={groupName}>
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">
-                    {groupName}
-                    <span className="ml-2 text-xs font-normal">({groupTasks.length})</span>
+                <motion.div
+                  key={groupName}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: { opacity: 1 },
+                  }}
+                >
+                  <h3 className="mb-3 flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    <span>{groupName}</span>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium tracking-normal text-muted-foreground">
+                      {groupTasks.length}
+                    </span>
                   </h3>
                   <div className="space-y-2">
                     {groupTasks.map((task) => (
-                      <TaskItem
+                      <motion.div
                         key={task.id}
-                        task={task}
-                        onToggleComplete={onToggleComplete}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        onClick={onTaskClick}
-                        showProject={showProject}
-                        showCategory={showCategory}
-                        showRestore={showRestore}
-                        selectable={selectable}
-                        selected={selectedIds.has(task.id)}
-                        onSelect={toggleSelect}
-                      />
+                        variants={{
+                          hidden: { opacity: 0, y: 8 },
+                          show: { opacity: 1, y: 0 },
+                        }}
+                      >
+                        <TaskItem
+                          task={task}
+                          onToggleComplete={onToggleComplete}
+                          onEdit={onEdit}
+                          onDelete={onDelete}
+                          onClick={onTaskClick}
+                          showProject={showProject}
+                          showCategory={showCategory}
+                          showRestore={showRestore}
+                          selectMode={selectMode}
+                          selected={selectedIds.has(task.id)}
+                          onSelect={toggleSelect}
+                        />
+                      </motion.div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </ScrollArea>
 
       {/* Quick Add Task */}
       {onAddTask && !isEmpty && (
-        <div className="px-6 py-3 border-t">
+        <div className="border-t bg-background/40 px-6 py-3 backdrop-blur">
           <button
             onClick={onAddTask}
-            className="flex items-center gap-2 text-sm text-[#e44232] hover:text-[#c3392b] font-medium transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-brand transition-colors hover:text-brand-hover"
           >
             <Plus className="h-4 w-4" />
             Add task

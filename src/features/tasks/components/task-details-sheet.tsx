@@ -8,6 +8,7 @@ import {
   Trash2,
   BookmarkPlus,
   Calendar as CalendarIcon,
+  CircleDot,
   Flag,
   Tag,
   FolderKanban,
@@ -34,7 +35,7 @@ import { useCategories } from "@/shared/hooks/use-categories";
 import { cn } from "@/shared/lib/utils";
 import { SaveAsTemplate } from "@/features/templates";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import type { CalendarTask, Subtask, TaskPriority } from "@/features/tasks/types/task.types";
+import type { CalendarTask, Subtask, TaskPriority, TaskStatus } from "@/features/tasks/types/task.types";
 
 interface TaskDetailSheetProps {
   task: CalendarTask | null;
@@ -68,6 +69,7 @@ export function TaskDetailSheet({
 
   // Edit form state
   const [editTitle, setEditTitle] = useState("");
+  const [editStatus, setEditStatus] = useState<TaskStatus>("todo");
   const [editDescription, setEditDescription] = useState("");
   const [editDate, setEditDate] = useState<Date | undefined>();
   const [editPriority, setEditPriority] = useState<TaskPriority>(2);
@@ -93,6 +95,7 @@ export function TaskDetailSheet({
   const handleStartEdit = () => {
     if (!task) return;
     setEditTitle(task.title);
+    setEditStatus(task.status);
     setEditDescription(task.description || "");
     setEditDate(task.dueDate ? parseISO(task.dueDate) : undefined);
     setEditPriority(task.priority);
@@ -108,6 +111,7 @@ export function TaskDetailSheet({
     if (!task || !onEdit || !editTitle.trim()) return;
     onEdit(task.id, {
       title: editTitle.trim(),
+      status: editStatus,
       description: editDescription.trim() || undefined,
       dueDate: editDate ? format(editDate, "yyyy-MM-dd") : undefined,
       priority: editPriority,
@@ -153,20 +157,23 @@ export function TaskDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto p-0">
+      <SheetContent
+        side="right"
+        className="w-full overflow-y-auto border-l border-border/70 bg-linear-to-b from-background via-background to-muted/20 p-0 sm:max-w-md"
+      >
         {task && (
           <>
             {/* Header */}
-            <div className="px-5 pt-5 pb-4 border-b">
+            <div className="sticky top-0 z-10 border-b bg-background/95 px-5 pb-4 pt-5 backdrop-blur">
               {/* Toolbar */}
-              <div className="flex items-center justify-between gap-2 mb-3 pr-6">
+              <div className="mb-3 flex items-center justify-between gap-2 pr-6">
                 <div className="flex items-center gap-2">
                   {onToggleComplete && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onToggleComplete(task.id)}
-                      className="gap-1.5 h-7 text-xs rounded-full"
+                      className="h-7 gap-1.5 rounded-full border-border/70 bg-card text-xs shadow-sm"
                     >
                       {isCompleted ? (
                         <>
@@ -188,7 +195,7 @@ export function TaskDetailSheet({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-7"
+                      className="size-7 rounded-full hover:bg-muted"
                       onClick={handleStartEdit}
                     >
                       <Pencil className="size-3.5" />
@@ -197,7 +204,7 @@ export function TaskDetailSheet({
                   {onDelete && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-7">
+                        <Button variant="ghost" size="icon" className="size-7 rounded-full hover:bg-muted">
                           <MoreVertical className="size-3.5" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -228,7 +235,7 @@ export function TaskDetailSheet({
               <SheetHeader className="p-0">
                 <SheetTitle
                   className={cn(
-                    "text-lg font-semibold leading-snug text-left",
+                    "text-left text-lg font-semibold leading-snug tracking-tight",
                     isCompleted && "line-through text-muted-foreground"
                   )}
                 >
@@ -239,9 +246,9 @@ export function TaskDetailSheet({
 
             {isEditing ? (
               /* ========== EDIT MODE ========== */
-              <div className="space-y-4 px-5 pt-4 pb-5">
+              <div className="space-y-4 px-5 pb-5 pt-4">
                 {/* Title */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-card/40 p-3.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Title
                   </label>
@@ -253,8 +260,27 @@ export function TaskDetailSheet({
                   />
                 </div>
 
+                {/* Status */}
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-card/40 p-3.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                    <CircleDot className="size-3.5" />
+                    Status
+                  </label>
+                  <TaskDropdownMenu
+                    icon={<CircleDot className={cn("h-4 w-4", editStatus === "completed" ? "text-green-500" : editStatus === "in-progress" ? "text-blue-500" : "text-muted-foreground")} />}
+                    placeholder="Status"
+                    value={editStatus}
+                    options={[
+                      { value: "todo", label: "To Do" },
+                      { value: "in-progress", label: "In Progress" },
+                      { value: "completed", label: "Completed" },
+                    ]}
+                    onValueChange={(val) => setEditStatus(val as TaskStatus)}
+                  />
+                </div>
+
                 {/* Description */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-card/40 p-3.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                     <AlignLeft className="size-3.5" />
                     Description
@@ -268,7 +294,7 @@ export function TaskDetailSheet({
                 </div>
 
                 {/* Due Date */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-card/40 p-3.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                     <CalendarIcon className="size-3.5" />
                     Due Date
@@ -306,7 +332,7 @@ export function TaskDetailSheet({
                 </div>
 
                 {/* Priority */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-card/40 p-3.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                     <Flag className="size-3.5" />
                     Priority
@@ -321,7 +347,7 @@ export function TaskDetailSheet({
                 </div>
 
                 {/* Category */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-card/40 p-3.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                     <Tag className="size-3.5" />
                     Category
@@ -336,7 +362,7 @@ export function TaskDetailSheet({
                 </div>
 
                 {/* Project */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-card/40 p-3.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                     <FolderKanban className="size-3.5" />
                     Project
@@ -351,7 +377,7 @@ export function TaskDetailSheet({
                 </div>
 
                 {/* Subtasks */}
-                <div className="space-y-2">
+                <div className="space-y-2 rounded-xl border border-border/60 bg-card/40 p-3.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Subtasks
                   </label>
@@ -363,8 +389,8 @@ export function TaskDetailSheet({
                           className={cn(
                             "flex items-center justify-center h-4.5 w-4.5 rounded-full border-2 shrink-0 transition-all",
                             subtask.completed
-                              ? "bg-[#e44232] border-[#e44232]"
-                              : "border-muted-foreground/30 hover:border-[#e44232]"
+                              ? "bg-brand border-brand"
+                              : "border-muted-foreground/30 hover:border-brand"
                           )}
                         >
                           {subtask.completed && <CheckCircle2 className="h-3 w-3 text-white" />}
@@ -464,7 +490,7 @@ export function TaskDetailSheet({
                   ) : (
                     <button
                       onClick={() => setIsAddingSubtask(true)}
-                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground/60 hover:text-[#e44232] transition-colors"
+                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground/70 transition-colors hover:text-brand"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       Add sub-task
@@ -473,7 +499,7 @@ export function TaskDetailSheet({
                 </div>
 
                 {/* Tags */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-card/40 p-3.5">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                     <Tag className="size-3.5" />
                     Tags
@@ -523,7 +549,7 @@ export function TaskDetailSheet({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-2 pt-4 border-t">
+                <div className="sticky bottom-0 flex items-center justify-end gap-2 border-t bg-background/95 pt-4 backdrop-blur">
                   <Button variant="outline" size="sm" onClick={handleCancel}>
                     Cancel
                   </Button>
@@ -531,7 +557,7 @@ export function TaskDetailSheet({
                     size="sm"
                     disabled={!editTitle.trim()}
                     onClick={handleSave}
-                    className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+                    className="bg-brand hover:bg-brand-hover text-white"
                   >
                     Save
                   </Button>
@@ -547,6 +573,9 @@ export function TaskDetailSheet({
                   }}
                   onUpdateAttachments={(attachments) => {
                     if (onEdit) onEdit(task.id, { attachments });
+                  }}
+                  onUpdateStatus={(status) => {
+                    if (onEdit) onEdit(task.id, { status: status as CalendarTask["status"] });
                   }}
                 />
               </div>

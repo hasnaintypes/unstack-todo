@@ -40,7 +40,7 @@ function TrashPage() {
       <TaskList
         title="Trash"
         tasks={trashedTasks}
-        onEdit={handleRestoreTask}
+        onRestore={handleRestoreTask}
         onDelete={(taskId: string) => setDeleteTaskId(taskId)}
         showProject
         showCategory
@@ -142,7 +142,7 @@ function TrashPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => restoreAllFromTrash()}
-              className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+              className="bg-brand hover:bg-brand-hover text-white"
             >
               Restore all
             </AlertDialogAction>

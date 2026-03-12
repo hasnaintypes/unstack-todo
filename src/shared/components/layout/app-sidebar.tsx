@@ -172,12 +172,14 @@ export function AppSidebar() {
             state === "expanded" ? "gap-3 px-1" : "justify-center"
           )}
         >
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 p-1 shrink-0">
-            <img src={logo} alt="UnStack Todo" className="size-full" />
-          </div>
-          {state === "expanded" && (
-            <span className="text-lg font-bold tracking-tight">UnStack</span>
-          )}
+          <a href="/inbox" className="flex items-center gap-3">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 p-1 shrink-0">
+              <img src={logo} alt="UnStack Todo" className="size-full" />
+            </div>
+            {state === "expanded" && (
+              <span className="text-lg font-bold tracking-tight">UnStack</span>
+            )}
+          </a>
         </div>
       </SidebarHeader>
 

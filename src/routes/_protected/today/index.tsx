@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { TaskEmptyState } from "@/features/tasks/components/empty-state";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
@@ -17,35 +17,19 @@ function TodayPage() {
   const todayTasks = useTodayTasks();
   const { addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } = useTasks();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
   const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
-  const handleAddTask = (taskData: Partial<CalendarTask>) => {
-    addTask({
+  const handleAddTask = async (taskData: Partial<CalendarTask>) => {
+    await addTask({
       ...taskData,
       dueDate: taskData.dueDate || new Date().toISOString().split("T")[0],
     } as Omit<CalendarTask, "id">);
   };
 
-  const handleEditTask = (taskData: Partial<CalendarTask>) => {
-    if (editingTask) {
-      updateTask(editingTask.id, taskData);
-      setEditingTask(undefined);
-    }
-  };
-
-  const handleEditClick = (task: CalendarTask) => {
-    setEditingTask(task);
-    setIsAddDialogOpen(true);
-  };
-
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      setEditingTask(undefined);
-    }
-    setIsAddDialogOpen(open);
-  };
+  const handleEdit = useCallback((taskId: string, updates: Partial<CalendarTask>) => {
+    updateTask(taskId, updates);
+  }, [updateTask]);
 
   return (
     <>
@@ -53,7 +37,7 @@ function TodayPage() {
         title="Today"
         tasks={todayTasks}
         onToggleComplete={toggleTaskComplete}
-        onEdit={handleEditClick}
+        onEdit={handleEdit}
         onDelete={moveToTrash}
         onTaskClick={setSelectedTask}
         onAddTask={() => setIsAddDialogOpen(true)}
@@ -74,11 +58,10 @@ function TodayPage() {
       />
 
       <TaskAddDialog
-        task={editingTask}
         open={isAddDialogOpen}
-        onOpenChange={handleDialogClose}
-        onSave={editingTask ? handleEditTask : handleAddTask}
-        defaultDate={editingTask ? undefined : new Date()}
+        onOpenChange={setIsAddDialogOpen}
+        onSave={handleAddTask}
+        defaultDate={new Date()}
       />
 
       <BatchDeleteDialog

@@ -30,6 +30,7 @@ interface TaskDetailContentProps {
   task: CalendarTask;
   onUpdateSubtasks?: (subtasks: Subtask[]) => void;
   onUpdateAttachments?: (attachments: Attachment[]) => void;
+  onUpdateStatus?: (status: string) => void;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: string }> = {
@@ -38,10 +39,17 @@ const statusConfig: Record<string, { label: string; color: string; icon: string 
   completed: { label: "Completed", color: "text-green-500", icon: "bg-green-500/10" },
 };
 
+const STATUS_CYCLE: Record<string, string> = {
+  todo: "in-progress",
+  "in-progress": "completed",
+  completed: "todo",
+};
+
 export function TaskDetailContent({
   task,
   onUpdateSubtasks,
   onUpdateAttachments,
+  onUpdateStatus,
 }: TaskDetailContentProps) {
   const { user } = useAuth();
   const priorityConfig = getPriorityConfig(task.priority);
@@ -50,21 +58,23 @@ export function TaskDetailContent({
   const totalSubtasks = task.subtasks?.length ?? 0;
 
   return (
-    <div className="space-y-1 pt-2">
+    <div className="space-y-3 pt-3">
       {/* Properties grid */}
-      <div className="grid gap-0">
+      <div className="grid gap-0 rounded-xl border border-border/60 bg-card/40 p-2">
         {/* Status */}
         <PropertyRow icon={<CircleDot className={cn("size-4", status.color)} />} label="Status">
           <Badge
             variant="outline"
             className={cn(
-              "text-xs font-medium",
+              "text-xs font-medium cursor-pointer transition-colors hover:ring-1 hover:ring-brand/30",
               task.status === "completed" &&
                 "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300",
               task.status === "in-progress" &&
                 "bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-300",
               task.status === "todo" && "bg-muted"
             )}
+            onClick={() => onUpdateStatus?.(STATUS_CYCLE[task.status] || "todo")}
+            title="Click to change status"
           >
             {status.label}
           </Badge>
@@ -134,10 +144,10 @@ export function TaskDetailContent({
 
         {/* Recurrence */}
         {task.recurrence && (
-          <PropertyRow icon={<Repeat className="size-4 text-[#e44232]" />} label="Repeats">
+          <PropertyRow icon={<Repeat className="size-4 text-brand" />} label="Repeats">
             <Badge
               variant="outline"
-              className="text-xs font-medium bg-[#e44232]/10 border-[#e44232]/20 text-[#e44232] capitalize"
+              className="text-xs font-medium bg-brand/10 border-brand/20 text-brand capitalize"
             >
               {task.recurrence}
             </Badge>
@@ -146,10 +156,10 @@ export function TaskDetailContent({
 
         {/* Reminder */}
         {task.reminderEnabled && (
-          <PropertyRow icon={<Bell className="size-4 text-[#e44232]" />} label="Reminder">
+          <PropertyRow icon={<Bell className="size-4 text-brand" />} label="Reminder">
             <Badge
               variant="outline"
-              className="text-xs font-medium bg-[#e44232]/10 border-[#e44232]/20 text-[#e44232]"
+              className="text-xs font-medium bg-brand/10 border-brand/20 text-brand"
             >
               {task.reminderBefore === "on_due" && "At due time"}
               {task.reminderBefore === "30m" && "30 min before"}
@@ -163,14 +173,14 @@ export function TaskDetailContent({
 
       {/* Description */}
       {task.description && (
-        <div className="pt-3 border-t">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="rounded-xl border border-border/60 bg-card/35 p-4">
+          <div className="mb-2 flex items-center gap-2">
             <AlignLeft className="size-4 text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Description
             </span>
           </div>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words pl-6 text-foreground/80">
+          <p className="whitespace-pre-wrap wrap-break-word pl-6 text-sm leading-relaxed text-foreground/80">
             {task.description}
           </p>
         </div>
@@ -178,8 +188,8 @@ export function TaskDetailContent({
 
       {/* Subtasks */}
       {task.subtasks && task.subtasks.length > 0 && (
-        <div className="pt-3 border-t">
-          <div className="flex items-center justify-between mb-3">
+        <div className="rounded-xl border border-border/60 bg-card/35 p-4">
+          <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ListTodo className="size-4 text-muted-foreground" />
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -192,18 +202,18 @@ export function TaskDetailContent({
           </div>
 
           {/* Progress bar */}
-          <div className="h-1.5 w-full rounded-full bg-muted mb-3 ml-6 max-w-[calc(100%-1.5rem)]">
+          <div className="mb-3 ml-6 h-1.5 w-full max-w-[calc(100%-1.5rem)] rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-[#e44232] transition-all duration-300"
+              className="h-full rounded-full bg-brand transition-all duration-300"
               style={{
                 width: `${totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0}%`,
               }}
             />
           </div>
 
-          <ul className="space-y-1 pl-6">
+          <ul className="space-y-1.5 pl-6">
             {task.subtasks.map((subtask, index) => (
-              <li key={index} className="flex items-center gap-2.5 group py-1">
+              <li key={index} className="group flex items-center gap-2.5 rounded-lg px-1 py-1">
                 <button
                   onClick={() => {
                     if (!onUpdateSubtasks) return;
@@ -215,8 +225,8 @@ export function TaskDetailContent({
                   className={cn(
                     "flex items-center justify-center size-4 rounded-full border-2 shrink-0 transition-all",
                     subtask.completed
-                      ? "bg-[#e44232] border-[#e44232]"
-                      : "border-muted-foreground/30 hover:border-[#e44232]"
+                      ? "bg-brand border-brand"
+                      : "border-muted-foreground/30 hover:border-brand"
                   )}
                 >
                   {subtask.completed && <CheckCircle2 className="size-3 text-white" />}
@@ -224,14 +234,14 @@ export function TaskDetailContent({
                 <div className="flex-1 min-w-0">
                   <span
                     className={cn(
-                      "text-sm leading-relaxed break-words",
+                      "text-sm leading-relaxed wrap-break-word",
                       subtask.completed && "line-through text-muted-foreground"
                     )}
                   >
                     {subtask.title}
                   </span>
                   {subtask.description && (
-                    <p className="text-xs text-muted-foreground mt-0.5 break-words">
+                    <p className="mt-0.5 text-xs text-muted-foreground wrap-break-word">
                       {subtask.description}
                     </p>
                   )}
@@ -312,8 +322,8 @@ function AttachmentSection({
   };
 
   return (
-    <div className="pt-3 border-t">
-      <div className="flex items-center justify-between mb-3">
+    <div className="rounded-xl border border-border/60 bg-card/35 p-4">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Paperclip className="size-4 text-muted-foreground" />
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -350,7 +360,7 @@ function AttachmentSection({
           {attachments.map((attachment) => (
             <div
               key={attachment.fileId}
-              className="group flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2"
+              className="group flex items-center gap-2 rounded-lg border border-border/50 bg-muted/40 px-3 py-2"
             >
               <Paperclip className="size-3.5 text-muted-foreground shrink-0" />
               <div className="flex-1 min-w-0">
@@ -390,12 +400,12 @@ function PropertyRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 py-2.5 px-1">
-      <div className="flex items-center gap-2 w-28 shrink-0">
+    <div className="grid grid-cols-[7rem_1fr] items-start gap-3 rounded-lg px-2 py-2.5 hover:bg-background/60">
+      <div className="flex w-28 shrink-0 items-center gap-2">
         {icon}
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
       </div>
-      <div className="flex-1 min-w-0">{children}</div>
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }

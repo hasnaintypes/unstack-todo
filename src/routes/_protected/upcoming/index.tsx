@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { TaskEmptyState } from "@/features/tasks/components/empty-state";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
@@ -17,32 +17,16 @@ function UpcomingPage() {
   const upcomingTasks = useUpcomingTasks();
   const { addTask, updateTask, toggleTaskComplete, moveToTrash } = useTasks();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
   const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
-  const handleAddTask = (taskData: Partial<CalendarTask>) => {
+  const handleAddTask = async (taskData: Partial<CalendarTask>) => {
     addTask(taskData as Omit<CalendarTask, "id">);
   };
 
-  const handleEditTask = (taskData: Partial<CalendarTask>) => {
-    if (editingTask) {
-      updateTask(editingTask.id, taskData);
-      setEditingTask(undefined);
-    }
-  };
-
-  const handleEditClick = (task: CalendarTask) => {
-    setEditingTask(task);
-    setIsAddDialogOpen(true);
-  };
-
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      setEditingTask(undefined);
-    }
-    setIsAddDialogOpen(open);
-  };
+  const handleEdit = useCallback((taskId: string, updates: Partial<CalendarTask>) => {
+    updateTask(taskId, updates);
+  }, [updateTask]);
 
   return (
     <>
@@ -50,7 +34,7 @@ function UpcomingPage() {
         title="Upcoming"
         tasks={upcomingTasks}
         onToggleComplete={toggleTaskComplete}
-        onEdit={handleEditClick}
+        onEdit={handleEdit}
         onDelete={moveToTrash}
         onAddTask={() => setIsAddDialogOpen(true)}
         groupBy="dueDate"
@@ -70,10 +54,9 @@ function UpcomingPage() {
       />
 
       <TaskAddDialog
-        task={editingTask}
         open={isAddDialogOpen}
-        onOpenChange={handleDialogClose}
-        onSave={editingTask ? handleEditTask : handleAddTask}
+        onOpenChange={setIsAddDialogOpen}
+        onSave={handleAddTask}
       />
 
       <BatchDeleteDialog

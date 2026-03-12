@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { TaskEmptyState } from "@/features/tasks/components/empty-state";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
@@ -17,14 +17,13 @@ function InboxPage() {
   const inboxTasks = useInboxTasks();
   const { addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } = useTasks();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
   const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
-  const handleAddTask = (taskData: Partial<CalendarTask>) => {
+  const handleAddTask = async (taskData: Partial<CalendarTask>) => {
     if (!taskData.title) return;
 
-    addTask({
+    await addTask({
       title: taskData.title,
       description: taskData.description,
       dueDate: taskData.dueDate || "",
@@ -41,24 +40,9 @@ function InboxPage() {
     });
   };
 
-  const handleEditTask = (taskData: Partial<CalendarTask>) => {
-    if (editingTask) {
-      updateTask(editingTask.id, taskData);
-      setEditingTask(undefined);
-    }
-  };
-
-  const handleEditClick = (task: CalendarTask) => {
-    setEditingTask(task);
-    setIsAddDialogOpen(true);
-  };
-
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      setEditingTask(undefined);
-    }
-    setIsAddDialogOpen(open);
-  };
+  const handleEdit = useCallback((taskId: string, updates: Partial<CalendarTask>) => {
+    updateTask(taskId, updates);
+  }, [updateTask]);
 
   return (
     <>
@@ -66,7 +50,7 @@ function InboxPage() {
         title="Inbox"
         tasks={inboxTasks}
         onToggleComplete={toggleTaskComplete}
-        onEdit={handleEditClick}
+        onEdit={handleEdit}
         onDelete={moveToTrash}
         onTaskClick={setSelectedTask}
         onAddTask={() => setIsAddDialogOpen(true)}
@@ -87,10 +71,9 @@ function InboxPage() {
       />
 
       <TaskAddDialog
-        task={editingTask}
         open={isAddDialogOpen}
-        onOpenChange={handleDialogClose}
-        onSave={editingTask ? handleEditTask : handleAddTask}
+        onOpenChange={setIsAddDialogOpen}
+        onSave={handleAddTask}
       />
 
       <BatchDeleteDialog

@@ -30,7 +30,6 @@ function ProjectDetailPage() {
     useTasks();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<CalendarTask | undefined>();
   const [showAiGenerator, setShowAiGenerator] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -41,6 +40,33 @@ function ProjectDetailPage() {
   const projectTasks = useMemo(
     () => tasks.filter((t) => t.project === project?.name),
     [tasks, project?.name]
+  );
+
+  const listSections = useMemo(
+    () => [
+      {
+        key: "todo",
+        title: "To Do",
+        hint: "Planned and ready to start",
+        badgeClass: "bg-slate-500/15 text-slate-600 dark:text-slate-300",
+        tasks: projectTasks.filter((task) => task.status === "todo"),
+      },
+      {
+        key: "in-progress",
+        title: "In Progress",
+        hint: "Actively being worked on",
+        badgeClass: "bg-amber-500/15 text-amber-600 dark:text-amber-300",
+        tasks: projectTasks.filter((task) => task.status === "in-progress"),
+      },
+      {
+        key: "completed",
+        title: "Completed",
+        hint: "Finished tasks",
+        badgeClass: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300",
+        tasks: projectTasks.filter((task) => task.status === "completed"),
+      },
+    ],
+    [projectTasks]
   );
 
   const handleAiGenerate = useCallback(() => {
@@ -64,29 +90,16 @@ function ProjectDetailPage() {
   }, [addTasksBatch, project]);
 
 
-  const handleAddTask = (taskData: Partial<CalendarTask>) => {
-    addTask({
+  const handleAddTask = async (taskData: Partial<CalendarTask>) => {
+    await addTask({
       ...taskData,
       project: project?.name,
     } as Omit<CalendarTask, "id">);
   };
 
-  const handleEditTask = (taskData: Partial<CalendarTask>) => {
-    if (editingTask) {
-      updateTask(editingTask.id, taskData);
-      setEditingTask(undefined);
-    }
-  };
-
-  const handleEditClick = (task: CalendarTask) => {
-    setEditingTask(task);
-    setIsAddDialogOpen(true);
-  };
-
-  const handleDialogClose = (open: boolean) => {
-    if (!open) setEditingTask(undefined);
-    setIsAddDialogOpen(open);
-  };
+  const handleEdit = useCallback((taskId: string, updates: Partial<CalendarTask>) => {
+    updateTask(taskId, updates);
+  }, [updateTask]);
 
   const handleDeleteProject = useCallback(async () => {
     if (!project) return;
@@ -149,12 +162,12 @@ function ProjectDetailPage() {
       <ProjectCharts tasks={projectTasks} />
 
       {/* Tasks */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
+      <div className="rounded-2xl border border-border/60 bg-card/40 p-4 shadow-sm backdrop-blur sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold">Tasks</h2>
+            <h2 className="text-lg font-semibold tracking-tight">Tasks</h2>
             {projectTasks.length > 0 && (
-              <span className="text-xs text-muted-foreground">
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                 {projectTasks.length} task{projectTasks.length !== 1 ? "s" : ""}
               </span>
             )}
@@ -181,27 +194,55 @@ function ProjectDetailPage() {
             onToggleComplete={toggleTaskComplete}
           />
         ) : (
-          <div className="space-y-1">
-            {projectTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onToggleComplete={toggleTaskComplete}
-                onEdit={handleEditClick}
-                onDelete={moveToTrash}
-                onClick={setSelectedTask}
-                showProject={false}
-              />
-            ))}
+          <div className="overflow-hidden rounded-xl border border-border/60 bg-background/55 shadow-inner">
+            <div className="border-b bg-muted/25 px-4 py-2.5 text-xs font-medium text-muted-foreground">
+              Click a task to open full details. Inline title edit is available from each row.
+            </div>
+            <div className="space-y-4 p-3">
+              {listSections.map((section) => (
+                <section key={section.key} className="rounded-xl border border-border/50 bg-card/45 p-3">
+                  <div className="mb-2.5 flex items-center justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold tracking-tight">{section.title}</h3>
+                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${section.badgeClass}`}>
+                          {section.tasks.length}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{section.hint}</p>
+                    </div>
+                  </div>
+
+                  {section.tasks.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 px-3 py-3 text-xs text-muted-foreground">
+                      No tasks in this section yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {section.tasks.map((task) => (
+                        <TaskItem
+                          key={task.id}
+                          task={task}
+                          onToggleComplete={toggleTaskComplete}
+                          onEdit={handleEdit}
+                          onDelete={moveToTrash}
+                          onClick={setSelectedTask}
+                          showProject={false}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
       <TaskAddDialog
-        task={editingTask}
         open={isAddDialogOpen}
-        onOpenChange={handleDialogClose}
-        onSave={editingTask ? handleEditTask : handleAddTask}
+        onOpenChange={setIsAddDialogOpen}
+        onSave={handleAddTask}
       />
 
       <DeleteProjectDialog

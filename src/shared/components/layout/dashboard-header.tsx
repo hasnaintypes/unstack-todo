@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { User, LogOut, Settings, Search } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { storageService } from "@/shared/services/storage.service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
   DropdownMenu,
@@ -53,6 +55,17 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
     navigate({ to: "/settings" });
   };
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const avatarFileId = (user?.prefs as Record<string, string> | undefined)?.avatarFileId;
+
+  useEffect(() => {
+    if (avatarFileId) {
+      setAvatarUrl(storageService.getFileDownloadUrl(avatarFileId).toString());
+    } else {
+      setAvatarUrl(null);
+    }
+  }, [avatarFileId]);
+
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -97,7 +110,7 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
             <button className="flex items-center gap-3 rounded-full outline-none transition-transform active:scale-95">
               <Avatar className="size-9 border border-border transition-colors hover:border-primary/50">
                 <AvatarImage
-                  src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || `User`}`}
+                  src={avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || "User"}`}
                 />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                   {initials}
