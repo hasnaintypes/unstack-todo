@@ -45,6 +45,7 @@ function TrashPage() {
         showProject
         showCategory
         showRestore
+        persistKey="trash"
         emptyState={
           <TaskEmptyState
             image={projectTaskEmptyState}

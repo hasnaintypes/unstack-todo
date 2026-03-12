@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { TaskEmptyState } from "@/features/tasks/components/empty-state";
 import { TaskList } from "@/features/tasks/components/task-list";
+import { BatchDeleteDialog } from "@/features/tasks/components/batch-delete-dialog";
 import { Button } from "@/shared/components/ui/button";
 import {
   AlertDialog,
@@ -26,6 +27,8 @@ function CompletedPage() {
   const completedTasks = useCompletedTasks();
   const { toggleTaskComplete, moveToTrash, clearCompleted, setSelectedTask } = useTasks();
   const [isClearDialogOpen, setClearDialogOpen] = useState(false);
+  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
   return (
     <>
@@ -36,6 +39,9 @@ function CompletedPage() {
         onDelete={moveToTrash}
         onTaskClick={setSelectedTask}
         groupBy="project"
+        selectable
+        onBatchDelete={(ids) => { setPendingDeleteIds(ids); setIsBatchDeleteOpen(true); }}
+        persistKey="completed"
         emptyState={
           <TaskEmptyState
             image={completedTaskEmptyState}
@@ -59,6 +65,17 @@ function CompletedPage() {
             </Button>
           )
         }
+      />
+
+      <BatchDeleteDialog
+        open={isBatchDeleteOpen}
+        onOpenChange={setIsBatchDeleteOpen}
+        count={pendingDeleteIds.length}
+        onConfirm={() => {
+          pendingDeleteIds.forEach((id) => moveToTrash(id));
+          setPendingDeleteIds([]);
+          setIsBatchDeleteOpen(false);
+        }}
       />
 
       <AlertDialog open={isClearDialogOpen} onOpenChange={setClearDialogOpen}>

@@ -3,7 +3,7 @@ export {
   type TaskAddDialogProps,
   type EmptyStateTaskInput,
 } from "./components/task-add-dialog";
-export { TaskDetailSheet } from "./components/task-details-dialog";
+export { TaskDetailSheet } from "./components/task-details-sheet";
 export { TaskDetailContent } from "./components/task-detail-content";
 export {
   TaskDropdownMenu,

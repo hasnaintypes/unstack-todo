@@ -127,6 +127,7 @@ const PROFILES = {
       max: 4,
       defaultValue: 2,
     },
+    { key: "onboardingCompleted", type: "boolean", required: false, defaultValue: false },
   ],
   indexes: [{ key: "idx_userId", type: "unique", attributes: ["userId"] }],
   permissions: collectionPermissions,
@@ -251,7 +252,7 @@ const SUBTASKS = {
     { key: "title", type: "varchar", size: 256, required: true },
     { key: "taskId", type: "varchar", size: 256, required: true },
     { key: "userId", type: "varchar", size: 256, required: true },
-    { key: "isCompleted", type: "boolean", required: true, defaultValue: false },
+    { key: "isCompleted", type: "boolean", required: true },
     { key: "completedAt", type: "datetime", required: false },
     { key: "order", type: "integer", required: false, min: 0, max: 10000, defaultValue: 0 },
   ],
@@ -375,7 +376,7 @@ async function ensureDatabase() {
 
 /**
  * Create a single collection with all its attributes and indexes.
- * Handles "already exists" gracefully.
+ * If the collection already exists, adds any missing attributes and indexes.
  */
 async function createTable(dbId, table) {
   const { id, name, columns, indexes, permissions } = table;
@@ -383,15 +384,59 @@ async function createTable(dbId, table) {
   console.log(`\n  ── ${name} (${id}) ──`);
 
   // Check if collection already exists
+  let existing = null;
   try {
-    await databases.getCollection(dbId, id);
-    console.log(`  Already exists. Skipping. (Delete in Console to recreate.)`);
-    return id;
+    existing = await databases.getCollection(dbId, id);
   } catch (err) {
     if (err.code !== 404) throw err;
   }
 
-  // Create collection
+  if (existing) {
+    // Collection exists — find and add missing attributes
+    const existingKeys = new Set(existing.attributes.map((a) => a.key));
+    const missingColumns = columns.filter((col) => !existingKeys.has(col.key));
+
+    if (missingColumns.length === 0) {
+      console.log(`  Already exists with all ${columns.length} attributes. Checking indexes...`);
+    } else {
+      console.log(`  Already exists. Adding ${missingColumns.length} missing attribute(s)...`);
+      for (const col of missingColumns) {
+        try {
+          await createAttribute(dbId, id, col);
+          console.log(`    + ${col.key} (${col.type})`);
+        } catch (err) {
+          console.error(`    ! Failed: ${col.key} — ${err.message}`);
+        }
+      }
+
+      // Wait for the new attributes to become available
+      const totalExpected = existingKeys.size + missingColumns.length;
+      console.log(`  Waiting for ${totalExpected} attributes...`);
+      await waitForAttributes(dbId, id, totalExpected);
+    }
+
+    // Check for missing indexes
+    const existingIndexKeys = new Set(existing.indexes.map((idx) => idx.key));
+    const missingIndexes = indexes.filter((idx) => !existingIndexKeys.has(idx.key));
+
+    if (missingIndexes.length > 0) {
+      console.log(`  Adding ${missingIndexes.length} missing index(es)...`);
+      for (const idx of missingIndexes) {
+        try {
+          await databases.createIndex(dbId, id, idx.key, idx.type, idx.attributes);
+          console.log(`    + ${idx.key} (${idx.attributes.join(", ")})`);
+        } catch (err) {
+          console.error(`    ! Failed: ${idx.key} — ${err.message}`);
+        }
+      }
+    } else {
+      console.log(`  All ${indexes.length} indexes present.`);
+    }
+
+    return id;
+  }
+
+  // Create new collection
   const collection = await databases.createCollection(dbId, id, name, permissions);
   console.log(`  Collection created: ${collection.$id}`);
 
@@ -493,17 +538,20 @@ async function waitForAttributes(dbId, collectionId, expectedCount, maxRetries =
   for (let i = 0; i < maxRetries; i++) {
     const collection = await databases.getCollection(dbId, collectionId);
     const ready = collection.attributes.filter((a) => a.status === "available").length;
+    const failed = collection.attributes.filter((a) => a.status === "failed");
+    const settled = ready + failed.length;
 
     if (ready >= expectedCount) {
       console.log(`  All ${ready} attributes ready.`);
       return;
     }
 
-    const failed = collection.attributes.filter((a) => a.status === "failed");
-    if (failed.length > 0) {
+    // If all attributes have settled (available or failed), stop waiting
+    if (settled >= expectedCount) {
       console.warn(
-        `  Warning: ${failed.length} attribute(s) failed: ${failed.map((a) => a.key).join(", ")}`
+        `  ${ready} available, ${failed.length} failed: ${failed.map((a) => a.key).join(", ")}. Continuing...`
       );
+      return;
     }
 
     console.log(`  ${ready}/${expectedCount} ready, waiting...`);

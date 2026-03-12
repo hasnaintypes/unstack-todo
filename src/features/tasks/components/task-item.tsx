@@ -30,6 +30,9 @@ export interface TaskItemProps {
   showProject?: boolean;
   showCategory?: boolean;
   showRestore?: boolean; // For trash view - shows restore button instead of edit
+  selectable?: boolean;
+  selected?: boolean;
+  onSelect?: (taskId: string) => void;
   className?: string;
 }
 
@@ -112,6 +115,9 @@ export function TaskItem({
   showProject = true,
   showCategory = true,
   showRestore = false,
+  selectable = false,
+  selected = false,
+  onSelect,
   className,
 }: TaskItemProps) {
   const [isHovered, setIsHovered] = React.useState(false);
@@ -137,12 +143,18 @@ export function TaskItem({
     onClick?.(task);
   };
 
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect?.(task.id);
+  };
+
   return (
     <div
       className={cn(
         "group relative flex items-center gap-3 px-4 py-3 rounded-lg border border-transparent",
         "hover:border-border hover:bg-accent/50 transition-all duration-200 cursor-pointer",
         isCompleted && "opacity-60",
+        selected && "border-[#e44232]/30 bg-[#e44232]/5",
         className
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -157,6 +169,34 @@ export function TaskItem({
         }
       }}
     >
+      {/* Selection Checkbox */}
+      {selectable && (
+        <button
+          onClick={handleSelectClick}
+          className={cn(
+            "flex items-center justify-center h-5 w-5 rounded border-2 shrink-0 transition-all",
+            selected
+              ? "bg-[#e44232] border-[#e44232]"
+              : "border-muted-foreground/30 hover:border-[#e44232]"
+          )}
+          aria-label={selected ? "Deselect task" : "Select task"}
+        >
+          {selected && (
+            <svg
+              className="w-3 h-3 text-white"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          )}
+        </button>
+      )}
+
       {/* Checkbox */}
       <button
         onClick={handleCheckboxClick}

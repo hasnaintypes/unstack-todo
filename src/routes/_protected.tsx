@@ -1,14 +1,16 @@
 import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SidebarProvider, SidebarInset } from "@/shared/components/ui/sidebar";
 import { AppSidebar } from "@/shared/components/layout/app-sidebar";
 import { DashboardHeader } from "@/shared/components/layout/dashboard-header";
-import { TaskDetailSheet } from "@/features/tasks/components/task-details-dialog";
+import { TaskDetailSheet } from "@/features/tasks/components/task-details-sheet";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
 import { QuickAddFAB } from "@/shared/components/quick-add-fab";
 import { KeyboardShortcutsDialog } from "@/shared/components/keyboard-shortcuts-dialog";
 import { useKeyboardShortcuts, type Shortcut } from "@/shared/hooks/use-keyboard-shortcuts";
 import { useTasks } from "@/shared/hooks/use-tasks";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { OnboardingDialog, onboardingService } from "@/features/onboarding";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ context }) => {
@@ -24,12 +26,25 @@ export const Route = createFileRoute("/_protected")({
 function ProtectedLayout() {
   const location = useLocation();
   const isCalendarPage = location.pathname === "/calendar";
+  const { user } = useAuth();
   const { selectedTask, setSelectedTask, updateTask, toggleTaskComplete, moveToTrash, addTask } =
     useTasks();
 
   const [isQuickAddOpen, setQuickAddOpen] = useState(false);
   const [isShortcutsHelpOpen, setShortcutsHelpOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [profileDocId, setProfileDocId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    onboardingService.getProfile(user.$id).then((profile) => {
+      if (profile && !profile.onboardingCompleted) {
+        setProfileDocId(profile.$id);
+        setOnboardingOpen(true);
+      }
+    }).catch(() => {});
+  }, [user]);
 
   const shortcuts = useMemo<Shortcut[]>(
     () => [
@@ -66,6 +81,11 @@ function ProtectedLayout() {
       project: taskData.project || "inbox",
       status: taskData.status || "todo",
       subtasks: taskData.subtasks,
+      tags: taskData.tags,
+      recurrence: taskData.recurrence ?? null,
+      reminderEnabled: taskData.reminderEnabled ?? false,
+      reminderBefore: taskData.reminderBefore,
+      attachments: taskData.attachments,
     });
   };
 
@@ -101,6 +121,17 @@ function ProtectedLayout() {
 
       {/* Keyboard Shortcuts Help */}
       <KeyboardShortcutsDialog open={isShortcutsHelpOpen} onOpenChange={setShortcutsHelpOpen} />
+
+      {/* Onboarding Dialog */}
+      <OnboardingDialog
+        open={onboardingOpen}
+        onComplete={() => {
+          setOnboardingOpen(false);
+          if (profileDocId) {
+            onboardingService.completeOnboarding(profileDocId).catch(() => {});
+          }
+        }}
+      />
     </SidebarProvider>
   );
 }

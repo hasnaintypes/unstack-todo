@@ -3,6 +3,7 @@ import { useState } from "react";
 import { TaskEmptyState } from "@/features/tasks/components/empty-state";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
+import { BatchDeleteDialog } from "@/features/tasks/components/batch-delete-dialog";
 import { useInboxTasks } from "@/features/tasks/hooks/use-task-filters";
 import { useTasks } from "@/shared/hooks/use-tasks";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
@@ -17,6 +18,8 @@ function InboxPage() {
   const { addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } = useTasks();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
+  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
   const handleAddTask = (taskData: Partial<CalendarTask>) => {
     if (!taskData.title) return;
@@ -30,6 +33,11 @@ function InboxPage() {
       project: taskData.project || "inbox",
       status: taskData.status || "todo",
       subtasks: taskData.subtasks,
+      tags: taskData.tags,
+      recurrence: taskData.recurrence ?? null,
+      reminderEnabled: taskData.reminderEnabled ?? false,
+      reminderBefore: taskData.reminderBefore,
+      attachments: taskData.attachments,
     });
   };
 
@@ -63,6 +71,9 @@ function InboxPage() {
         onTaskClick={setSelectedTask}
         onAddTask={() => setIsAddDialogOpen(true)}
         showProject={false}
+        selectable
+        onBatchDelete={(ids) => { setPendingDeleteIds(ids); setIsBatchDeleteOpen(true); }}
+        persistKey="inbox"
         emptyState={
           <TaskEmptyState
             image={inboxTaskEmptyState}
@@ -80,6 +91,17 @@ function InboxPage() {
         open={isAddDialogOpen}
         onOpenChange={handleDialogClose}
         onSave={editingTask ? handleEditTask : handleAddTask}
+      />
+
+      <BatchDeleteDialog
+        open={isBatchDeleteOpen}
+        onOpenChange={setIsBatchDeleteOpen}
+        count={pendingDeleteIds.length}
+        onConfirm={() => {
+          pendingDeleteIds.forEach((id) => moveToTrash(id));
+          setPendingDeleteIds([]);
+          setIsBatchDeleteOpen(false);
+        }}
       />
     </>
   );

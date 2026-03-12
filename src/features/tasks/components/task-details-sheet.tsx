@@ -73,8 +73,11 @@ export function TaskDetailSheet({
   const [editPriority, setEditPriority] = useState<TaskPriority>(2);
   const [editCategory, setEditCategory] = useState("");
   const [editProject, setEditProject] = useState("");
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [editSubtasks, setEditSubtasks] = useState<Subtask[]>([]);
   const [newSubtask, setNewSubtask] = useState("");
+  const [newSubtaskDescription, setNewSubtaskDescription] = useState("");
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
 
   const isCompleted = task?.status === "completed";
@@ -95,6 +98,8 @@ export function TaskDetailSheet({
     setEditPriority(task.priority);
     setEditCategory(task.category || "");
     setEditProject(task.project || "");
+    setEditTags(task.tags ? [...task.tags] : []);
+    setTagInput("");
     setEditSubtasks(task.subtasks ? [...task.subtasks] : []);
     setIsEditing(true);
   };
@@ -108,6 +113,7 @@ export function TaskDetailSheet({
       priority: editPriority,
       category: editCategory.trim() || undefined,
       project: editProject.trim() || undefined,
+      tags: editTags.length > 0 ? editTags : undefined,
       subtasks: editSubtasks.length > 0 ? editSubtasks : undefined,
     });
     setIsEditing(false);
@@ -117,10 +123,21 @@ export function TaskDetailSheet({
     setIsEditing(false);
   };
 
+  const [editingSubtaskIdx, setEditingSubtaskIdx] = useState<number | null>(null);
+  const [subtaskDescription, setSubtaskDescription] = useState("");
+
   const handleAddSubtask = () => {
     if (newSubtask.trim()) {
-      setEditSubtasks([...editSubtasks, { title: newSubtask.trim(), completed: false }]);
+      setEditSubtasks([
+        ...editSubtasks,
+        {
+          title: newSubtask.trim(),
+          description: newSubtaskDescription.trim() || undefined,
+          completed: false,
+        },
+      ]);
       setNewSubtask("");
+      setNewSubtaskDescription("");
     }
   };
 
@@ -339,54 +356,108 @@ export function TaskDetailSheet({
                     Subtasks
                   </label>
                   {editSubtasks.map((subtask, index) => (
-                    <div key={index} className="group flex items-center gap-2.5">
-                      <button
-                        onClick={() => handleToggleEditSubtask(index)}
-                        className={cn(
-                          "flex items-center justify-center h-4.5 w-4.5 rounded-full border-2 shrink-0 transition-all",
-                          subtask.completed
-                            ? "bg-[#e44232] border-[#e44232]"
-                            : "border-muted-foreground/30 hover:border-[#e44232]"
-                        )}
-                      >
-                        {subtask.completed && <CheckCircle2 className="h-3 w-3 text-white" />}
-                      </button>
-                      <span
-                        className={cn(
-                          "text-sm flex-1",
-                          subtask.completed && "line-through text-muted-foreground"
-                        )}
-                      >
-                        {subtask.title}
-                      </span>
-                      <button
-                        onClick={() => handleRemoveSubtask(index)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="size-3.5 text-muted-foreground" />
-                      </button>
+                    <div key={index} className="group">
+                      <div className="flex items-center gap-2.5">
+                        <button
+                          onClick={() => handleToggleEditSubtask(index)}
+                          className={cn(
+                            "flex items-center justify-center h-4.5 w-4.5 rounded-full border-2 shrink-0 transition-all",
+                            subtask.completed
+                              ? "bg-[#e44232] border-[#e44232]"
+                              : "border-muted-foreground/30 hover:border-[#e44232]"
+                          )}
+                        >
+                          {subtask.completed && <CheckCircle2 className="h-3 w-3 text-white" />}
+                        </button>
+                        <span
+                          className={cn(
+                            "text-sm flex-1 cursor-pointer",
+                            subtask.completed && "line-through text-muted-foreground"
+                          )}
+                          onClick={() => {
+                            setEditingSubtaskIdx(editingSubtaskIdx === index ? null : index);
+                            setSubtaskDescription(subtask.description || "");
+                          }}
+                        >
+                          {subtask.title}
+                        </span>
+                        <button
+                          onClick={() => handleRemoveSubtask(index)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="size-3.5 text-muted-foreground" />
+                        </button>
+                      </div>
+                      {subtask.description && editingSubtaskIdx !== index && (
+                        <p className="text-xs text-muted-foreground ml-7 mt-0.5">{subtask.description}</p>
+                      )}
+                      {editingSubtaskIdx === index && (
+                        <div className="ml-7 mt-1">
+                          <input
+                            autoFocus
+                            className="w-full bg-transparent text-xs text-muted-foreground outline-none border-b border-muted-foreground/20 pb-1"
+                            value={subtaskDescription}
+                            onChange={(e) => setSubtaskDescription(e.target.value)}
+                            placeholder="Add a description..."
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === "Escape") {
+                                setEditSubtasks(editSubtasks.map((s, i) =>
+                                  i === index ? { ...s, description: subtaskDescription.trim() || undefined } : s
+                                ));
+                                setEditingSubtaskIdx(null);
+                              }
+                            }}
+                            onBlur={() => {
+                              setEditSubtasks(editSubtasks.map((s, i) =>
+                                i === index ? { ...s, description: subtaskDescription.trim() || undefined } : s
+                              ));
+                              setEditingSubtaskIdx(null);
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   ))}
 
                   {isAddingSubtask ? (
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-4.5 w-4.5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+                    <div className="ml-0 space-y-1">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-4.5 w-4.5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+                        <input
+                          autoFocus
+                          className="flex-1 bg-transparent text-sm outline-none"
+                          value={newSubtask}
+                          onChange={(e) => setNewSubtask(e.target.value)}
+                          placeholder="Subtask title"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleAddSubtask();
+                            else if (e.key === "Escape") {
+                              setIsAddingSubtask(false);
+                              setNewSubtask("");
+                              setNewSubtaskDescription("");
+                            }
+                          }}
+                        />
+                      </div>
                       <input
-                        autoFocus
-                        className="flex-1 bg-transparent text-sm outline-none"
-                        value={newSubtask}
-                        onChange={(e) => setNewSubtask(e.target.value)}
-                        placeholder="Subtask title"
+                        className="w-full bg-transparent text-xs text-muted-foreground outline-none pl-7"
+                        value={newSubtaskDescription}
+                        onChange={(e) => setNewSubtaskDescription(e.target.value)}
+                        placeholder="Description (optional)"
                         onKeyDown={(e) => {
                           if (e.key === "Enter") handleAddSubtask();
                           else if (e.key === "Escape") {
                             setIsAddingSubtask(false);
                             setNewSubtask("");
+                            setNewSubtaskDescription("");
                           }
                         }}
                         onBlur={() => {
                           if (newSubtask.trim()) handleAddSubtask();
-                          setIsAddingSubtask(false);
+                          else {
+                            setIsAddingSubtask(false);
+                            setNewSubtaskDescription("");
+                          }
                         }}
                       />
                     </div>
@@ -399,6 +470,56 @@ export function TaskDetailSheet({
                       Add sub-task
                     </button>
                   )}
+                </div>
+
+                {/* Tags */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                    <Tag className="size-3.5" />
+                    Tags
+                  </label>
+                  {editTags.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {editTags.map((tag, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-xs font-medium"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => setEditTags(editTags.filter((_, idx) => idx !== i))}
+                            className="hover:text-indigo-700"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+                        e.preventDefault();
+                        const newTag = tagInput.trim().replace(/,$/, "");
+                        if (newTag && !editTags.includes(newTag)) {
+                          setEditTags([...editTags, newTag]);
+                        }
+                        setTagInput("");
+                      }
+                    }}
+                    onBlur={() => {
+                      const newTag = tagInput.trim().replace(/,$/, "");
+                      if (newTag && !editTags.includes(newTag)) {
+                        setEditTags([...editTags, newTag]);
+                      }
+                      setTagInput("");
+                    }}
+                    placeholder="Add tags (press Enter or comma)"
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
+                  />
                 </div>
 
                 {/* Footer */}

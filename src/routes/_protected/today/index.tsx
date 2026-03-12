@@ -3,6 +3,7 @@ import { useState } from "react";
 import { TaskEmptyState } from "@/features/tasks/components/empty-state";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
+import { BatchDeleteDialog } from "@/features/tasks/components/batch-delete-dialog";
 import { useTodayTasks } from "@/features/tasks/hooks/use-task-filters";
 import { useTasks } from "@/shared/hooks/use-tasks";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
@@ -17,6 +18,8 @@ function TodayPage() {
   const { addTask, updateTask, toggleTaskComplete, moveToTrash, setSelectedTask } = useTasks();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<CalendarTask | undefined>(undefined);
+  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
   const handleAddTask = (taskData: Partial<CalendarTask>) => {
     addTask({
@@ -55,6 +58,9 @@ function TodayPage() {
         onTaskClick={setSelectedTask}
         onAddTask={() => setIsAddDialogOpen(true)}
         groupBy="priority"
+        selectable
+        onBatchDelete={(ids) => { setPendingDeleteIds(ids); setIsBatchDeleteOpen(true); }}
+        persistKey="today"
         emptyState={
           <TaskEmptyState
             image={todayTaskEmptyState}
@@ -73,6 +79,17 @@ function TodayPage() {
         onOpenChange={handleDialogClose}
         onSave={editingTask ? handleEditTask : handleAddTask}
         defaultDate={editingTask ? undefined : new Date()}
+      />
+
+      <BatchDeleteDialog
+        open={isBatchDeleteOpen}
+        onOpenChange={setIsBatchDeleteOpen}
+        count={pendingDeleteIds.length}
+        onConfirm={() => {
+          pendingDeleteIds.forEach((id) => moveToTrash(id));
+          setPendingDeleteIds([]);
+          setIsBatchDeleteOpen(false);
+        }}
       />
     </>
   );

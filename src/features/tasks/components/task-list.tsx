@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Plus, ArrowUpDown, Check } from "lucide-react";
+import { Plus, ArrowUpDown, Check, Trash2, X } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
@@ -26,6 +26,9 @@ export interface TaskListProps {
   showProject?: boolean;
   showCategory?: boolean;
   showRestore?: boolean; // For trash view
+  selectable?: boolean;
+  onBatchDelete?: (taskIds: string[]) => void;
+  persistKey?: string;
   emptyState?: React.ReactNode;
   showHeader?: boolean;
   headerActions?: React.ReactNode;
@@ -146,6 +149,9 @@ export function TaskList({
   showProject = true,
   showCategory = true,
   showRestore = false,
+  selectable = false,
+  onBatchDelete,
+  persistKey,
   emptyState,
   showHeader = true,
   headerActions,
@@ -154,7 +160,42 @@ export function TaskList({
   groupBy = "none",
   defaultSortBy = "default",
 }: TaskListProps) {
-  const [sortBy, setSortBy] = React.useState<SortBy>(defaultSortBy);
+  const [sortBy, setSortBy] = React.useState<SortBy>(() => {
+    if (persistKey) {
+      const saved = localStorage.getItem(`unstack-sort-${persistKey}`);
+      if (saved && saved in sortLabels) return saved as SortBy;
+    }
+    return defaultSortBy;
+  });
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+
+  React.useEffect(() => {
+    if (persistKey) {
+      localStorage.setItem(`unstack-sort-${persistKey}`, sortBy);
+    }
+  }, [sortBy, persistKey]);
+
+  // Clear selection when tasks change
+  React.useEffect(() => {
+    setSelectedIds(new Set());
+  }, [tasks.length]);
+
+  const toggleSelect = React.useCallback((taskId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(taskId)) next.delete(taskId);
+      else next.add(taskId);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = React.useCallback(() => setSelectedIds(new Set()), []);
+
+  const handleBatchDelete = React.useCallback(() => {
+    if (onBatchDelete && selectedIds.size > 0) {
+      onBatchDelete([...selectedIds]);
+    }
+  }, [onBatchDelete, selectedIds]);
 
   const groupedTasks = React.useMemo(() => {
     const groups = groupTasks(tasks, groupBy);
@@ -165,6 +206,27 @@ export function TaskList({
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
+      {/* Selection Bar */}
+      {selectable && selectedIds.size > 0 && (
+        <div className="flex items-center justify-between px-6 py-2 border-b bg-[#e44232]/5">
+          <span className="text-sm font-medium">
+            {selectedIds.size} selected
+          </span>
+          <div className="flex items-center gap-2">
+            {onBatchDelete && (
+              <Button variant="outline" size="sm" onClick={handleBatchDelete} className="text-red-600 hover:text-red-700 gap-1.5">
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={clearSelection} className="gap-1.5">
+              <X className="h-3.5 w-3.5" />
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Header - only show when we have tasks or when explicitly showing header with actions */}
       {showHeader && !isEmpty && (title || headerActions || onAddTask) && (
         <div className="flex items-center justify-between px-6 py-4 border-b">
@@ -256,6 +318,9 @@ export function TaskList({
                   showProject={showProject}
                   showCategory={showCategory}
                   showRestore={showRestore}
+                  selectable={selectable}
+                  selected={selectedIds.has(task.id)}
+                  onSelect={toggleSelect}
                 />
               ))}
             </div>
@@ -279,6 +344,9 @@ export function TaskList({
                         showProject={showProject}
                         showCategory={showCategory}
                         showRestore={showRestore}
+                        selectable={selectable}
+                        selected={selectedIds.has(task.id)}
+                        onSelect={toggleSelect}
                       />
                     ))}
                   </div>
