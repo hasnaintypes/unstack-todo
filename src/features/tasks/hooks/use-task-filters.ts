@@ -1,8 +1,8 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { isToday, isFuture, startOfDay } from "date-fns";
 import { useTasks } from "@/shared/hooks/use-tasks";
-import { taskService } from "@/features/tasks/services/task.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useTrashTasksQuery } from "@/features/tasks/hooks/use-tasks-query";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 
 /**
@@ -77,37 +77,11 @@ export function useCompletedTasks() {
 
 /**
  * Hook to get tasks in trash
- * Fetches tasks separately from Appwrite with deletedAt field
+ * Uses React Query for caching and background refresh
  */
-export function useTrashTasks() {
+export function useTrashTasks(): CalendarTask[] {
   const { user } = useAuth();
-  const [trashTasks, setTrashTasks] = useState<CalendarTask[]>([]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchTrash = async () => {
-      if (!user?.$id) {
-        if (mounted) setTrashTasks([]);
-        return;
-      }
-
-      try {
-        const tasks = await taskService.getTrashTasks(user.$id);
-        if (mounted) setTrashTasks(tasks);
-      } catch (err) {
-        console.error("Error loading trash:", err);
-        if (mounted) setTrashTasks([]);
-      }
-    };
-
-    fetchTrash();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user?.$id]);
-
+  const { data: trashTasks = [] } = useTrashTasksQuery(user?.$id);
   return trashTasks;
 }
 

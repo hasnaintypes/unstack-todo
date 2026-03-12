@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { Header } from "@/shared/components/layout/header";
 import { Footer } from "@/shared/components/layout/footer";
 import { ThemeProvider } from "@/app/providers/theme-provider";
+import { QueryProvider } from "@/app/providers/query-provider";
 import { TaskProvider } from "@/app/providers/task-provider";
 import { ProjectProvider } from "@/app/providers/project-provider";
 import { CategoryProvider } from "@/app/providers/category-provider";
@@ -40,27 +41,29 @@ function RootComponent() {
   const isMinimalLayout = isAuthRoute || isProtectedRoute;
 
   return (
-    <ThemeProvider defaultTheme="system" storageKey="unstack-ui-theme">
-      <TaskProvider>
-        <ProjectProvider>
-          <CategoryProvider>
-            <div className="flex flex-col min-h-screen font-sans antialiased text-foreground bg-background">
-              {!isMinimalLayout && <Header />}
-              <main
-                className={cn(
-                  "flex-1 flex flex-col mx-auto w-full",
-                  !isMinimalLayout && "container max-w-screen-2xl px-4 py-6"
-                )}
-              >
-                <Outlet />
-              </main>
-              {!isMinimalLayout && <Footer />}
-              <Toaster />
-              {showRouterDevtools && <TanStackRouterDevtools />}
-            </div>
-          </CategoryProvider>
-        </ProjectProvider>
-      </TaskProvider>
-    </ThemeProvider>
+    <QueryProvider>
+      <ThemeProvider defaultTheme="system" storageKey="unstack-ui-theme">
+        <TaskProvider>
+          <ProjectProvider>
+            <CategoryProvider>
+              <div className="flex flex-col min-h-screen font-sans antialiased text-foreground bg-background">
+                {!isMinimalLayout && <Header />}
+                <main
+                  className={cn(
+                    "flex-1 flex flex-col mx-auto w-full",
+                    !isMinimalLayout && "container max-w-screen-2xl px-4 py-6"
+                  )}
+                >
+                  <Outlet />
+                </main>
+                {!isMinimalLayout && <Footer />}
+                <Toaster />
+                {showRouterDevtools && <TanStackRouterDevtools />}
+              </div>
+            </CategoryProvider>
+          </ProjectProvider>
+        </TaskProvider>
+      </ThemeProvider>
+    </QueryProvider>
   );
 }
