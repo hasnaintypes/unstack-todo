@@ -1,5 +1,7 @@
 import { createRootRouteWithContext, Outlet, useLocation } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { ErrorBoundary } from "react-error-boundary";
+import { ErrorFallback } from "@/shared/components/error-fallback";
 import { Header } from "@/shared/components/layout/header";
 import { Footer } from "@/shared/components/layout/footer";
 import { ThemeProvider } from "@/app/providers/theme-provider";
@@ -54,7 +56,9 @@ function RootComponent() {
                     !isMinimalLayout && "container max-w-screen-2xl px-4 py-6"
                   )}
                 >
-                  <Outlet />
+                  <ErrorBoundary FallbackComponent={ErrorFallback}>
+                    <Outlet />
+                  </ErrorBoundary>
                 </main>
                 {!isMinimalLayout && <Footer />}
                 <Toaster />
