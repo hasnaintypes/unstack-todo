@@ -76,47 +76,47 @@
 - ~~**Issue:** Signup and password change had different validation rules.~~
 - ~~**Fix:** Shared `passwordSchema` in `src/shared/lib/validation.ts` used by both forms via zod + react-hook-form.~~
 
-### 10. Avatar Upload Has No MIME Validation
+### ~~10. Avatar Upload Has No MIME Validation~~ FIXED
 
-- **File:** `src/features/profile/components/personal-info-card.tsx:37-57`
-- **Issue:** File input has `accept="image/*"` but no client-side MIME type validation beyond the HTML attribute. Only `file.size > 2MB` is checked. A user can rename a malicious file to `.jpg`.
-- **Fix:** Validate `file.type.startsWith('image/')` and whitelist specific MIME types (`image/jpeg`, `image/png`, `image/webp`, `image/gif`).
+- ~~**File:** `src/features/profile/components/personal-info-card.tsx`~~
+- ~~**Issue:** No client-side MIME type validation. A user can rename a malicious file to `.jpg`.~~
+- ~~**Fix:** Added MIME whitelist check (JPEG, PNG, WebP, GIF) and updated file input `accept` attribute.~~
 
-### 11. Old Avatar Never Deleted on Re-Upload
+### ~~11. Old Avatar Never Deleted on Re-Upload~~ FIXED
 
-- **File:** `src/features/profile/components/personal-info-card.tsx:44-57`
-- **Issue:** When uploading a new avatar, the old file is never deleted from Appwrite Storage, creating orphaned files and storage bloat.
-- **Fix:** Before uploading, check if `avatarFileId` exists in prefs and delete the old file.
+- ~~**File:** `src/features/profile/components/personal-info-card.tsx`~~
+- ~~**Issue:** Old avatar file never deleted from Appwrite Storage on re-upload.~~
+- ~~**Fix:** Delete old avatar file from storage before uploading new one.~~
 
-### 12. Account Deletion Does Not Delete Storage Files
+### ~~12. Account Deletion Does Not Delete Storage Files~~ FIXED
 
-- **File:** `src/features/auth/services/auth.service.ts:83-115`
-- **Issue:** `deleteAccount()` deletes documents from all collections but never deletes uploaded files (avatars, attachments). These files persist as orphans — potential privacy issue since files remain accessible if IDs are known.
-- **Fix:** Enumerate and delete all storage files (avatar from prefs, attachments from tasks) before deleting documents.
+- ~~**File:** `src/features/auth/services/auth.service.ts`~~
+- ~~**Issue:** `deleteAccount()` never deletes uploaded files (avatars, attachments).~~
+- ~~**Fix:** Delete avatar and task attachment files from storage before removing documents.~~
 
-### 13. AI Prompt Injection via Project Name
+### ~~13. AI Prompt Injection via Project Name~~ FIXED
 
-- **File:** `src/shared/services/ai.service.ts:328-338`
-- **Issue:** User-supplied `projectName` and `projectDescription` are interpolated directly into the Gemini prompt. Crafted inputs can manipulate AI output or bypass safety guidelines.
-- **Fix:** Sanitize inputs (strip special chars, limit length to 200), use structured JSON payloads instead of string interpolation.
+- ~~**File:** `api/ai.ts`~~
+- ~~**Issue:** User inputs interpolated directly into Gemini prompt without sanitization.~~
+- ~~**Fix:** Added `sanitize()` helper that strips special chars and enforces length limits on all user inputs.~~
 
-### 14. `deleteAccount` Pagination May Miss Documents
+### ~~14. `deleteAccount` Pagination May Miss Documents~~ FIXED
 
-- **File:** `src/features/auth/services/auth.service.ts:96-108`
-- **Issue:** Each collection query uses `Query.limit(500)`. Users with >500 tasks will have orphaned documents after deletion.
-- **Fix:** Loop with pagination until no documents remain in each collection.
+- ~~**File:** `src/features/auth/services/auth.service.ts`~~
+- ~~**Issue:** Single `Query.limit(500)` call per collection. Users with >500 docs have orphaned documents.~~
+- ~~**Fix:** Replaced with while-loop processing 100 docs per iteration until none remain.~~
 
-### 15. `any` Type Usage (6 instances)
+### ~~15. `any` Type Usage (6 instances)~~ FIXED
 
-- **Files:** `task.service.ts:128`, `project.service.ts:19`, `category.service.ts:20`, `template.service.ts:20`, `comment.service.ts:10`, `reminder.service.ts:20` — all `documentToX(doc: any)`
-- **Issue:** Bypasses TypeScript type checking entirely. All use `eslint-disable` comments to suppress warnings.
-- **Fix:** Use `Models.Document` from Appwrite SDK with proper type casting and runtime validation.
+- ~~**Files:** 6 service files — all `documentToX(doc: any)`~~
+- ~~**Issue:** Bypasses TypeScript type checking. All use `eslint-disable` comments.~~
+- ~~**Fix:** Replaced with `Models.DefaultDocument` from Appwrite SDK. Removed all `eslint-disable` comments.~~
 
-### 16. Bulk Operations Can Hit API Rate Limits
+### ~~16. Bulk Operations Can Hit API Rate Limits~~ FIXED
 
-- **Files:** `task.service.ts` — `emptyTrash()`, `clearCompleted()`, `restoreAllFromTrash()`, `createTasksBatch()`; `project.service.ts` — `deleteProject()`; `category.service.ts` — `deleteCategory()`
-- **Issue:** `Promise.all()` fires parallel requests for each document. With 100+ items, this can exceed Appwrite rate limits causing silent failures.
-- **Fix:** Batch with chunking (10-20 at a time) using sequential processing per chunk.
+- ~~**Files:** `task.service.ts`, `project.service.ts`, `category.service.ts`~~
+- ~~**Issue:** `Promise.all()` fires all requests in parallel, exceeding Appwrite rate limits.~~
+- ~~**Fix:** Added `processInChunks()` utility (batches of 15). Applied to all bulk operations. Added missing `Query.limit(500)`.~~
 
 ### 17. `console.error`/`console.log` in Production (50+ instances)
 
@@ -351,7 +351,7 @@
 | ~~F2~~   | ~~**Google OAuth**~~                 | ~~FIXED — Implemented with Appwrite OAuth2. Google button now redirects to Google auth.~~ | ~~Medium~~ | ~~High~~   |
 | ~~F3~~   | ~~**Discord OAuth**~~                | ~~FIXED — Replaced Apple button with Discord. Discord user ID auto-extracted from OAuth identity and saved to preferences.~~ | ~~Medium~~ | ~~High~~ |
 | F4   | **Mobile Bottom Navigation**     | Sidebar is hamburger on mobile. Add proper bottom tab bar for mobile                                           | Medium | High   |
-| F5   | **Focus Mode**                   | Toggle to hide sidebar + header, show only current task list for distraction-free work. Add toggle in both (1) dashboard header as a quick-access icon button and (2) Settings page under Appearance section as a default preference | Medium | Medium |
+| ~~F5~~   | ~~**Focus Mode**~~                   | ~~FIXED — Implemented focus mode with minimal top bar, `F` keyboard shortcut, header icon toggle, and settings default preference stored in `user_preferences`.~~ | ~~Medium~~ | ~~Medium~~ |
 | F6   | **Terms/Privacy Pages**          | Dead anchor links. Create actual pages or remove for legal compliance                                          | Low    | Medium |
 | ~~F7~~   | ~~**Email Verification**~~           | ~~Removed — requires Appwrite paid plan~~                        | ~~Low~~   | ~~Medium~~ |
 | F8   | **Recurring Tasks Processing**   | Recurrence field exists in UI/DB but no backend processes it. Implement via Appwrite Function cron             | High   | Medium |
@@ -398,18 +398,18 @@
 9. ~~**#7** — Fixed auth loading race condition~~
 10. ~~**#9** — Unified password validation in shared utility~~
 11. ~~**#8** — Fixed array index keys (18 instances across 12 files)~~
-12. **#14** — Fix deleteAccount pagination for >500 docs
+12. ~~**#14** — Fix deleteAccount pagination for >500 docs~~
 
-### Phase 3 — Data Integrity & Features
+### Phase 3 — Data Integrity & Features ✅ DONE
 
-13. **#10** — Validate avatar MIME type
-14. **#11** — Delete old avatar on re-upload
-15. **#12** — Delete storage files on account deletion
-16. **#13** — Sanitize AI prompt inputs
-17. **#15** — Replace `any` types with `Models.Document`
-18. **#16** — Chunk bulk operations
+13. ~~**#10** — Validate avatar MIME type~~
+14. ~~**#11** — Delete old avatar on re-upload~~
+15. ~~**#12** — Delete storage files on account deletion~~
+16. ~~**#13** — Sanitize AI prompt inputs~~
+17. ~~**#15** — Replace `any` types with `Models.DefaultDocument`~~
+18. ~~**#16** — Chunk bulk operations~~
 19. ~~**F1** — Removed (requires Appwrite paid plan)~~
-20. **F5** — Implement Focus Mode with settings toggle
+20. ~~**F5** — Implement Focus Mode with settings toggle~~
 21. ~~**F7** — Removed (requires Appwrite paid plan)~~
 
 ### Phase 4 — Quality & Scale
