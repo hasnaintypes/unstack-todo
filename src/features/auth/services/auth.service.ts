@@ -1,5 +1,5 @@
 import { account, databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { OAuthProvider, Permission, Role } from "appwrite";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PROFILES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROFILES_COLLECTION_ID || "profiles";
@@ -78,6 +78,130 @@ export const authService = {
 
   async logout() {
     return await account.deleteSession("current");
+  },
+
+  loginWithGoogle() {
+    account.createOAuth2Session(
+      OAuthProvider.Google,
+      `${window.location.origin}/inbox`,
+      `${window.location.origin}/auth/sign-in`
+    );
+  },
+
+  loginWithDiscord() {
+    account.createOAuth2Session(
+      OAuthProvider.Discord,
+      `${window.location.origin}/inbox`,
+      `${window.location.origin}/auth/sign-in`
+    );
+  },
+
+  async ensureUserDocs(userId: string, userName?: string) {
+    const userPermissions = [
+      Permission.read(Role.user(userId)),
+      Permission.update(Role.user(userId)),
+      Permission.delete(Role.user(userId)),
+    ];
+
+    // Check if profile already exists
+    try {
+      const existing = await databases.listDocuments(DATABASE_ID, PROFILES_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.limit(1),
+      ]);
+      if (existing.total > 0) {
+        // Profile exists — but check if Discord identity needs syncing
+        await this.syncDiscordIdentity(userId);
+        return;
+      }
+    } catch {
+      // Collection may not exist, try creating anyway
+    }
+
+    // Try to extract Discord user ID from OAuth identities
+    let discordUserId: string | null = null;
+    try {
+      const identities = await account.listIdentities();
+      const discordIdentity = identities.identities.find(
+        (i) => i.provider === "discord"
+      );
+      if (discordIdentity) {
+        discordUserId = discordIdentity.providerUid;
+      }
+    } catch {
+      // Identities API may not be available
+    }
+
+    // Create profile document
+    try {
+      await databases.createDocument(
+        DATABASE_ID,
+        PROFILES_COLLECTION_ID,
+        ID.unique(),
+        {
+          userId,
+          displayName: userName || null,
+          avatarUrl: null,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+          defaultProjectId: null,
+          weekStartsOn: 1,
+          defaultPriority: 2,
+          onboardingCompleted: false,
+        },
+        userPermissions
+      );
+    } catch (err) {
+      console.error("Failed to create profile document for OAuth user:", err);
+    }
+
+    // Create user_preferences document
+    try {
+      await databases.createDocument(
+        DATABASE_ID,
+        PREFERENCES_COLLECTION_ID,
+        ID.unique(),
+        {
+          userId,
+          emailEnabled: false,
+          discordEnabled: !!discordUserId,
+          discordUserId: discordUserId || null,
+          dailySummaryEnabled: false,
+          dailySummaryTime: "09:00",
+          defaultReminderBefore: "1h",
+        },
+        userPermissions
+      );
+    } catch (err) {
+      console.error("Failed to create preferences document for OAuth user:", err);
+    }
+  },
+
+  async syncDiscordIdentity(userId: string) {
+    try {
+      // Check if Discord identity exists but isn't saved in preferences yet
+      const identities = await account.listIdentities();
+      const discordIdentity = identities.identities.find(
+        (i) => i.provider === "discord"
+      );
+      if (!discordIdentity) return;
+
+      const prefs = await databases.listDocuments(DATABASE_ID, PREFERENCES_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.limit(1),
+      ]);
+      if (prefs.total === 0) return;
+
+      const prefDoc = prefs.documents[0];
+      // Only update if discordUserId is not already set
+      if (!prefDoc.discordUserId) {
+        await databases.updateDocument(DATABASE_ID, PREFERENCES_COLLECTION_ID, prefDoc.$id, {
+          discordUserId: discordIdentity.providerUid,
+          discordEnabled: true,
+        });
+      }
+    } catch {
+      // Non-critical, fail silently
+    }
   },
 
   async deleteAccount(userId: string) {

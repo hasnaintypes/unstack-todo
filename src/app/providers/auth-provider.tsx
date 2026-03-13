@@ -8,6 +8,8 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name?: string) => Promise<void>;
+  loginWithGoogle: () => void;
+  loginWithDiscord: () => void;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
@@ -24,6 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
+      // Ensure profile + preferences docs exist (handles first-time OAuth users)
+      if (currentUser) {
+        authService.ensureUserDocs(currentUser.$id, currentUser.name).catch(() => {});
+      }
     } finally {
       setIsLoading(false);
     }
@@ -44,14 +50,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await checkAuth();
   };
 
+  const loginWithGoogle = () => {
+    authService.loginWithGoogle();
+  };
+
+  const loginWithDiscord = () => {
+    authService.loginWithDiscord();
+  };
+
   const logout = async () => {
     await authService.logout();
     setUser(null);
-    window.location.href = "/";
+    window.location.href = "/auth/sign-in";
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, loginWithGoogle, loginWithDiscord, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );
