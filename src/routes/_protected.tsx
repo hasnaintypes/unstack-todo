@@ -98,8 +98,8 @@ function ProtectedLayout() {
     });
   };
 
-  // Show loading screen while auth is initializing — after all hooks
-  if (authLoading) {
+  // Block rendering until auth check completes — prevents flash of protected content
+  if (authLoading || !user) {
     return (
       <div className="flex h-svh w-full items-center justify-center bg-background">
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
