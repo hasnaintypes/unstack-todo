@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { TaskPriority } from "@/features/tasks/types/task.types";
 
 export interface TaskSuggestion {
@@ -6,14 +5,6 @@ export interface TaskSuggestion {
   description: string;
   priority: 1 | 2 | 3 | 4;
 }
-
-// --- Gemini setup ---
-// WARNING: VITE_GEMINI_API_KEY is bundled into client-side JS and visible in browser DevTools.
-// For production, proxy Gemini calls through an Appwrite Function or backend endpoint.
-// In Google AI Studio, restrict this key to your domain(s) to limit abuse.
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
-const model = genAI?.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // --- Template-based fallback data ---
 const TASK_TEMPLATES: Record<string, TaskSuggestion[]> = {
@@ -314,47 +305,33 @@ function fallbackTaskSuggestions(
   return TASK_TEMPLATES[category] || TASK_TEMPLATES.default;
 }
 
-// --- AI-powered functions ---
+// --- AI-powered functions (via Vercel API proxy) ---
+
+async function callAiProxy(body: Record<string, unknown>): Promise<Response> {
+  return fetch("/api/ai", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
 
 export async function generateTaskSuggestions(
   projectName: string,
   projectDescription: string
 ): Promise<TaskSuggestion[]> {
-  if (!model) {
-    return fallbackTaskSuggestions(projectName, projectDescription);
-  }
-
   try {
-    const prompt = `You are a project management assistant. Generate 5-8 actionable tasks for a project.
+    const res = await callAiProxy({
+      action: "suggest-tasks",
+      projectName,
+      projectDescription,
+    });
 
-Project name: "${projectName}"
-Project description: "${projectDescription || "No description provided"}"
+    if (!res.ok) throw new Error("AI proxy error");
 
-Return ONLY a JSON array (no markdown, no code fences) with objects having these fields:
-- "title": string (concise task title)
-- "description": string (1-2 sentence description)
-- "priority": number (1=Low, 2=Medium, 3=High, 4=Urgent)
-
-Example: [{"title":"Set up repo","description":"Initialize repository with linting.","priority":3}]`;
-
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
-    // Strip markdown code fences if present
-    const cleaned = text
-      .replace(/^```(?:json)?\s*\n?/i, "")
-      .replace(/\n?```\s*$/i, "")
-      .trim();
-    const parsed = JSON.parse(cleaned) as TaskSuggestion[];
-
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed.map((t) => ({
-        title: String(t.title),
-        description: String(t.description),
-        priority: ([1, 2, 3, 4].includes(t.priority) ? t.priority : 2) as 1 | 2 | 3 | 4,
-      }));
-    }
+    const data = (await res.json()) as TaskSuggestion[];
+    if (Array.isArray(data) && data.length > 0) return data;
   } catch (err) {
-    console.error("Gemini generateTaskSuggestions failed, using fallback:", err);
+    console.error("AI suggest-tasks failed, using fallback:", err);
   }
 
   return fallbackTaskSuggestions(projectName, projectDescription);
@@ -364,50 +341,45 @@ export async function autoSetPriority(
   taskTitle: string,
   taskDescription?: string
 ): Promise<TaskPriority> {
-  if (!model) return 2;
-
   try {
-    const prompt = `Given this task, return ONLY a single number (1, 2, 3, or 4) representing its priority.
+    const res = await callAiProxy({
+      action: "auto-priority",
+      taskTitle,
+      taskDescription,
+    });
 
-1 = Low (nice-to-have, no deadline pressure)
-2 = Medium (standard work, should be done soon)
-3 = High (important, time-sensitive)
-4 = Urgent (critical, must be done immediately)
+    if (!res.ok) throw new Error("AI proxy error");
 
-Task title: "${taskTitle}"
-${taskDescription ? `Task description: "${taskDescription}"` : ""}
-
-Respond with ONLY the number, nothing else.`;
-
-    const result = await model.generateContent(prompt);
-    const num = parseInt(result.response.text().trim(), 10);
-    if ([1, 2, 3, 4].includes(num)) return num as TaskPriority;
+    const data = (await res.json()) as { priority: number };
+    if ([1, 2, 3, 4].includes(data.priority)) return data.priority as TaskPriority;
   } catch (err) {
-    console.error("Gemini autoSetPriority failed:", err);
+    console.error("AI auto-priority failed:", err);
   }
 
   return 2;
 }
 
 export async function generateDescription(taskTitle: string): Promise<string> {
-  if (!model) return "";
-
   try {
-    const prompt = `Generate a helpful 1-2 sentence description for this task. Be concise and actionable.
+    const res = await callAiProxy({
+      action: "generate-description",
+      taskTitle,
+    });
 
-Task title: "${taskTitle}"
+    if (!res.ok) throw new Error("AI proxy error");
 
-Respond with ONLY the description text, nothing else.`;
-
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const data = (await res.json()) as { description: string };
+    return data.description || "";
   } catch (err) {
-    console.error("Gemini generateDescription failed:", err);
+    console.error("AI generate-description failed:", err);
   }
 
   return "";
 }
 
 export function hasAiKey(): boolean {
-  return !!apiKey;
+  // In production, AI is always available through the proxy.
+  // The proxy returns 501 if GEMINI_API_KEY is not configured,
+  // and each function falls back gracefully.
+  return true;
 }
