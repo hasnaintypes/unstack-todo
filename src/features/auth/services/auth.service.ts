@@ -1,10 +1,12 @@
 import { account, databases, ID, Query } from "@/config/appwrite";
 import { OAuthProvider, Permission, Role } from "appwrite";
+import { storageService } from "@/shared/services/storage.service";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PROFILES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROFILES_COLLECTION_ID || "profiles";
 const PREFERENCES_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_PREFERENCES_COLLECTION_ID || "user_preferences";
+const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
 
 export const authService = {
   async getCurrentUser() {
@@ -205,9 +207,42 @@ export const authService = {
   },
 
   async deleteAccount(userId: string) {
-    // Delete all user documents first
+    // 1. Delete avatar from storage
+    try {
+      const prefs = await account.getPrefs();
+      if (prefs.avatarFileId) {
+        try { await storageService.deleteTaskAttachment(prefs.avatarFileId); } catch { /* may be gone */ }
+      }
+    } catch { /* prefs may not exist */ }
+
+    // 2. Delete task attachment files from storage
+    try {
+      let offset = 0;
+      while (true) {
+        const tasks = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNotNull("attachments"),
+          Query.limit(100),
+          Query.offset(offset),
+        ]);
+        if (tasks.documents.length === 0) break;
+        for (const doc of tasks.documents) {
+          try {
+            const attachments = JSON.parse(doc.attachments);
+            if (Array.isArray(attachments)) {
+              for (const att of attachments) {
+                try { await storageService.deleteTaskAttachment(att.fileId || att.id); } catch { /* skip */ }
+              }
+            }
+          } catch { /* parse error, skip */ }
+        }
+        offset += tasks.documents.length;
+      }
+    } catch { /* tasks collection may not exist */ }
+
+    // 3. Delete all user documents with paginated loop
     const collections = [
-      import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks",
+      TASKS_COLLECTION_ID,
       import.meta.env.VITE_APPWRITE_PROJECTS_COLLECTION_ID || "projects",
       import.meta.env.VITE_APPWRITE_CATEGORIES_COLLECTION_ID || "categories",
       import.meta.env.VITE_APPWRITE_SUBTASKS_COLLECTION_ID || "subtasks",
@@ -219,13 +254,16 @@ export const authService = {
 
     for (const collectionId of collections) {
       try {
-        const docs = await databases.listDocuments(DATABASE_ID, collectionId, [
-          Query.equal("userId", userId),
-          Query.limit(500),
-        ]);
-        await Promise.all(
-          docs.documents.map((doc) => databases.deleteDocument(DATABASE_ID, collectionId, doc.$id))
-        );
+        while (true) {
+          const docs = await databases.listDocuments(DATABASE_ID, collectionId, [
+            Query.equal("userId", userId),
+            Query.limit(100),
+          ]);
+          if (docs.documents.length === 0) break;
+          await Promise.all(
+            docs.documents.map((doc) => databases.deleteDocument(DATABASE_ID, collectionId, doc.$id))
+          );
+        }
       } catch {
         // Collection may not exist or no docs, continue
       }
