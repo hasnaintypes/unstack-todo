@@ -118,11 +118,11 @@
 - ~~**Issue:** `Promise.all()` fires all requests in parallel, exceeding Appwrite rate limits.~~
 - ~~**Fix:** Added `processInChunks()` utility (batches of 15). Applied to all bulk operations. Added missing `Query.limit(500)`.~~
 
-### 17. `console.error`/`console.log` in Production (50+ instances)
+### ~~17. `console.error`/`console.log` in Production (50+ instances)~~ FIXED
 
-- **Files:** All service files, providers, components (50+ instances across 20 files)
-- **Issue:** Error details and stack traces exposed in browser console in production. Reveals code structure, API endpoints, and internal state.
-- **Fix:** Replace with proper logging service (Sentry, LogRocket) or wrap in `import.meta.env.DEV` guards.
+- ~~**Files:** All service files, providers, components (50+ instances across 20 files)~~
+- ~~**Issue:** Error details and stack traces exposed in browser console in production. Reveals code structure, API endpoints, and internal state.~~
+- ~~**Fix:** Created `src/shared/lib/logger.ts` (browser) and `api/lib/logger.ts` (server) using Better Stack (Logtail). Replaced all 53 `console.error` calls across 21 files. Logs ship to Better Stack in production, fall back to console in development.~~
 
 ### 18. Task Pagination Hardcoded to 1000
 
@@ -130,29 +130,29 @@
 - **Issue:** `Query.limit(1000)` loads all tasks at once. Tasks beyond 1000 are silently lost. Performance degrades for power users.
 - **Fix:** Implement cursor-based pagination or infinite scroll.
 
-### 19. Missing Timezone Handling
+### ~~19. Missing Timezone Handling~~ FIXED
 
-- **Files:** `src/features/tasks/hooks/use-task-filters.ts`, `src/features/tasks/components/task-item.tsx`
-- **Issue:** All date comparisons use `new Date()` without timezone consideration. "Today" in UTC may differ from the user's timezone.
-- **Fix:** Use `date-fns-tz` or normalize all dates to user's timezone.
+- ~~**Files:** `src/features/tasks/hooks/use-task-filters.ts`, `src/features/tasks/components/task-item.tsx`~~
+- ~~**Issue:** All date comparisons use `new Date()` without timezone consideration. "Today" in UTC may differ from the user's timezone.~~
+- ~~**Fix:** Replaced `new Date(dateString)` with `parseISO()` from date-fns, which creates local-midnight dates from date-only strings. Fixes isToday/isFuture near midnight in negative-UTC timezones.~~
 
-### 20. Silent Auth Failure
+### ~~20. Silent Auth Failure~~ FIXED
 
-- **File:** `src/features/auth/services/auth.service.ts` — `getCurrentUser()`
-- **Issue:** Returns `null` on any error without logging. Network failures, expired tokens, and server errors all look the same.
-- **Fix:** Differentiate error types — return `null` for 401 (not logged in), throw for network/server errors.
+- ~~**File:** `src/features/auth/services/auth.service.ts` — `getCurrentUser()`~~
+- ~~**Issue:** Returns `null` on any error without logging. Network failures, expired tokens, and server errors all look the same.~~
+- ~~**Fix:** Added `AppwriteException` check — return `null` for 401 (not logged in), throw for network/server errors.~~
 
-### 21. No Session Refresh
+### ~~21. No Session Refresh~~ FIXED
 
-- **File:** `src/app/providers/auth-provider.tsx`
-- **Issue:** No mechanism to refresh expired sessions. If session expires during use, API calls fail silently with no user feedback.
-- **Fix:** Detect 401 responses globally and redirect to login with a "session expired" message.
+- ~~**File:** `src/app/providers/auth-provider.tsx`~~
+- ~~**Issue:** No mechanism to refresh expired sessions. If session expires during use, API calls fail silently with no user feedback.~~
+- ~~**Fix:** Added `visibilitychange` listener to re-check session on tab focus. Added `sessionExpired` state with toast notification on redirect to sign-in.~~
 
-### 22. Unsafe Non-Null Assertion in main.tsx
+### ~~22. Unsafe Non-Null Assertion in main.tsx~~ FIXED
 
-- **File:** `src/main.tsx:15`
-- **Issue:** `auth: undefined!` uses TypeScript non-null assertion, which can cause runtime errors if accessed before auth initializes.
-- **Fix:** Properly type the context with `auth: AuthContext | undefined` and guard access.
+- ~~**File:** `src/main.tsx:15`~~
+- ~~**Issue:** `auth: undefined!` uses TypeScript non-null assertion, which can cause runtime errors if accessed before auth initializes.~~
+- ~~**Fix:** Replaced with valid default `{ user: null, isLoading: true, sessionExpired: false }`.~~
 
 ### 23. Task Form Component Too Large (338 lines)
 
@@ -184,32 +184,27 @@
 - **Issue:** Settings UI allows configuring reminder preferences (email, Discord, daily summary, per-task reminders) but no backend job sends actual notifications. Users configure reminders thinking they'll work.
 - **Fix:** Implement notification delivery via Appwrite Functions with email (SMTP) and Discord webhook integrations, or clearly mark as "coming soon" in the UI.
 
-### 28. Silent `.catch(() => {})` Swallowing Errors `NEW`
+### ~~28. Silent `.catch(() => {})` Swallowing Errors~~ FIXED
 
-- **Files:** `src/routes/_protected.tsx:55,149`
-- **Issue:** Two `.catch(() => {})` calls silently swallow errors from onboarding profile fetch and completion. If these fail, no debugging information exists.
-- **Fix:** At minimum log with `console.debug()` in dev mode, or use proper error reporting.
+- ~~**Files:** `src/routes/_protected.tsx:55,149`~~
+- ~~**Issue:** Two `.catch(() => {})` calls silently swallow errors from onboarding profile fetch and completion. If these fail, no debugging information exists.~~
+- ~~**Fix:** Replaced with `logger.warn()` calls for onboarding profile, focus mode preference, and onboarding completion.~~
 
-### 29. Hardcoded Route Detection in __root.tsx `NEW`
+### ~~29. Hardcoded Route Detection in __root.tsx~~ FIXED
 
-- **File:** `src/routes/__root.tsx`
-- **Issue:** Root layout checks 8+ hardcoded pathname prefixes to determine if the current route is protected. This breaks when new routes are added and doesn't scale.
-  ```ts
-  const isProtectedRoute =
-    location.pathname.startsWith("/inbox") ||
-    location.pathname.startsWith("/today") || ...
-  ```
-- **Fix:** Use TanStack Router route metadata or context-based detection instead of pathname matching.
+- ~~**File:** `src/routes/__root.tsx`~~
+- ~~**Issue:** Root layout checks 8+ hardcoded pathname prefixes to determine if the current route is protected. This breaks when new routes are added and doesn't scale.~~
+- ~~**Fix:** Inverted the check — only 2 marketing routes (`/` and `/about`) vs 10+ protected. New routes auto-get minimal layout.~~
 
 ---
 
 ## LOW
 
-### 30. Three Unused Dependencies
+### ~~30. Unused Dependencies~~ PARTIALLY FIXED
 
-- **File:** `package.json`
-- **Issue:** `node-appwrite` (server SDK, zero imports in `src/`), `inngest` (only used in scripts), `next-themes` (zero imports) are in production dependencies.
-- **Fix:** Remove `node-appwrite` and `next-themes`. Move `inngest` to `devDependencies`.
+- ~~**File:** `package.json`~~
+- ~~**Issue:** `next-themes` (zero imports) in production dependencies.~~
+- ~~**Fix:** Removed `next-themes`. `node-appwrite` and `inngest` kept — actively used by `api/` serverless functions.~~
 
 ### 31. `Forgot Password?` Link is Dead
 
@@ -253,11 +248,11 @@
 - **Issue:** Some icon-only buttons lack `aria-label` attributes.
 - **Fix:** Add descriptive `aria-label` to all icon buttons.
 
-### 38. `dbService` is Dead Code
+### ~~38. `dbService` is Dead Code~~ FIXED
 
-- **File:** `src/shared/services/db.service.ts`
-- **Issue:** Generic database wrapper never imported anywhere. All services call `databases` directly.
-- **Fix:** Remove the file.
+- ~~**File:** `src/shared/services/db.service.ts`~~
+- ~~**Issue:** Generic database wrapper never imported anywhere. All services call `databases` directly.~~
+- ~~**Fix:** Deleted `db.service.ts` and its sole consumer `database.types.ts`.~~
 
 ### 39. `safeParseAttachments` Casts Without Validation
 
@@ -271,10 +266,10 @@
 - **Issue:** Users can spam login attempts indefinitely. No throttling or lockout.
 - **Fix:** Add attempt counter with exponential backoff. Appwrite has some built-in protection, but client-side throttling improves UX.
 
-### 41. No CI/CD Pipeline
+### ~~41. No CI/CD Pipeline~~ FIXED
 
-- **Issue:** No GitHub Actions. No automated linting, type-checking, or deployment.
-- **Fix:** Add `.github/workflows/ci.yml` with lint, typecheck, build steps.
+- ~~**Issue:** No GitHub Actions. No automated linting, type-checking, or deployment.~~
+- ~~**Fix:** Added `.github/workflows/ci.yml` with lint, typecheck, build steps. Runs on push/PR to develop and master.~~
 
 ### 42. No Offline Indicator in UI `NEW`
 
@@ -373,9 +368,9 @@
 | #    | Improvement                     | Description                                                                                | Effort | Impact |
 | ---- | ------------------------------- | ------------------------------------------------------------------------------------------ | ------ | ------ |
 | D1   | **React Hook Form + Zod**       | All forms use raw `useState`. Migrate to react-hook-form with zod schemas for validation   | Medium | High   |
-| D2   | **CI/CD Pipeline**              | No GitHub Actions. Add lint, typecheck, build steps                                        | Medium | High   |
-| D3   | **Remove Dead Code**            | `node-appwrite`, `next-themes`, `inngest` (from deps), `db.service.ts`                     | Low    | Low    |
-| D4   | **Centralized Error Reporting** | Replace 50+ `console.error` calls with Sentry or similar. Dev-only logging for debug       | Medium | Medium |
+| ~~D2~~   | ~~**CI/CD Pipeline**~~              | ~~FIXED — Added `.github/workflows/ci.yml` with lint, typecheck, build~~                 | ~~Medium~~ | ~~High~~   |
+| ~~D3~~   | ~~**Remove Dead Code**~~            | ~~FIXED — Deleted `db.service.ts`, `database.types.ts`, removed `next-themes`~~          | ~~Low~~    | ~~Low~~    |
+| ~~D4~~   | ~~**Centralized Error Reporting**~~ | ~~FIXED — Better Stack logger replaces all 53 console.error calls~~                      | ~~Medium~~ | ~~Medium~~ |
 | D5   | **Stricter ESLint**             | Add `no-explicit-any` rule, `eslint-plugin-react` for component best practices             | Low    | Medium |
 
 ---
@@ -412,16 +407,18 @@
 20. ~~**F5** — Implement Focus Mode with settings toggle~~
 21. ~~**F7** — Removed (requires Appwrite paid plan)~~
 
-### Phase 4 — Quality & Scale
+### Phase 4 — Quality & Scale ✅ DONE
 
-22. **#17** — Replace `console.error` with proper logging / Sentry
-23. **#18** — Implement task pagination (cursor-based)
-24. **#19** — Add timezone handling
-25. **#20-21** — Handle auth failures and session refresh
-26. **#23-24** — Break up god components (task-add-dialog, task-details-sheet)
-27. **#29** — Replace hardcoded route detection with metadata
-28. **D2** — Add CI/CD pipeline
-29. **D3** — Remove dead code and unused deps
+22. ~~**#17** — Replaced console.error with Better Stack logger (53 calls across 21 files)~~
+23. **#18** — Skipped (task pagination — low priority for current user base)
+24. ~~**#19** — Fixed timezone handling with parseISO~~
+25. ~~**#20-21** — Differentiated auth errors + session refresh on tab focus~~
+26. **#23-24** — Skipped (god components — refactor deferred)
+27. ~~**#22** — Replaced unsafe non-null assertion in main.tsx~~
+28. ~~**#28** — Replaced silent .catch with logger.warn~~
+29. ~~**#29** — Replaced hardcoded route detection with inverse check~~
+30. ~~**D2** — Added GitHub Actions CI workflow~~
+31. ~~**D3** — Removed dead code (db.service.ts, database.types.ts, next-themes)~~
 
 ### Phase 5 — Feature Completion
 
