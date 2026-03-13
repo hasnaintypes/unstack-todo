@@ -48,6 +48,11 @@ export function PersonalInfoCard() {
     }
     setIsUploadingAvatar(true);
     try {
+      // Delete old avatar file if it exists
+      const currentAvatarId = (user?.prefs as Record<string, string> | undefined)?.avatarFileId;
+      if (currentAvatarId) {
+        try { await storageService.deleteTaskAttachment(currentAvatarId); } catch { /* old file may be gone */ }
+      }
       const result = await storageService.uploadTaskAttachment(file);
       const url = storageService.getFileDownloadUrl(result.$id);
       await account.updatePrefs({ avatarFileId: result.$id });
