@@ -1,5 +1,6 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
+import { processInChunks } from "@/shared/lib/utils";
 import type {
   CalendarTask,
   Subtask,
@@ -211,21 +212,21 @@ export const taskService = {
     userId: string
   ): Promise<CalendarTask[]> {
     try {
-      const docs = await Promise.all(
-        tasks.map((task) =>
-          databases.createDocument(
-            DATABASE_ID,
-            TASKS_COLLECTION_ID,
-            ID.unique(),
-            taskToDocument(task, userId),
-            [
-              Permission.read(Role.user(userId)),
-              Permission.update(Role.user(userId)),
-              Permission.delete(Role.user(userId)),
-            ]
-          )
-        )
-      );
+      const docs: Models.Document[] = [];
+      await processInChunks(tasks, async (task) => {
+        const doc = await databases.createDocument(
+          DATABASE_ID,
+          TASKS_COLLECTION_ID,
+          ID.unique(),
+          taskToDocument(task, userId),
+          [
+            Permission.read(Role.user(userId)),
+            Permission.update(Role.user(userId)),
+            Permission.delete(Role.user(userId)),
+          ]
+        );
+        docs.push(doc);
+      });
       return docs.map(documentToTask);
     } catch (error) {
       console.error("Error creating tasks batch:", error);
@@ -356,10 +357,8 @@ export const taskService = {
         Query.equal("taskId", taskId),
         Query.limit(500),
       ]);
-      await Promise.all(
-        comments.documents.map((doc) =>
-          databases.deleteDocument(DATABASE_ID, COMMENTS_COLLECTION_ID, doc.$id)
-        )
+      await processInChunks(comments.documents, (doc) =>
+        databases.deleteDocument(DATABASE_ID, COMMENTS_COLLECTION_ID, doc.$id)
       );
     } catch {
       // Comments collection may not exist or no comments, continue
@@ -413,15 +412,13 @@ export const taskService = {
         Query.equal("userId", userId),
         Query.equal("status", "completed"),
         Query.isNull("deletedAt"),
+        Query.limit(500),
       ]);
 
-      // Move all completed tasks to trash
-      await Promise.all(
-        response.documents.map((doc) =>
-          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
-            deletedAt: new Date().toISOString(),
-          })
-        )
+      await processInChunks(response.documents, (doc) =>
+        databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+          deletedAt: new Date().toISOString(),
+        })
       );
     } catch (error) {
       console.error("Error clearing completed:", error);
@@ -437,14 +434,13 @@ export const taskService = {
       const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
         Query.equal("userId", userId),
         Query.isNotNull("deletedAt"),
+        Query.limit(500),
       ]);
 
-      await Promise.all(
-        response.documents.map(async (doc) => {
-          await this.deleteTaskComments(doc.$id);
-          await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id);
-        })
-      );
+      await processInChunks(response.documents, async (doc) => {
+        await this.deleteTaskComments(doc.$id);
+        await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id);
+      });
     } catch (error) {
       console.error("Error emptying trash:", error);
       throw new Error("Failed to empty trash");
@@ -572,12 +568,11 @@ export const taskService = {
       const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
         Query.equal("userId", userId),
         Query.isNotNull("deletedAt"),
+        Query.limit(500),
       ]);
 
-      await Promise.all(
-        response.documents.map((doc) =>
-          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
-        )
+      await processInChunks(response.documents, (doc) =>
+        databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
       );
     } catch (error) {
       console.error("Error restoring all:", error);

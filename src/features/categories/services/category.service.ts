@@ -1,5 +1,6 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
+import { processInChunks } from "@/shared/lib/utils";
 import type { Category } from "@/features/categories/types/category.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -91,12 +92,10 @@ export const categoryService = {
         Query.equal("categoryId", categoryName),
         Query.limit(500),
       ]);
-      await Promise.all(
-        tasks.documents.map((doc) =>
-          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
-            categoryId: null,
-          })
-        )
+      await processInChunks(tasks.documents, (doc) =>
+        databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+          categoryId: null,
+        })
       );
     } catch {
       // Tasks collection may not exist or no tasks, continue
