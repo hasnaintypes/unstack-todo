@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isToday, isFuture, startOfDay } from "date-fns";
+import { isToday, isFuture, startOfDay, parseISO } from "date-fns";
 import { useTasks } from "@/shared/hooks/use-tasks";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useTrashTasksQuery } from "@/features/tasks/hooks/use-tasks-query";
@@ -34,7 +34,7 @@ export function useTodayTasks() {
       if (!task.dueDate) return false;
 
       try {
-        return isToday(new Date(task.dueDate));
+        return isToday(parseISO(task.dueDate));
       } catch {
         return false;
       }
@@ -55,7 +55,7 @@ export function useUpcomingTasks() {
       if (!task.dueDate) return false;
 
       try {
-        const date = new Date(task.dueDate);
+        const date = parseISO(task.dueDate);
         return isFuture(date) && !isToday(date);
       } catch {
         return false;
@@ -103,7 +103,7 @@ export function useOverdueTasks() {
       if (!task.dueDate) return false;
 
       try {
-        const taskDate = startOfDay(new Date(task.dueDate));
+        const taskDate = startOfDay(parseISO(task.dueDate));
         return taskDate < today;
       } catch {
         return false;

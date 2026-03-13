@@ -1,5 +1,5 @@
 import * as React from "react";
-import { format, isToday, isTomorrow, isPast, isThisWeek } from "date-fns";
+import { format, isToday, isTomorrow, isPast, isThisWeek, parseISO } from "date-fns";
 import {
   Calendar,
   Pencil,
@@ -55,12 +55,11 @@ const getPriorityColor = (priority: number): string => {
 
 const formatDueDate = (dueDate: string): { text: string; color: string; isPastDue: boolean } => {
   try {
-    const date = new Date(dueDate);
+    const date = parseISO(dueDate);
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
-    const taskDate = new Date(date);
-    taskDate.setHours(0, 0, 0, 0);
+    const taskDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
     if (isPast(taskDate) && taskDate < now) {
       return {
