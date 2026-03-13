@@ -203,6 +203,100 @@ pnpm build
 pnpm preview
 ```
 
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start Vite dev server |
+| `pnpm build` | TypeScript check + production build |
+| `pnpm typecheck` | Run TypeScript compiler (no emit) |
+| `pnpm lint` | Run ESLint |
+| `pnpm preview` | Preview production build locally |
+| `pnpm setup:db` | Create Appwrite database collections |
+
+## API Routes (Vercel Serverless Functions)
+
+The `api/` directory contains Vercel serverless functions that run server-side. These are **not** part of the Vite client bundle.
+
+### `POST /api/ai`
+
+Proxies AI requests to Google Gemini, keeping the API key server-side only.
+
+**Environment variable:** `GEMINI_API_KEY` (set in Vercel Dashboard > Settings > Environment Variables)
+
+**Request body:**
+
+```json
+{ "action": "<action-name>", ...params }
+```
+
+**Actions:**
+
+| Action | Params | Response |
+|--------|--------|----------|
+| `suggest-tasks` | `projectName`, `projectDescription` | `TaskSuggestion[]` — array of `{ title, description, priority }` |
+| `auto-priority` | `taskTitle`, `taskDescription?` | `{ priority: 1\|2\|3\|4 }` |
+| `generate-description` | `taskTitle` | `{ description: string }` |
+
+**Example:**
+
+```bash
+curl -X POST https://your-app.vercel.app/api/ai \
+  -H "Content-Type: application/json" \
+  -d '{"action": "suggest-tasks", "projectName": "My App", "projectDescription": "A todo app"}'
+```
+
+### Local Development with AI
+
+The AI proxy runs on Vercel, so it won't work with `pnpm dev` by default. To use AI features locally:
+
+1. Install the Vercel CLI:
+   ```bash
+   pnpm add -g vercel
+   ```
+
+2. Link your project:
+   ```bash
+   vercel link
+   ```
+
+3. Pull environment variables (includes `GEMINI_API_KEY`):
+   ```bash
+   vercel env pull .env.local
+   ```
+
+4. Run the dev server with Vercel (serves both Vite + API routes):
+   ```bash
+   vercel dev
+   ```
+
+   This starts the app at `http://localhost:3000` with the `/api/ai` route working locally.
+
+> **Note:** If you skip this, AI features gracefully fall back to template-based suggestions — no errors, just no Gemini-powered responses.
+
+### `POST /api/inngest`
+
+Handles Inngest webhook events for scheduled functions (reminders, daily summary).
+
+**Environment variables:** `INNGEST_SIGNING_KEY`, `INNGEST_EVENT_KEY` (set in Vercel Dashboard)
+
+## OAuth Setup
+
+### Google OAuth
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) > APIs & Services > Credentials
+2. Create an OAuth 2.0 Client ID (Web application)
+3. Add authorized JavaScript origins: `https://your-app.vercel.app`
+4. Add authorized redirect URI: `https://cloud.appwrite.io/v1/account/sessions/oauth2/callback/google/<APPWRITE_PROJECT_ID>`
+5. In Appwrite Console > Auth > Settings > Google, enter the Client ID and Secret
+
+### Discord OAuth
+
+1. Go to [Discord Developer Portal](https://discord.com/developers/applications) > New Application
+2. Go to OAuth2 tab, copy Client ID and reset/copy Client Secret
+3. Add redirect URL: `https://cloud.appwrite.io/v1/account/sessions/oauth2/callback/discord/<APPWRITE_PROJECT_ID>`
+4. In Appwrite Console > Auth > Settings > Discord, enter the Client ID and Secret
+
 ## Project Structure
 
 ```
