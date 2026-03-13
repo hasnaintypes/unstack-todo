@@ -40,5 +40,3 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
     </PersistQueryClientProvider>
   );
 }
-
-export { queryClient };
