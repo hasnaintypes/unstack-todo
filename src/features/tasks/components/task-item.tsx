@@ -314,7 +314,7 @@ function TaskItemInner({
             {task.tags && task.tags.length > 0 && (
               <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
                 <span className="text-muted-foreground font-medium">Tags:</span>
-                {task.tags.map((tag, i) => (
+                {task.tags.map((tag) => (
                   <span
                     key={tag}
                     className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-medium text-indigo-600 dark:text-indigo-400"

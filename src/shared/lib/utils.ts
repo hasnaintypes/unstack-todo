@@ -5,9 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export async function processInChunks<T>(
+export async function processInChunks<T, R>(
   items: T[],
-  fn: (item: T) => Promise<unknown>,
+  fn: (item: T) => Promise<R>,
   chunkSize = 15
 ): Promise<void> {
   for (let i = 0; i < items.length; i += chunkSize) {

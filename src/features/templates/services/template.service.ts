@@ -1,6 +1,7 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
 import type { TaskTemplate } from "../types/template.types";
+
 import type { Subtask, TaskPriority } from "@/features/tasks/types/task.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -16,7 +17,7 @@ function safeParseSubtasks(raw: string): Subtask[] {
   }
 }
 
-function documentToTemplate(doc: Models.Document): TaskTemplate {
+function documentToTemplate(doc: Models.DefaultDocument): TaskTemplate {
   return {
     id: doc.$id,
     userId: doc.userId,

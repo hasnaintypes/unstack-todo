@@ -65,7 +65,7 @@ const Features = () => {
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[22rem]">
-          {features.map((feature, i) => (
+          {features.map((feature) => (
             <div
               key={feature.title}
               className={cn(
@@ -106,7 +106,7 @@ const Features = () => {
                   {/* Tags / Highlights (Matching your image) */}
                   {feature.highlights && (
                     <div className="flex flex-wrap gap-2 pt-2">
-                      {feature.highlights.map((tag, idx) => (
+                      {feature.highlights.map((tag) => (
                         <span
                           key={tag}
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/5 border border-orange-500/20 text-[11px] font-medium text-orange-500/80"

@@ -286,6 +286,7 @@ const USER_PREFERENCES = {
       required: false,
       defaultValue: "1h",
     },
+    { key: "focusModeDefault", type: "boolean", required: false, defaultValue: false },
   ],
   indexes: [
     { key: "idx_userId", type: "unique", attributes: ["userId"] },

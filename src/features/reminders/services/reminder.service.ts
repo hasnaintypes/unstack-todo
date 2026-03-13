@@ -2,6 +2,7 @@ import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
 import type { UserReminderPreferences } from "../types/reminder.types";
 
+
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PREFERENCES_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_PREFERENCES_COLLECTION_ID ||
@@ -14,9 +15,10 @@ const DEFAULT_PREFERENCES: Omit<UserReminderPreferences, "id" | "userId"> = {
   dailySummaryEnabled: false,
   dailySummaryTime: "09:00",
   defaultReminderBefore: "1h",
+  focusModeDefault: false,
 };
 
-function documentToPreferences(doc: Models.Document): UserReminderPreferences {
+function documentToPreferences(doc: Models.DefaultDocument): UserReminderPreferences {
   return {
     id: doc.$id,
     userId: doc.userId,
@@ -26,6 +28,7 @@ function documentToPreferences(doc: Models.Document): UserReminderPreferences {
     dailySummaryEnabled: doc.dailySummaryEnabled ?? false,
     dailySummaryTime: doc.dailySummaryTime || "09:00",
     defaultReminderBefore: doc.defaultReminderBefore || "1h",
+    focusModeDefault: doc.focusModeDefault ?? false,
   };
 }
 
@@ -66,7 +69,7 @@ export const reminderService = {
     updates: Partial<Omit<UserReminderPreferences, "id" | "userId">>
   ): Promise<UserReminderPreferences> {
     try {
-      const doc = await databases.updateDocument(
+      const doc = await databases.updateDocument<Models.DefaultDocument>(
         DATABASE_ID,
         PREFERENCES_COLLECTION_ID,
         preferencesId,

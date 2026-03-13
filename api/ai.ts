@@ -7,7 +7,7 @@ const model = genAI?.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 function sanitize(input: unknown, maxLength = 200): string {
   if (typeof input !== "string") return "";
-  return input.replace(/[^\w\s.,!?;:'"()\-@#&+=\/]/g, "").slice(0, maxLength).trim();
+  return input.replace(/[^\w\s.,!?;:'"()\-@#&+=/]/g, "").slice(0, maxLength).trim();
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

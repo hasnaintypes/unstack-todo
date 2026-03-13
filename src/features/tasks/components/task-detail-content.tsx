@@ -129,7 +129,7 @@ export function TaskDetailContent({
         {task.tags && task.tags.length > 0 && (
           <PropertyRow icon={<Tag className="size-4 text-indigo-500" />} label="Tags">
             <div className="flex flex-wrap gap-1">
-              {task.tags.map((tag, i) => (
+              {task.tags.map((tag) => (
                 <Badge
                   key={tag}
                   variant="outline"

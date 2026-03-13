@@ -14,7 +14,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, signUpSchema } from "@/shared/lib/validation";
 import type { z } from "zod";
@@ -44,7 +44,8 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
   });
 
   const form = isSignIn ? signInForm : signUpForm;
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = form;
+  const { handleSubmit, formState: { errors, isSubmitting } } = form;
+  const register = (isSignIn ? signInForm : signUpForm).register as unknown as ReturnType<typeof useForm<FieldValues>>["register"];
 
   const onSubmit = async (data: SignInData | SignUpData) => {
     try {
@@ -96,7 +97,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
                 id="name"
                 type="text"
                 placeholder="John Doe"
-                {...(signUpForm.register as typeof register)("name")}
+                {...register("name")}
                 disabled={isSubmitting}
               />
               {!isSignIn && "name" in errors && errors.name && (

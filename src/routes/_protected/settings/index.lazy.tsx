@@ -1,5 +1,5 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Sun,
   Moon,
@@ -10,6 +10,7 @@ import {
   Upload,
   Loader2,
   HardDrive,
+  Maximize2,
 } from "lucide-react";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
@@ -18,6 +19,7 @@ import { cn } from "@/shared/lib/utils";
 import { useTheme } from "@/app/providers/theme-provider";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { ReminderSettings } from "@/features/reminders/components/reminder-settings";
+import { reminderService } from "@/features/reminders/services/reminder.service";
 import { taskService } from "@/features/tasks/services/task.service";
 import { useTasks } from "@/shared/hooks/use-tasks";
 import { toast } from "sonner";
@@ -39,7 +41,30 @@ function SettingsPage() {
   const { refreshTasks } = useTasks();
   const [isExporting, setIsExporting] = useState<"json" | "csv" | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [focusModeDefault, setFocusModeDefault] = useState(false);
+  const [preferencesId, setPreferencesId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load focus mode preference
+  useEffect(() => {
+    if (!user?.$id) return;
+    reminderService.getPreferences(user.$id).then((prefs) => {
+      setFocusModeDefault(prefs.focusModeDefault ?? false);
+      if (prefs.id) setPreferencesId(prefs.id);
+    }).catch(() => {});
+  }, [user?.$id]);
+
+  const handleFocusModeToggle = async (checked: boolean) => {
+    setFocusModeDefault(checked);
+    if (!preferencesId) return;
+    try {
+      await reminderService.updatePreferences(preferencesId, { focusModeDefault: checked });
+      toast.success(checked ? "Focus mode will be enabled on startup" : "Focus mode default disabled");
+    } catch {
+      setFocusModeDefault(!checked);
+      toast.error("Failed to update focus mode preference");
+    }
+  };
 
   const handleExport = async (format: "json" | "csv") => {
     if (!user?.$id || isExporting) return;
@@ -184,6 +209,14 @@ function SettingsPage() {
               </button>
             ))}
           </div>
+          <Separator className="my-4" />
+          <SettingRow
+            icon={<Maximize2 className="size-4" />}
+            title="Focus mode on startup"
+            description="Start in distraction-free mode (hide sidebar & header)"
+          >
+            <Switch checked={focusModeDefault} onCheckedChange={handleFocusModeToggle} />
+          </SettingRow>
         </div>
       </div>
 

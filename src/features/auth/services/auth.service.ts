@@ -64,6 +64,7 @@ export const authService = {
           dailySummaryEnabled: false,
           dailySummaryTime: "09:00",
           defaultReminderBefore: "1h",
+          focusModeDefault: false,
         },
         userPermissions
       );
@@ -170,6 +171,7 @@ export const authService = {
           dailySummaryEnabled: false,
           dailySummaryTime: "09:00",
           defaultReminderBefore: "1h",
+          focusModeDefault: false,
         },
         userPermissions
       );

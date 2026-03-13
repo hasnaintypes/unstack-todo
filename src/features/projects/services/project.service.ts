@@ -3,6 +3,7 @@ import { Permission, Role, type Models } from "appwrite";
 import { processInChunks } from "@/shared/lib/utils";
 import type { Project } from "@/features/projects/types/project.types";
 
+
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PROJECTS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROJECTS_COLLECTION_ID || "projects";
 const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
@@ -16,7 +17,7 @@ function generateSlug(name: string): string {
     .replace(/-+/g, "-");
 }
 
-function documentToProject(doc: Models.Document): Project {
+function documentToProject(doc: Models.DefaultDocument): Project {
   return {
     id: doc.$id,
     name: doc.name,
@@ -85,7 +86,7 @@ export const projectService = {
     if (updates.icon !== undefined) payload.icon = updates.icon || null;
     if (updates.order !== undefined) payload.position = updates.order;
 
-    const doc = await databases.updateDocument(
+    const doc = await databases.updateDocument<Models.DefaultDocument>(
       DATABASE_ID,
       PROJECTS_COLLECTION_ID,
       projectId,
@@ -107,7 +108,7 @@ export const projectService = {
         Query.limit(500),
       ]);
       await processInChunks(tasks.documents, (doc) =>
-        databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+        databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
           projectId: null,
         })
       );

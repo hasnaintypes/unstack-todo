@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { User, LogOut, Settings, Search } from "lucide-react";
+import { useMemo } from "react";
+import { User, LogOut, Settings, Search, Maximize2 } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { storageService } from "@/shared/services/storage.service";
@@ -15,6 +15,7 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 import { Separator } from "@/shared/components/ui/separator";
+import { Button } from "@/shared/components/ui/button";
 import { CommandPalette } from "@/shared/components/command-palette";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -38,9 +39,10 @@ function getPageTitle(pathname: string): string {
 interface DashboardHeaderProps {
   searchOpen?: boolean;
   onSearchOpenChange?: (open: boolean) => void;
+  onToggleFocusMode?: () => void;
 }
 
-export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHeaderProps) {
+export function DashboardHeader({ searchOpen, onSearchOpenChange, onToggleFocusMode }: DashboardHeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,16 +57,11 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
     navigate({ to: "/settings" });
   };
 
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const avatarFileId = (user?.prefs as Record<string, string> | undefined)?.avatarFileId;
-
-  useEffect(() => {
-    if (avatarFileId) {
-      setAvatarUrl(storageService.getFileDownloadUrl(avatarFileId).toString());
-    } else {
-      setAvatarUrl(null);
-    }
-  }, [avatarFileId]);
+  const avatarUrl = useMemo(
+    () => (avatarFileId ? storageService.getFileDownloadUrl(avatarFileId).toString() : null),
+    [avatarFileId]
+  );
 
   const fallbackAvatarUrl = useMemo(
     () => `https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || "User"}`,
@@ -108,8 +105,19 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
         </button>
       </div>
 
-      {/* Right: Avatar */}
-      <div className="flex items-center gap-4">
+      {/* Right: Focus + Avatar */}
+      <div className="flex items-center gap-2">
+        {onToggleFocusMode && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-9"
+            onClick={onToggleFocusMode}
+            title="Focus Mode (F)"
+          >
+            <Maximize2 className="size-4" />
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 rounded-full outline-none transition-transform active:scale-95">

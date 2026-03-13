@@ -3,6 +3,7 @@ import { Permission, Role, type Models } from "appwrite";
 import { processInChunks } from "@/shared/lib/utils";
 import type { Category } from "@/features/categories/types/category.types";
 
+
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const CATEGORIES_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_CATEGORIES_COLLECTION_ID || "categories";
@@ -17,7 +18,7 @@ function generateSlug(name: string): string {
     .replace(/-+/g, "-");
 }
 
-function documentToCategory(doc: Models.Document): Category {
+function documentToCategory(doc: Models.DefaultDocument): Category {
   return {
     id: doc.$id,
     name: doc.name,
@@ -67,7 +68,7 @@ export const categoryService = {
     }
     if (updates.color !== undefined) payload.color = updates.color || null;
 
-    const doc = await databases.updateDocument(
+    const doc = await databases.updateDocument<Models.DefaultDocument>(
       DATABASE_ID,
       CATEGORIES_COLLECTION_ID,
       categoryId,
@@ -93,7 +94,7 @@ export const categoryService = {
         Query.limit(500),
       ]);
       await processInChunks(tasks.documents, (doc) =>
-        databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+        databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
           categoryId: null,
         })
       );

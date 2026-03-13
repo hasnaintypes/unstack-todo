@@ -125,7 +125,7 @@ function safeParseAttachments(raw: string): Attachment[] {
 /**
  * Convert Appwrite document to CalendarTask
  */
-function documentToTask(doc: Models.Document): CalendarTask {
+function documentToTask(doc: Models.DefaultDocument): CalendarTask {
   return {
     id: doc.$id,
     title: doc.title,
@@ -171,7 +171,7 @@ export const taskService = {
    */
   async getTask(taskId: string): Promise<CalendarTask> {
     try {
-      const doc = await databases.getDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
+      const doc = await databases.getDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
 
       return documentToTask(doc);
     } catch (error) {
@@ -212,7 +212,7 @@ export const taskService = {
     userId: string
   ): Promise<CalendarTask[]> {
     try {
-      const docs: Models.Document[] = [];
+      const docs: Models.DefaultDocument[] = [];
       await processInChunks(tasks, async (task) => {
         const doc = await databases.createDocument(
           DATABASE_ID,
@@ -282,7 +282,7 @@ export const taskService = {
             : null;
       }
 
-      const doc = await databases.updateDocument(
+      const doc = await databases.updateDocument<Models.DefaultDocument>(
         DATABASE_ID,
         TASKS_COLLECTION_ID,
         taskId,
@@ -302,11 +302,11 @@ export const taskService = {
   async toggleTaskComplete(taskId: string): Promise<CalendarTask> {
     try {
       // First get the current task
-      const currentTask = await databases.getDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
+      const currentTask = await databases.getDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
 
       const newStatus = currentTask.status === "completed" ? "todo" : "completed";
 
-      const doc = await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+      const doc = await databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
         status: newStatus,
         completedAt: newStatus === "completed" ? new Date().toISOString() : null,
       });
@@ -337,7 +337,7 @@ export const taskService = {
    */
   async restoreFromTrash(taskId: string): Promise<CalendarTask> {
     try {
-      const doc = await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+      const doc = await databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
         deletedAt: null,
       });
 
@@ -416,7 +416,7 @@ export const taskService = {
       ]);
 
       await processInChunks(response.documents, (doc) =>
-        databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+        databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
           deletedAt: new Date().toISOString(),
         })
       );
@@ -572,7 +572,7 @@ export const taskService = {
       ]);
 
       await processInChunks(response.documents, (doc) =>
-        databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
+        databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
       );
     } catch (error) {
       console.error("Error restoring all:", error);
