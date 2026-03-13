@@ -15,6 +15,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { OnboardingDialog, onboardingService } from "@/features/onboarding";
 import { reminderService } from "@/features/reminders/services/reminder.service";
 import { toast } from "sonner";
+import { logger } from "@/shared/lib/logger";
 
 const PAGE_TITLES: Record<string, string> = {
   "/inbox": "Inbox",
@@ -79,7 +80,7 @@ function ProtectedLayout() {
         setProfileDocId(profile.$id);
         setOnboardingOpen(true);
       }
-    }).catch(() => {});
+    }).catch((err) => logger.warn("Failed to load onboarding profile", { error: err }));
   }, [user]);
 
   // Load focus mode default from user preferences
@@ -89,7 +90,7 @@ function ProtectedLayout() {
       if (prefs.focusModeDefault) {
         setFocusMode(true);
       }
-    }).catch(() => {});
+    }).catch((err) => logger.warn("Failed to load focus mode preference", { error: err }));
   }, [user]);
 
   const toggleFocusMode = useCallback(() => setFocusMode((prev) => !prev), []);
@@ -232,7 +233,7 @@ function ProtectedLayout() {
         onComplete={() => {
           setOnboardingOpen(false);
           if (profileDocId) {
-            onboardingService.completeOnboarding(profileDocId).catch(() => {});
+            onboardingService.completeOnboarding(profileDocId).catch((err) => logger.warn("Failed to complete onboarding", { error: err }));
           }
         }}
       />
