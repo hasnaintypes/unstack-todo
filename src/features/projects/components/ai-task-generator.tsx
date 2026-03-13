@@ -3,6 +3,7 @@ import { Sparkles, X, Check, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { cn } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
 import { generateTaskSuggestions, type TaskSuggestion } from "@/shared/services/ai.service";
 import type { Project } from "@/features/projects/types/project.types";
 
@@ -31,7 +32,7 @@ export function AiTaskGenerator({
       setSuggestions(result);
       setSelectedSuggestions(new Set(result.map((_: TaskSuggestion, i: number) => i)));
     } catch (err) {
-      console.error("Error generating suggestions:", err);
+      logger.error("Error generating suggestions", { error: err });
     } finally {
       setIsGenerating(false);
     }
@@ -61,7 +62,7 @@ export function AiTaskGenerator({
       await onAddTasks(selected);
       onClose();
     } catch (err) {
-      console.error("Error adding tasks:", err);
+      logger.error("Error adding tasks", { error: err });
     } finally {
       setIsAdding(false);
     }

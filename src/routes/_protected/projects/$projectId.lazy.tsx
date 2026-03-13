@@ -17,6 +17,7 @@ import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 import type { TaskSuggestion } from "@/shared/services/ai.service";
 import { toast } from "sonner";
+import { logger } from "@/shared/lib/logger";
 
 export const Route = createLazyFileRoute("/_protected/projects/$projectId")({
   component: ProjectDetailPage,
@@ -108,7 +109,7 @@ function ProjectDetailPage() {
       await deleteProject(project.id);
       navigate({ to: "/inbox" });
     } catch (err) {
-      console.error("Error deleting project:", err);
+      logger.error("Error deleting project", { error: err });
       toast.error("Failed to delete project");
     } finally {
       setIsDeleting(false);
@@ -123,7 +124,7 @@ function ProjectDetailPage() {
         await updateProject(project.id, data);
         toast.success("Project updated");
       } catch (err) {
-        console.error("Error updating project:", err);
+        logger.error("Error updating project", { error: err });
         toast.error("Failed to update project");
       }
     },

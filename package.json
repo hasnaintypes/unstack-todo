@@ -21,6 +21,8 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.2",
+    "@logtail/browser": "^0.5.8",
+    "@logtail/node": "^0.5.8",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/query-sync-storage-persister": "^5.90.24",
     "@tanstack/react-query": "^5.90.21",

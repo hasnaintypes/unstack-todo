@@ -1,6 +1,7 @@
 import { account, databases, ID, Query } from "@/config/appwrite";
 import { OAuthProvider, Permission, Role } from "appwrite";
 import { storageService } from "@/shared/services/storage.service";
+import { logger } from "@/shared/lib/logger";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PROFILES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROFILES_COLLECTION_ID || "profiles";
@@ -48,7 +49,7 @@ export const authService = {
         userPermissions
       );
     } catch (err) {
-      console.error("Failed to create profile document:", err);
+      logger.error("Failed to create profile document", { error: err });
     }
 
     // Create user_preferences document
@@ -69,7 +70,7 @@ export const authService = {
         userPermissions
       );
     } catch (err) {
-      console.error("Failed to create user preferences document:", err);
+      logger.error("Failed to create user preferences document", { error: err });
     }
 
     return user;
@@ -154,7 +155,7 @@ export const authService = {
         userPermissions
       );
     } catch (err) {
-      console.error("Failed to create profile document for OAuth user:", err);
+      logger.error("Failed to create profile document for OAuth user", { error: err });
     }
 
     // Create user_preferences document
@@ -176,7 +177,7 @@ export const authService = {
         userPermissions
       );
     } catch (err) {
-      console.error("Failed to create preferences document for OAuth user:", err);
+      logger.error("Failed to create preferences document for OAuth user", { error: err });
     }
   },
 

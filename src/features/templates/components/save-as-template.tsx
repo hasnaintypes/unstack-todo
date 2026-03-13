@@ -12,6 +12,7 @@ import { Input } from "@/shared/components/ui/input";
 import { templateService } from "../services/template.service";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 import { toast } from "sonner";
+import { logger } from "@/shared/lib/logger";
 
 interface SaveAsTemplateProps {
   task: CalendarTask;
@@ -46,7 +47,7 @@ export function SaveAsTemplate({ task, userId, open, onOpenChange }: SaveAsTempl
       });
       onOpenChange(false);
     } catch (error) {
-      console.error("Error saving template:", error);
+      logger.error("Error saving template", { error });
       toast.error("Failed to save template");
     } finally {
       setIsSaving(false);

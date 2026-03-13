@@ -44,6 +44,7 @@ import { useProjects } from "@/shared/hooks/use-projects";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { autoSetPriority, generateDescription, hasAiKey } from "@/shared/services/ai.service";
 import { cn } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
 import {
   Tooltip,
   TooltipContent,
@@ -196,7 +197,7 @@ export function TaskAddDialog({
       await addCategory({ name: label });
       setCategory(label);
     } catch (err) {
-      console.error("Error creating category:", err);
+      logger.error("Error creating category", { error: err });
     }
   };
 
@@ -214,7 +215,7 @@ export function TaskAddDialog({
       await addProject({ name: label });
       setProject(label);
     } catch (err) {
-      console.error("Error creating project:", err);
+      logger.error("Error creating project", { error: err });
     }
   };
 
@@ -258,7 +259,7 @@ export function TaskAddDialog({
       resetForm();
       onOpenChange?.(false);
     } catch (err) {
-      console.error("Error saving task:", err);
+      logger.error("Error saving task", { error: err });
     } finally {
       setIsSaving(false);
     }

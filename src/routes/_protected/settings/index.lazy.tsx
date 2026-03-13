@@ -23,6 +23,7 @@ import { reminderService } from "@/features/reminders/services/reminder.service"
 import { taskService } from "@/features/tasks/services/task.service";
 import { useTasks } from "@/shared/hooks/use-tasks";
 import { toast } from "sonner";
+import { logger } from "@/shared/lib/logger";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 
 export const Route = createLazyFileRoute("/_protected/settings/")({
@@ -87,7 +88,7 @@ function SettingsPage() {
       URL.revokeObjectURL(url);
       toast.success(`Tasks exported as ${format.toUpperCase()}`);
     } catch (error) {
-      console.error("Export error:", error);
+      logger.error("Export error", { error });
       toast.error("Failed to export tasks");
     } finally {
       setIsExporting(null);
@@ -147,7 +148,7 @@ function SettingsPage() {
       await refreshTasks();
       toast.success(`${imported.length} task${imported.length !== 1 ? "s" : ""} imported`);
     } catch (error) {
-      console.error("Import error:", error);
+      logger.error("Import error", { error });
       toast.error(
         `Failed to import: ${error instanceof Error ? error.message : "Unknown error"}`
       );

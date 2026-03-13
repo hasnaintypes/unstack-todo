@@ -1,6 +1,7 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
 import type { TaskTemplate } from "../types/template.types";
+import { logger } from "@/shared/lib/logger";
 
 import type { Subtask, TaskPriority } from "@/features/tasks/types/task.types";
 
@@ -41,7 +42,7 @@ export const templateService = {
       ]);
       return response.documents.map(documentToTemplate);
     } catch (error) {
-      console.error("Error fetching templates:", error);
+      logger.error("Error fetching templates", { error });
       return [];
     }
   },

@@ -1,6 +1,7 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
 import { processInChunks } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
 import type {
   CalendarTask,
   Subtask,
@@ -54,12 +55,6 @@ const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
 const COMMENTS_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_TASK_COMMENTS_COLLECTION_ID || "task_comments";
-
-if (!DATABASE_ID) {
-  console.error(
-    "Missing Appwrite configuration. Please set VITE_APPWRITE_DATABASE_ID in your .env file"
-  );
-}
 
 /**
  * Convert CalendarTask to Appwrite document format
@@ -161,7 +156,7 @@ export const taskService = {
 
       return response.documents.map(documentToTask);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      logger.error("Error fetching tasks", { error });
       throw new Error("Failed to fetch tasks");
     }
   },
@@ -175,7 +170,7 @@ export const taskService = {
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error fetching task:", error);
+      logger.error("Error fetching task", { error });
       throw new Error("Failed to fetch task");
     }
   },
@@ -199,7 +194,7 @@ export const taskService = {
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error creating task:", error);
+      logger.error("Error creating task", { error });
       throw new Error("Failed to create task");
     }
   },
@@ -229,7 +224,7 @@ export const taskService = {
       });
       return docs.map(documentToTask);
     } catch (error) {
-      console.error("Error creating tasks batch:", error);
+      logger.error("Error creating tasks batch", { error });
       throw new Error("Failed to create tasks");
     }
   },
@@ -291,7 +286,7 @@ export const taskService = {
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error updating task:", error);
+      logger.error("Error updating task", { error });
       throw new Error("Failed to update task");
     }
   },
@@ -313,7 +308,7 @@ export const taskService = {
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error toggling task:", error);
+      logger.error("Error toggling task", { error });
       throw new Error("Failed to toggle task");
     }
   },
@@ -327,7 +322,7 @@ export const taskService = {
         deletedAt: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("Error moving task to trash:", error);
+      logger.error("Error moving task to trash", { error });
       throw new Error("Failed to move task to trash");
     }
   },
@@ -343,7 +338,7 @@ export const taskService = {
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error restoring task:", error);
+      logger.error("Error restoring task", { error });
       throw new Error("Failed to restore task");
     }
   },
@@ -373,7 +368,7 @@ export const taskService = {
       await this.deleteTaskComments(taskId);
       await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
     } catch (error) {
-      console.error("Error deleting task:", error);
+      logger.error("Error deleting task", { error });
       throw new Error("Failed to delete task");
     }
   },
@@ -398,7 +393,7 @@ export const taskService = {
           }) as CalendarTask & { deletedAt: string }
       );
     } catch (error) {
-      console.error("Error fetching trash:", error);
+      logger.error("Error fetching trash", { error });
       throw new Error("Failed to fetch trash");
     }
   },
@@ -421,7 +416,7 @@ export const taskService = {
         })
       );
     } catch (error) {
-      console.error("Error clearing completed:", error);
+      logger.error("Error clearing completed", { error });
       throw new Error("Failed to clear completed tasks");
     }
   },
@@ -442,7 +437,7 @@ export const taskService = {
         await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id);
       });
     } catch (error) {
-      console.error("Error emptying trash:", error);
+      logger.error("Error emptying trash", { error });
       throw new Error("Failed to empty trash");
     }
   },
@@ -575,7 +570,7 @@ export const taskService = {
         databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
       );
     } catch (error) {
-      console.error("Error restoring all:", error);
+      logger.error("Error restoring all", { error });
       throw new Error("Failed to restore all tasks");
     }
   },

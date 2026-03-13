@@ -9,6 +9,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { templateService } from "../services/template.service";
 import type { TaskTemplate } from "../types/template.types";
+import { logger } from "@/shared/lib/logger";
 
 interface TemplatePickerProps {
   open: boolean;
@@ -47,7 +48,7 @@ export function TemplatePicker({ open, onOpenChange, userId, onSelect }: Templat
       await templateService.deleteTemplate(id);
       setTemplates((prev) => prev?.filter((t) => t.id !== id) ?? null);
     } catch (error) {
-      console.error("Error deleting template:", error);
+      logger.error("Error deleting template", { error });
     }
   };
 

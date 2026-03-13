@@ -1,6 +1,7 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
 import type { TaskComment } from "../types/comment.types";
+import { logger } from "@/shared/lib/logger";
 
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -27,7 +28,7 @@ export const commentService = {
       ]);
       return response.documents.map(documentToComment);
     } catch (error) {
-      console.error("Error fetching comments:", error);
+      logger.error("Error fetching comments", { error });
       return [];
     }
   },

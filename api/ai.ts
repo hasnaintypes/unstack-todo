@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { logger } from "./lib/logger";
 
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
@@ -93,7 +94,7 @@ Respond with ONLY the description text, nothing else.`;
         return res.status(400).json({ error: `Unknown action: ${action}` });
     }
   } catch (err) {
-    console.error("AI API error:", err);
+    logger.error("AI API error", { error: err });
     return res.status(500).json({ error: "AI request failed" });
   }
 }

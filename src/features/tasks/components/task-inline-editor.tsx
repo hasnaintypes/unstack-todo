@@ -23,6 +23,7 @@ import { TaskReminderToggle } from "@/features/reminders/components/task-reminde
 import { useProjects } from "@/shared/hooks/use-projects";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { cn } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
 import type {
   CalendarTask,
   Subtask,
@@ -90,7 +91,7 @@ export function TaskInlineEditor({ task, onSave, onCancel }: TaskInlineEditorPro
       await addProject({ name: label });
       setProject(label);
     } catch (err) {
-      console.error("Error creating project:", err);
+      logger.error("Error creating project", { error: err });
     }
   };
 
@@ -99,7 +100,7 @@ export function TaskInlineEditor({ task, onSave, onCancel }: TaskInlineEditorPro
       await addCategory({ name: label });
       setCategory(label);
     } catch (err) {
-      console.error("Error creating category:", err);
+      logger.error("Error creating category", { error: err });
     }
   };
 

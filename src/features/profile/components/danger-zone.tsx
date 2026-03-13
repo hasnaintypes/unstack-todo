@@ -17,6 +17,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { authService } from "@/features/auth/services/auth.service";
+import { logger } from "@/shared/lib/logger";
 
 export function DangerZone() {
   const { user, logout } = useAuth();
@@ -34,7 +35,7 @@ export function DangerZone() {
         description: "Your account and all data have been removed.",
       });
     } catch (err) {
-      console.error("Account deletion error:", err);
+      logger.error("Account deletion error", { error: err });
       toast.error("Failed to delete account", {
         description: "Please try again or contact support.",
       });

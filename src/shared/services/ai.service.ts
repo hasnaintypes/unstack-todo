@@ -1,4 +1,5 @@
 import type { TaskPriority } from "@/features/tasks/types/task.types";
+import { logger } from "@/shared/lib/logger";
 
 export interface TaskSuggestion {
   title: string;
@@ -331,7 +332,7 @@ export async function generateTaskSuggestions(
     const data = (await res.json()) as TaskSuggestion[];
     if (Array.isArray(data) && data.length > 0) return data;
   } catch (err) {
-    console.error("AI suggest-tasks failed, using fallback:", err);
+    logger.error("AI suggest-tasks failed, using fallback", { error: err });
   }
 
   return fallbackTaskSuggestions(projectName, projectDescription);
@@ -353,7 +354,7 @@ export async function autoSetPriority(
     const data = (await res.json()) as { priority: number };
     if ([1, 2, 3, 4].includes(data.priority)) return data.priority as TaskPriority;
   } catch (err) {
-    console.error("AI auto-priority failed:", err);
+    logger.error("AI auto-priority failed", { error: err });
   }
 
   return 2;
@@ -371,7 +372,7 @@ export async function generateDescription(taskTitle: string): Promise<string> {
     const data = (await res.json()) as { description: string };
     return data.description || "";
   } catch (err) {
-    console.error("AI generate-description failed:", err);
+    logger.error("AI generate-description failed", { error: err });
   }
 
   return "";

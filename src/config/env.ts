@@ -13,6 +13,7 @@ const envSchema = z.object({
   VITE_APPWRITE_PREFERENCES_COLLECTION_ID: z.string().default("user_preferences"),
   VITE_APPWRITE_TASK_COMMENTS_COLLECTION_ID: z.string().default("task_comments"),
   VITE_APPWRITE_TASK_TEMPLATES_COLLECTION_ID: z.string().default("task_templates"),
+  VITE_BETTERSTACK_TOKEN: z.string().optional(),
 });
 
 function validateEnv() {
@@ -29,6 +30,7 @@ function validateEnv() {
     VITE_APPWRITE_PREFERENCES_COLLECTION_ID: import.meta.env.VITE_APPWRITE_PREFERENCES_COLLECTION_ID,
     VITE_APPWRITE_TASK_COMMENTS_COLLECTION_ID: import.meta.env.VITE_APPWRITE_TASK_COMMENTS_COLLECTION_ID,
     VITE_APPWRITE_TASK_TEMPLATES_COLLECTION_ID: import.meta.env.VITE_APPWRITE_TASK_TEMPLATES_COLLECTION_ID,
+    VITE_BETTERSTACK_TOKEN: import.meta.env.VITE_BETTERSTACK_TOKEN,
   };
 
   const result = envSchema.safeParse(raw);

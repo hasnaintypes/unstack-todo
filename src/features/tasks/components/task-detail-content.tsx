@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
 import type { CalendarTask, Subtask, Attachment } from "@/features/tasks/types/task.types";
 import { CommentList } from "@/features/comments";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -299,7 +300,7 @@ function AttachmentSection({
       };
       onUpdateAttachments([...attachments, newAttachment]);
     } catch (error) {
-      console.error("Error uploading file:", error);
+      logger.error("Error uploading file", { error });
     } finally {
       setIsUploading(false);
       e.target.value = "";
@@ -312,7 +313,7 @@ function AttachmentSection({
       await storageService.deleteTaskAttachment(fileId);
       onUpdateAttachments(attachments.filter((a) => a.fileId !== fileId));
     } catch (error) {
-      console.error("Error deleting attachment:", error);
+      logger.error("Error deleting attachment", { error });
     }
   };
 

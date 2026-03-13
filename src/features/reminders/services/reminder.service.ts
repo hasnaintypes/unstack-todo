@@ -1,6 +1,7 @@
 import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
 import type { UserReminderPreferences } from "../types/reminder.types";
+import { logger } from "@/shared/lib/logger";
 
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -59,7 +60,7 @@ export const reminderService = {
 
       return documentToPreferences(doc);
     } catch (error) {
-      console.error("Error fetching reminder preferences:", error);
+      logger.error("Error fetching reminder preferences", { error });
       return { userId, ...DEFAULT_PREFERENCES };
     }
   },
@@ -77,7 +78,7 @@ export const reminderService = {
       );
       return documentToPreferences(doc);
     } catch (error) {
-      console.error("Error updating reminder preferences:", error);
+      logger.error("Error updating reminder preferences", { error });
       throw new Error("Failed to update preferences");
     }
   },

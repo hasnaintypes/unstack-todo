@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sparkles, Loader2, Check, Plus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
 import { useProjects } from "@/shared/hooks/use-projects";
 import { PROJECT_COLORS } from "@/features/projects/utils/colors";
 import {
@@ -52,7 +53,7 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
       onOpenChange(false);
       onCreated?.(created.id, shouldGenerate);
     } catch (err) {
-      console.error("Error creating project:", err);
+      logger.error("Error creating project", { error: err });
     } finally {
       setIsSubmitting(false);
     }

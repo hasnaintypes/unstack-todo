@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { logger } from "@/shared/lib/logger";
 import { logo } from "@/assets";
 import { cn } from "@/shared/lib/utils";
 import { useProjects } from "@/shared/hooks/use-projects";
@@ -128,7 +129,7 @@ export function AppSidebar() {
         description: "You can find it in the Archived section.",
       });
     } catch (err) {
-      console.error("Error archiving project:", err);
+      logger.error("Error archiving project", { error: err });
       toast.error("Failed to archive project");
     }
   };
@@ -140,7 +141,7 @@ export function AppSidebar() {
         description: "Project is now active again.",
       });
     } catch (err) {
-      console.error("Error unarchiving project:", err);
+      logger.error("Error unarchiving project", { error: err });
       toast.error("Failed to restore project");
     }
   };
@@ -153,7 +154,7 @@ export function AppSidebar() {
         description: "The project has been permanently removed.",
       });
     } catch (err) {
-      console.error("Error deleting project:", err);
+      logger.error("Error deleting project", { error: err });
       toast.error("Failed to delete project");
     }
   };

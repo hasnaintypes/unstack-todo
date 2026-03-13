@@ -4,6 +4,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { commentService } from "../services/comment.service";
 import type { TaskComment } from "../types/comment.types";
+import { logger } from "@/shared/lib/logger";
 import { formatDistanceToNow } from "date-fns";
 
 interface CommentListProps {
@@ -41,7 +42,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
       setComments((prev) => [comment, ...prev]);
       setNewComment("");
     } catch (error) {
-      console.error("Error adding comment:", error);
+      logger.error("Error adding comment", { error });
     } finally {
       setIsSending(false);
     }
@@ -52,7 +53,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
       await commentService.deleteComment(commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
     } catch (error) {
-      console.error("Error deleting comment:", error);
+      logger.error("Error deleting comment", { error });
     }
   };
 
@@ -69,7 +70,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
       setEditingId(null);
       setEditContent("");
     } catch (error) {
-      console.error("Error updating comment:", error);
+      logger.error("Error updating comment", { error });
     }
   };
 

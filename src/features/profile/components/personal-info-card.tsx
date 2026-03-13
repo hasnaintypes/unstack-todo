@@ -13,6 +13,7 @@ import {
 import { Separator } from "@/shared/components/ui/separator";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { storageService } from "@/shared/services/storage.service";
+import { logger } from "@/shared/lib/logger";
 import { account } from "@/config/appwrite";
 import { toast } from "sonner";
 
@@ -59,7 +60,7 @@ export function PersonalInfoCard() {
       setAvatarUrl(url.toString());
       toast.success("Profile picture updated");
     } catch (err) {
-      console.error("Avatar upload error:", err);
+      logger.error("Avatar upload error", { error: err });
       toast.error("Failed to upload profile picture");
     } finally {
       setIsUploadingAvatar(false);
