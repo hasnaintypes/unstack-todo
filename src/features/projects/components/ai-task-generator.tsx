@@ -91,7 +91,7 @@ export function AiTaskGenerator({
             <div className="space-y-2">
               {suggestions.map((s, i) => (
                 <button
-                  key={i}
+                  key={`suggestion-${s.title}`}
                   onClick={() => toggleSuggestion(i)}
                   className={cn(
                     "flex items-start gap-3 w-full text-left p-3 rounded-lg border transition-all",

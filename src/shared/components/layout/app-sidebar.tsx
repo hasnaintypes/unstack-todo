@@ -255,7 +255,7 @@ export function AppSidebar() {
                         <div className="space-y-2 px-2 py-1">
                           {[...Array(3)].map((_, i) => (
                             <div
-                              key={i}
+                              key={`skeleton-${i}`}
                               className="h-8 rounded-md bg-muted animate-pulse"
                               style={{ animationDelay: `${i * 0.1}s` }}
                             />

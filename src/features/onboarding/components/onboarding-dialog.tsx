@@ -76,7 +76,7 @@ export function OnboardingDialog({ open, onComplete }: OnboardingDialogProps) {
           <div className="flex items-center gap-1.5">
             {STEPS.map((_, i) => (
               <div
-                key={i}
+                key={`step-${i}`}
                 className={`h-1.5 rounded-full transition-all ${
                   i === step ? "w-6 bg-brand" : "w-1.5 bg-muted-foreground/30"
                 }`}

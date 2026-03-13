@@ -70,7 +70,7 @@ const PricingCard = ({
 
       <ul className="space-y-4 mt-auto">
         {features.map((feature, idx) => (
-          <li key={idx} className="flex items-center gap-3 text-sm text-muted-foreground">
+          <li key={feature} className="flex items-center gap-3 text-sm text-muted-foreground">
             <div className="shrink-0 w-4 h-4 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
               <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
                 <path

@@ -337,7 +337,7 @@ export function TaskAddDialog({
           {/* Sub-tasks Section */}
           <div className="space-y-2">
             {subtasks.map((subtask, index) => (
-              <div key={index} className="group flex items-start gap-3 pl-8 text-sm">
+              <div key={`subtask-${index}`} className="group flex items-start gap-3 pl-8 text-sm">
                 <div className="h-4 w-4 rounded-full border border-muted-foreground/30 shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <span className="text-foreground/80">{subtask.title}</span>
@@ -503,7 +503,7 @@ export function TaskAddDialog({
             <div className="flex items-center gap-2 flex-wrap">
               {tags.map((tag, i) => (
                 <span
-                  key={i}
+                  key={tag}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-xs font-medium"
                 >
                   {tag}

@@ -131,7 +131,7 @@ export function TaskDetailContent({
             <div className="flex flex-wrap gap-1">
               {task.tags.map((tag, i) => (
                 <Badge
-                  key={i}
+                  key={tag}
                   variant="outline"
                   className="text-xs font-medium bg-indigo-500/10 border-indigo-500/20 text-indigo-500"
                 >
@@ -213,7 +213,7 @@ export function TaskDetailContent({
 
           <ul className="space-y-1.5 pl-6">
             {task.subtasks.map((subtask, index) => (
-              <li key={index} className="group flex items-center gap-2.5 rounded-lg px-1 py-1">
+              <li key={`subtask-${subtask.title}-${index}`} className="group flex items-center gap-2.5 rounded-lg px-1 py-1">
                 <button
                   onClick={() => {
                     if (!onUpdateSubtasks) return;

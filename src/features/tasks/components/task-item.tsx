@@ -316,7 +316,7 @@ function TaskItemInner({
                 <span className="text-muted-foreground font-medium">Tags:</span>
                 {task.tags.map((tag, i) => (
                   <span
-                    key={i}
+                    key={tag}
                     className="inline-flex items-center gap-1 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-medium text-indigo-600 dark:text-indigo-400"
                   >
                     <Tag className="h-3 w-3" />
@@ -334,7 +334,7 @@ function TaskItemInner({
                 </span>
                 <div className="space-y-1 mt-1">
                   {task.subtasks.map((sub, i) => (
-                    <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <div key={`subtask-${sub.title}-${i}`} className="flex items-start gap-2 text-xs text-muted-foreground">
                       <div
                         className={cn(
                           "h-3.5 w-3.5 rounded-sm border shrink-0 mt-0.5 flex items-center justify-center",

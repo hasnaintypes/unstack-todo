@@ -223,7 +223,7 @@ export function TaskInlineEditor({ task, onSave, onCancel }: TaskInlineEditorPro
       {/* Subtasks */}
       <div className="space-y-1.5">
         {subtasks.map((subtask, index) => (
-          <div key={index} className="group/sub flex items-start gap-2 text-xs">
+          <div key={`subtask-${index}`} className="group/sub flex items-start gap-2 text-xs">
             <button
               onClick={() => toggleSubtaskComplete(index)}
               className={cn(
@@ -434,7 +434,7 @@ export function TaskInlineEditor({ task, onSave, onCancel }: TaskInlineEditorPro
       <div className="flex flex-wrap items-center gap-1.5 border-t border-border/40 pt-3">
         {tags.map((tag, i) => (
           <span
-            key={i}
+            key={tag}
             className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-xs font-medium"
           >
             {tag}

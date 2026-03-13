@@ -382,7 +382,7 @@ export function TaskDetailSheet({
                     Subtasks
                   </label>
                   {editSubtasks.map((subtask, index) => (
-                    <div key={index} className="group">
+                    <div key={`subtask-${index}`} className="group">
                       <div className="flex items-center gap-2.5">
                         <button
                           onClick={() => handleToggleEditSubtask(index)}
@@ -508,7 +508,7 @@ export function TaskDetailSheet({
                     <div className="flex items-center gap-2 flex-wrap">
                       {editTags.map((tag, i) => (
                         <span
-                          key={i}
+                          key={tag}
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-xs font-medium"
                         >
                           {tag}

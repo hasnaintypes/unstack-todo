@@ -318,7 +318,7 @@ export function TaskList({
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <div
-                  key={i}
+                  key={`skeleton-${i}`}
                   className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-4 py-3"
                   style={{ opacity: 1 - i * 0.15 }}
                 >
