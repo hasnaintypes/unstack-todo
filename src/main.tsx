@@ -12,7 +12,7 @@ import { routeTree } from "./routeTree.gen";
 const router = createRouter({
   routeTree,
   context: {
-    auth: undefined!, // We'll inject this via the App component
+    auth: { user: null, isLoading: true, sessionExpired: false },
   },
 });
 
