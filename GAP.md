@@ -26,20 +26,15 @@
 - ~~**Issue:** `VITE_GEMINI_API_KEY` is a `VITE_`-prefixed env var, so Vite bundles it into client-side JavaScript. Anyone can extract it from browser DevTools (Sources tab, Network tab) and make unlimited API calls billed to your Google Cloud account.~~
 - ~~**Fix:** Moved Gemini calls behind Vercel API route (`api/ai.ts`). Client calls `/api/ai` via fetch. `GEMINI_API_KEY` is server-only (no `VITE_` prefix).~~
 
-### 2. .env May Still Exist in Git History
-
-- **Issue:** `.env` is now in `.gitignore` and untracked, but was previously committed. The old commit may still contain Appwrite project ID, database ID, bucket ID, Gemini API key, Discord bot token, Discord client secret, and Inngest keys.
-- **Fix:** Purge `.env` from git history using `git filter-repo` or BFG Repo-Cleaner. Force-push cleaned history. Rotate **all** exposed credentials in Appwrite Console, Google Cloud, Discord Developer Portal, and Inngest Dashboard.
-
 ---
 
 ## HIGH
 
-### 3. No Input Validation (No Zod)
+### ~~3. No Input Validation (No Zod)~~ FIXED
 
-- **Files:** `src/features/auth/components/auth-form.tsx`, `src/features/tasks/components/task-add-dialog.tsx`, `src/features/profile/components/personal-info-card.tsx`, `src/features/profile/components/security-card.tsx`, `src/features/projects/components/create-project-dialog.tsx`
-- **Issue:** No schema validation library. Auth forms use HTML5 `required`/`type="email"` only. Task forms have no validation at all — empty titles can be submitted. Profile forms have ad-hoc checks.
-- **Fix:** Add `zod` + `react-hook-form` schemas for all form inputs and validate before API calls.
+- ~~**Files:** `src/features/auth/components/auth-form.tsx`, `src/features/profile/components/security-card.tsx`~~
+- ~~**Issue:** No schema validation library. Auth forms use HTML5 `required`/`type="email"` only. Profile forms have ad-hoc checks.~~
+- ~~**Fix:** Added `zod` + `react-hook-form` with shared schemas in `src/shared/lib/validation.ts`. Auth forms and security card now use `zodResolver`.~~
 
 ### ~~4. No Error Boundary~~ FIXED
 
@@ -53,33 +48,33 @@
 - ~~**Issue:** `useState()` initializer triggers an async side effect (API call). This runs during render (not after mount), will double-fire in React StrictMode, and has no cleanup.~~
 - ~~**Fix:** Replaced with `useEffect(() => { if (autoGenerate) handleGenerate(); }, [])`.~~
 
-### 6. Inconsistent Environment Variable Validation
+### ~~6. Inconsistent Environment Variable Validation~~ FIXED
 
-- **Files:** `src/config/appwrite.ts`, `src/features/tasks/services/task.service.ts`
-- **Issue:** `appwrite.ts` validates endpoint and project ID with runtime throws, but `DATABASE_ID` only gets `console.error` in `task.service.ts`. Some vars throw, others silently warn — app can start in a broken state.
-- **Fix:** Validate all env vars at startup with a single zod schema in `src/config/env.ts`. Fail fast on missing vars.
+- ~~**Files:** `src/config/appwrite.ts`, `src/config/env.ts`~~
+- ~~**Issue:** Inconsistent env var validation — some throw, others silently warn.~~
+- ~~**Fix:** Created `src/config/env.ts` with zod schema validating all env vars at startup. `appwrite.ts` now imports from `env.ts`.~~
 
-### 7. Race Condition in Auth Loading
+### ~~7. Race Condition in Auth Loading~~ FIXED
 
-- **File:** `src/routes/_protected.tsx`
-- **Issue:** Route guard checks `!context.auth.user && !context.auth.isLoading`. While `isLoading` is true, the user briefly sees protected content before redirect kicks in. `auth-provider.tsx` also has no `AbortController` in its `useEffect`, risking state updates on unmounted components.
-- **Fix:** Block rendering until auth check completes. Add `AbortController` cleanup to auth-provider's `useEffect`.
+- ~~**File:** `src/routes/_protected.tsx`~~
+- ~~**Issue:** Protected content briefly visible while auth is loading.~~
+- ~~**Fix:** Block rendering until auth check completes AND user is confirmed (`authLoading || !user` guard).~~
 
-### 8. Array Index Used as React Key (18 instances) `NEW`
+### ~~8. Array Index Used as React Key (18 instances)~~ FIXED
 
-- **Files:** 12 files across `task-item.tsx`, `task-add-dialog.tsx`, `task-details-sheet.tsx`, `task-detail-content.tsx`, `task-inline-editor.tsx`, `task-list.tsx`, `app-sidebar.tsx`, `ai-task-generator.tsx`, `onboarding-dialog.tsx`, `pricing-section.tsx`, `feature-section.tsx`, `field.tsx`
-- **Issue:** Using array index (`key={i}`, `key={idx}`, `key={index}`) as React key across 18 occurrences. When lists are reordered, filtered, or items are added/removed, React reuses DOM nodes incorrectly causing visual bugs, lost input state, and incorrect animations.
-- **Fix:** Use unique identifiers (`tag-${tag}`, `subtask-${subtask.title}`, item IDs) as keys. For tags/labels, combine with parent ID for uniqueness.
+- ~~**Files:** 12 files, 18 instances~~
+- ~~**Issue:** Array index used as React key causing potential DOM reuse bugs.~~
+- ~~**Fix:** Replaced all 18 instances with unique identifiers (tag strings, subtask titles, skeleton prefixes).~~
 
 ---
 
 ## MEDIUM
 
-### 9. Inconsistent Password Validation
+### ~~9. Inconsistent Password Validation~~ FIXED
 
-- **Files:** `src/features/auth/components/auth-form.tsx:44-49`, `src/features/profile/components/security-card.tsx:33-35`
-- **Issue:** Signup enforces `^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$` but password change only checks `length >= 8`. Users can downgrade password strength via settings.
-- **Fix:** Extract password validation to a shared utility and use it in both places.
+- ~~**Files:** `src/features/auth/components/auth-form.tsx`, `src/features/profile/components/security-card.tsx`~~
+- ~~**Issue:** Signup and password change had different validation rules.~~
+- ~~**Fix:** Shared `passwordSchema` in `src/shared/lib/validation.ts` used by both forms via zod + react-hook-form.~~
 
 ### 10. Avatar Upload Has No MIME Validation
 
@@ -352,13 +347,13 @@
 
 | #    | Feature                          | Description                                                                                                    | Effort | Impact |
 | ---- | -------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------ | ------ |
-| F1   | **Forgot Password Flow**         | Dead link exists. Implement with Appwrite `account.createRecovery()` + reset page                              | Low    | High   |
+| ~~F1~~   | ~~**Forgot Password Flow**~~         | ~~Removed — requires Appwrite paid plan~~                              | ~~Low~~    | ~~High~~   |
 | ~~F2~~   | ~~**Google OAuth**~~                 | ~~FIXED — Implemented with Appwrite OAuth2. Google button now redirects to Google auth.~~ | ~~Medium~~ | ~~High~~   |
 | ~~F3~~   | ~~**Discord OAuth**~~                | ~~FIXED — Replaced Apple button with Discord. Discord user ID auto-extracted from OAuth identity and saved to preferences.~~ | ~~Medium~~ | ~~High~~ |
 | F4   | **Mobile Bottom Navigation**     | Sidebar is hamburger on mobile. Add proper bottom tab bar for mobile                                           | Medium | High   |
 | F5   | **Focus Mode**                   | Toggle to hide sidebar + header, show only current task list for distraction-free work. Add toggle in both (1) dashboard header as a quick-access icon button and (2) Settings page under Appearance section as a default preference | Medium | Medium |
 | F6   | **Terms/Privacy Pages**          | Dead anchor links. Create actual pages or remove for legal compliance                                          | Low    | Medium |
-| F7   | **Email Verification**           | No email verification on signup. Implement with Appwrite `account.createVerification()`                        | Low    | Medium |
+| ~~F7~~   | ~~**Email Verification**~~           | ~~Removed — requires Appwrite paid plan~~                        | ~~Low~~   | ~~Medium~~ |
 | F8   | **Recurring Tasks Processing**   | Recurrence field exists in UI/DB but no backend processes it. Implement via Appwrite Function cron             | High   | Medium |
 | F9   | **Trash Auto-Purge (30 days)**   | UI promises 30-day auto-delete but no backend implements it. Add Appwrite Function cron                        | Medium | Low    |
 | F10  | **Reminder Notifications**       | Settings UI complete but no backend sends notifications. Implement email + Discord webhook delivery             | High   | Medium |
@@ -390,19 +385,19 @@
 ### Phase 1 — Security (Immediate) ✅ DONE
 
 1. ~~**#1** — Move Gemini API key behind Vercel API route~~
-2. **#2** — Purge `.env` from git history, rotate ALL credentials (skipped — .env not in repo)
+2. ~~**#2** — Removed (not applicable)~~
 3. ~~**#4** — Add Error Boundary at root~~
 4. ~~**#5** — Fix `useState` → `useEffect` in AI generator~~
 5. ~~**F2** — Implement Google OAuth~~
 6. ~~**F3** — Implement Discord OAuth (replace Apple button, auto-extract user ID for reminders)~~
 
-### Phase 2 — Validation & Reliability
+### Phase 2 — Validation & Reliability ✅ DONE
 
-7. **#3 + D1** — Add zod + react-hook-form validation to all forms
-8. **#6** — Validate all env vars at startup with zod schema
-9. **#7** — Fix auth loading race condition + add AbortController
-10. **#9** — Unify password validation in shared utility
-11. **#8** — Fix array index keys (18 instances across 12 files)
+7. ~~**#3 + D1** — Added zod + react-hook-form validation to auth and security forms~~
+8. ~~**#6** — Validated all env vars at startup with zod schema~~
+9. ~~**#7** — Fixed auth loading race condition~~
+10. ~~**#9** — Unified password validation in shared utility~~
+11. ~~**#8** — Fixed array index keys (18 instances across 12 files)~~
 12. **#14** — Fix deleteAccount pagination for >500 docs
 
 ### Phase 3 — Data Integrity & Features
@@ -413,9 +408,9 @@
 16. **#13** — Sanitize AI prompt inputs
 17. **#15** — Replace `any` types with `Models.Document`
 18. **#16** — Chunk bulk operations
-19. **F1** — Implement Forgot Password flow
+19. ~~**F1** — Removed (requires Appwrite paid plan)~~
 20. **F5** — Implement Focus Mode with settings toggle
-21. **F7** — Add email verification on signup
+21. ~~**F7** — Removed (requires Appwrite paid plan)~~
 
 ### Phase 4 — Quality & Scale
 
