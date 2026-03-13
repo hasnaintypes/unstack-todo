@@ -1,5 +1,5 @@
 import { account, databases, ID, Query } from "@/config/appwrite";
-import { OAuthProvider, Permission, Role } from "appwrite";
+import { AppwriteException, OAuthProvider, Permission, Role } from "appwrite";
 import { storageService } from "@/shared/services/storage.service";
 import { logger } from "@/shared/lib/logger";
 
@@ -13,8 +13,11 @@ export const authService = {
   async getCurrentUser() {
     try {
       return await account.get();
-    } catch {
-      return null;
+    } catch (error: unknown) {
+      if (error instanceof AppwriteException && error.code === 401) {
+        return null; // not logged in — expected
+      }
+      throw error; // network/server error — bubble up
     }
   },
 

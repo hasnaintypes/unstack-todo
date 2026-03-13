@@ -17,6 +17,7 @@ interface MyRouterContext {
   auth: {
     user: Models.User<Models.Preferences> | null;
     isLoading: boolean;
+    sessionExpired?: boolean;
   };
 }
 

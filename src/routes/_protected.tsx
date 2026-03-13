@@ -14,6 +14,7 @@ import { useTasks } from "@/shared/hooks/use-tasks";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { OnboardingDialog, onboardingService } from "@/features/onboarding";
 import { reminderService } from "@/features/reminders/services/reminder.service";
+import { toast } from "sonner";
 
 const PAGE_TITLES: Record<string, string> = {
   "/inbox": "Inbox",
@@ -48,7 +49,7 @@ function ProtectedLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const isCalendarPage = location.pathname === "/calendar";
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, sessionExpired } = useAuth();
   const { selectedTask, setSelectedTask, updateTask, toggleTaskComplete, moveToTrash, addTask } =
     useTasks();
 
@@ -64,9 +65,12 @@ function ProtectedLayout() {
   // Redirect to sign-in once auth check completes with no user
   useEffect(() => {
     if (!authLoading && !user) {
+      if (sessionExpired) {
+        toast.error("Your session has expired. Please sign in again.");
+      }
       navigate({ to: "/auth/sign-in" });
     }
-  }, [authLoading, user, navigate]);
+  }, [authLoading, user, sessionExpired, navigate]);
 
   useEffect(() => {
     if (!user) return;
