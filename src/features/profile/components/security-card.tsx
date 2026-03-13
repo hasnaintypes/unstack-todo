@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Lock } from "lucide-react";
-import { toast } from "sonner";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Label } from "@/shared/components/ui/label";
@@ -12,34 +10,30 @@ import {
   CardDescription,
 } from "@/shared/components/ui/card";
 import { useProfile } from "@/features/profile/hooks/use-profile";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { changePasswordSchema } from "@/shared/lib/validation";
+import type { z } from "zod";
+
+type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 
 export function SecurityCard() {
   const { isUpdating, updatePassword } = useProfile();
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = async () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Please fill in all password fields");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ChangePasswordData>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
+  });
 
-    if (newPassword !== confirmPassword) {
-      toast.error("New passwords don't match");
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
-
+  const onSubmit = async (data: ChangePasswordData) => {
     try {
-      await updatePassword(newPassword, currentPassword);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      await updatePassword(data.newPassword, data.currentPassword);
+      reset();
     } catch {
       // error already toasted
     }
@@ -56,52 +50,60 @@ export function SecurityCard() {
           Ensure your account is using a long, random password to stay secure.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="oldPassword">Current Password</Label>
-          <Input
-            id="oldPassword"
-            type="password"
-            placeholder="••••••••"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
+            <Label htmlFor="oldPassword">Current Password</Label>
             <Input
-              id="newPassword"
+              id="oldPassword"
               type="password"
               placeholder="••••••••"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              {...register("currentPassword")}
             />
+            {errors.currentPassword && (
+              <p className="text-xs text-destructive">{errors.currentPassword.message}</p>
+            )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-        </div>
 
-        <div className="flex justify-end pt-2">
-          <Button
-            size="lg"
-            variant="secondary"
-            className="w-full md:w-auto px-8"
-            onClick={handleSubmit}
-            disabled={isUpdating}
-          >
-            {isUpdating ? "Updating..." : "Update Password"}
-          </Button>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                placeholder="••••••••"
+                {...register("newPassword")}
+              />
+              {errors.newPassword && (
+                <p className="text-xs text-destructive">{errors.newPassword.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                {...register("confirmPassword")}
+              />
+              {errors.confirmPassword && (
+                <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <Button
+              size="lg"
+              variant="secondary"
+              type="submit"
+              className="w-full md:w-auto px-8"
+              disabled={isUpdating}
+            >
+              {isUpdating ? "Updating..." : "Update Password"}
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

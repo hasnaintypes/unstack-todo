@@ -11,12 +11,16 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
-
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-
 import { Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signInSchema, signUpSchema } from "@/shared/lib/validation";
+import type { z } from "zod";
+
+type SignInData = z.infer<typeof signInSchema>;
+type SignUpData = z.infer<typeof signUpSchema>;
 
 interface AuthFormProps extends React.ComponentProps<"div"> {
   type: "sign-in" | "sign-up";
@@ -25,33 +29,32 @@ interface AuthFormProps extends React.ComponentProps<"div"> {
 export function AuthForm({ className, type, ...props }: AuthFormProps) {
   const { signIn, signUp, loginWithGoogle, loginWithDiscord } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const isSignIn = type === "sign-in";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const signInForm = useForm<SignInData>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const signUpForm = useForm<SignUpData>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { name: "", email: "", password: "" },
+  });
+
+  const form = isSignIn ? signInForm : signUpForm;
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = form;
+
+  const onSubmit = async (data: SignInData | SignUpData) => {
     try {
       if (isSignIn) {
-        await signIn(email, password);
+        const d = data as SignInData;
+        await signIn(d.email, d.password);
         toast.success("Welcome back!");
       } else {
-        // Password validation: 8+ chars, 1 uppercase, 1 lowercase, 1 digit
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-        if (!passwordRegex.test(password)) {
-          throw new Error(
-            "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, and a number."
-          );
-        }
-        if (!name.trim()) {
-          throw new Error("Name is required for sign up.");
-        }
-        await signUp(email, password, name);
+        const d = data as SignUpData;
+        await signUp(d.email, d.password, d.name);
         toast.success("Account created successfully!");
       }
       navigate({ to: "/inbox" });
@@ -59,14 +62,12 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred. Please try again.";
       toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
     <div className={cn("flex flex-col gap-4", className)} {...props}>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup className="gap-4">
           <div className="flex flex-col items-center gap-1.5 text-center">
             <h1 className="text-xl font-bold">{isSignIn ? "Welcome Back" : "Create an Account"}</h1>
@@ -95,11 +96,12 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
                 id="name"
                 type="text"
                 placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                disabled={isLoading}
+                {...(signUpForm.register as typeof register)("name")}
+                disabled={isSubmitting}
               />
+              {!isSignIn && "name" in errors && errors.name && (
+                <p className="text-xs text-destructive">{errors.name.message}</p>
+              )}
             </Field>
           )}
           <Field className="gap-1.5">
@@ -108,36 +110,30 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
               id="email"
               type="email"
               placeholder="m@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
+              {...register("email")}
+              disabled={isSubmitting}
             />
+            {errors.email && (
+              <p className="text-xs text-destructive">{errors.email.message}</p>
+            )}
           </Field>
           <Field className="gap-1.5">
             <div className="flex items-center justify-between">
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              {isSignIn && (
-                <a href="#" className="text-sm underline underline-offset-4">
-                  Forgot Password?
-                </a>
-              )}
             </div>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
+                {...register("password")}
+                disabled={isSubmitting}
                 className="pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 tabIndex={-1}
               >
                 {showPassword ? (
@@ -148,10 +144,13 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
                 <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
               </button>
             </div>
+            {errors.password && (
+              <p className="text-xs text-destructive">{errors.password.message}</p>
+            )}
           </Field>
           <Field className="pt-1">
-            <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
-              {isLoading ? "Loading..." : isSignIn ? "Login" : "Register"}
+            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
+              {isSubmitting ? "Loading..." : isSignIn ? "Login" : "Register"}
             </Button>
           </Field>
           <FieldSeparator>Or</FieldSeparator>
