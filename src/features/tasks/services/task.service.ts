@@ -1,5 +1,5 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
 import type {
   CalendarTask,
   Subtask,
@@ -124,8 +124,7 @@ function safeParseAttachments(raw: string): Attachment[] {
 /**
  * Convert Appwrite document to CalendarTask
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToTask(doc: any): CalendarTask {
+function documentToTask(doc: Models.Document): CalendarTask {
   return {
     id: doc.$id,
     title: doc.title,

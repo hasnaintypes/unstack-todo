@@ -1,5 +1,5 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
 import type { Category } from "@/features/categories/types/category.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -16,8 +16,7 @@ function generateSlug(name: string): string {
     .replace(/-+/g, "-");
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToCategory(doc: any): Category {
+function documentToCategory(doc: Models.Document): Category {
   return {
     id: doc.$id,
     name: doc.name,

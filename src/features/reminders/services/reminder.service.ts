@@ -1,5 +1,5 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
 import type { UserReminderPreferences } from "../types/reminder.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -16,8 +16,7 @@ const DEFAULT_PREFERENCES: Omit<UserReminderPreferences, "id" | "userId"> = {
   defaultReminderBefore: "1h",
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToPreferences(doc: any): UserReminderPreferences {
+function documentToPreferences(doc: Models.Document): UserReminderPreferences {
   return {
     id: doc.$id,
     userId: doc.userId,

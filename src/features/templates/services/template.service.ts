@@ -1,5 +1,5 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
 import type { TaskTemplate } from "../types/template.types";
 import type { Subtask, TaskPriority } from "@/features/tasks/types/task.types";
 
@@ -16,8 +16,7 @@ function safeParseSubtasks(raw: string): Subtask[] {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToTemplate(doc: any): TaskTemplate {
+function documentToTemplate(doc: Models.Document): TaskTemplate {
   return {
     id: doc.$id,
     userId: doc.userId,

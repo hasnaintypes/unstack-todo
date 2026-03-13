@@ -1,5 +1,5 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
 import type { Project } from "@/features/projects/types/project.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -15,8 +15,7 @@ function generateSlug(name: string): string {
     .replace(/-+/g, "-");
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToProject(doc: any): Project {
+function documentToProject(doc: Models.Document): Project {
   return {
     id: doc.$id,
     name: doc.name,

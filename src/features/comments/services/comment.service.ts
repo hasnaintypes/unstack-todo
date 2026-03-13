@@ -1,13 +1,12 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
 import type { TaskComment } from "../types/comment.types";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const COMMENTS_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_TASK_COMMENTS_COLLECTION_ID || "task_comments";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToComment(doc: any): TaskComment {
+function documentToComment(doc: Models.Document): TaskComment {
   return {
     id: doc.$id,
     taskId: doc.taskId,
