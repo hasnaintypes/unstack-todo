@@ -29,19 +29,8 @@ function RootComponent() {
   const showRouterDevtools =
     import.meta.env.DEV && import.meta.env.VITE_SHOW_ROUTER_DEVTOOLS !== "false";
   const location = useLocation();
-  const isAuthRoute = location.pathname.startsWith("/auth/");
-  const isProtectedRoute =
-    location.pathname.startsWith("/inbox") ||
-    location.pathname.startsWith("/today") ||
-    location.pathname.startsWith("/upcoming") ||
-    location.pathname.startsWith("/calendar") ||
-    location.pathname.startsWith("/completed") ||
-    location.pathname.startsWith("/trash") ||
-    location.pathname.startsWith("/projects") ||
-    location.pathname.startsWith("/tasks") ||
-    location.pathname.startsWith("/profile") ||
-    location.pathname.startsWith("/settings");
-  const isMinimalLayout = isAuthRoute || isProtectedRoute;
+  const isMarketingRoute = location.pathname === "/" || location.pathname.startsWith("/about");
+  const isMinimalLayout = !isMarketingRoute;
 
   return (
     <QueryProvider>
