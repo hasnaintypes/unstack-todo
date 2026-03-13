@@ -37,6 +37,11 @@ export function PersonalInfoCard() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      toast.error("Only JPEG, PNG, WebP, and GIF images are allowed");
+      return;
+    }
     if (file.size > 2 * 1024 * 1024) {
       toast.error("File size must be under 2MB");
       return;
@@ -98,7 +103,7 @@ export function PersonalInfoCard() {
                 {initials}
               </div>
             )}
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleAvatarUpload} />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
