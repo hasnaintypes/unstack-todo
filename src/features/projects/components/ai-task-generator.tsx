@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Sparkles, X, Check, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
@@ -38,11 +38,12 @@ export function AiTaskGenerator({
   }, [project]);
 
   // Auto-generate on mount if requested
-  useState(() => {
-    if (autoGenerate && suggestions.length === 0) {
+  useEffect(() => {
+    if (autoGenerate) {
       handleGenerate();
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleSuggestion = (idx: number) => {
     setSelectedSuggestions((prev) => {
