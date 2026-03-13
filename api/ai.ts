@@ -5,6 +5,11 @@ const apiKey = process.env.GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 const model = genAI?.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+function sanitize(input: unknown, maxLength = 200): string {
+  if (typeof input !== "string") return "";
+  return input.replace(/[^\w\s.,!?;:'"()\-@#&+=\/]/g, "").slice(0, maxLength).trim();
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -19,7 +24,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     switch (action) {
       case "suggest-tasks": {
-        const { projectName, projectDescription } = params;
+        const projectName = sanitize(params.projectName, 200);
+        const projectDescription = sanitize(params.projectDescription, 500);
         const prompt = `You are a project management assistant. Generate 5-8 actionable tasks for a project.
 
 Project name: "${projectName}"
@@ -52,7 +58,8 @@ Example: [{"title":"Set up repo","description":"Initialize repository with linti
       }
 
       case "auto-priority": {
-        const { taskTitle, taskDescription } = params;
+        const taskTitle = sanitize(params.taskTitle, 200);
+        const taskDescription = sanitize(params.taskDescription, 500);
         const prompt = `Given this task, return ONLY a single number (1, 2, 3, or 4) representing its priority.
 
 1 = Low (nice-to-have, no deadline pressure)
@@ -71,7 +78,7 @@ Respond with ONLY the number, nothing else.`;
       }
 
       case "generate-description": {
-        const { taskTitle } = params;
+        const taskTitle = sanitize(params.taskTitle, 200);
         const prompt = `Generate a helpful 1-2 sentence description for this task. Be concise and actionable.
 
 Task title: "${taskTitle}"
