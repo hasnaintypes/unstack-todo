@@ -1,4 +1,5 @@
-import { Github, Twitter, Linkedin } from "lucide-react";
+import { Github } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { ModeToggle } from "@/shared/components/mode-toggle";
 
 export function Footer() {
@@ -11,84 +12,67 @@ export function Footer() {
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2 space-y-4">
             <h2 className="text-xl font-bold tracking-tight">
-              Hasnain<span className="text-primary">.dev</span>
+              Unstack<span className="text-primary"> Todo</span>
             </h2>
             <p className="text-muted-foreground text-sm max-w-xs">
-              Building digital experiences with precision and passion. Open source contributor and
-              full-stack explorer.
+              A modern task management app built for speed and simplicity. Organize your work, stay
+              focused, and get things done.
             </p>
             <div className="flex gap-4">
               <a
-                href="#"
+                href="https://github.com/hasnaintypes/unstack-todo"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="GitHub"
               >
                 <Github size={20} />
               </a>
-              <a
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={20} />
-              </a>
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Product Links */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Project</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">Product</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Showcase
+                <a href="/#features" className="hover:text-primary transition-colors">
+                  Features
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Documentation
-                </a>
+                <Link to="/about" className="hover:text-primary transition-colors">
+                  About
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Source Code
-                </a>
+                <Link to="/auth/sign-in" className="hover:text-primary transition-colors">
+                  Sign In
+                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Legal / Contact */}
+          {/* Legal */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider">Legal</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <Link to="/privacy" className="hover:text-primary transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <Link to="/terms" className="hover:text-primary transition-colors">
                   Terms of Service
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Cookie Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>&copy; {currentYear} Hasnain. All rights reserved.</p>
+          <p>&copy; {currentYear} Unstack Todo. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <div className="w-px h-4 bg-border hidden md:block" />
             <ModeToggle />
