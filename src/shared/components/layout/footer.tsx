@@ -52,9 +52,9 @@ export function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider">Product</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="/#features" className="hover:text-primary transition-colors">
+                <Link to="/features" className="hover:text-primary transition-colors">
                   Features
-                </a>
+                </Link>
               </li>
               <li>
                 <Link to="/about" className="hover:text-primary transition-colors">
