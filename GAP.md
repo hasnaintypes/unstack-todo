@@ -166,11 +166,11 @@
 - ~~**Issue:** Another god component with 8+ `useState` calls handling sheet shell, editing state, title/description edits, property edits, subtask UI, comments integration, and save-as-template logic.~~
 - ~~**Fix:** Extracted `TaskDetailEditForm` component. Reuses `TaskSubtasksEditor` and `TaskTagsInput` from task-form/. Reduced task-details-sheet from 597 to ~175 lines.~~
 
-### 25. Recurrence Fields Stored But Never Processed `NEW`
+### ~~25. Recurrence Fields Stored But Never Processed~~ FIXED
 
-- **Files:** `src/features/tasks/types/task.types.ts:5,37`, `src/features/tasks/services/task.service.ts`
-- **Issue:** Tasks have a `recurrence` field (`daily | weekly | monthly | weekdays`) that is saved to the database and shown in the UI, but no backend job or client-side logic ever creates recurring task instances. Users set recurrence expecting it to work, but nothing happens.
-- **Fix:** Either implement recurrence processing via Appwrite Functions/cron job, or remove the UI and mark as "coming soon".
+- ~~**Files:** `src/features/tasks/types/task.types.ts:5,37`, `src/features/tasks/services/task.service.ts`~~
+- ~~**Issue:** Tasks have a `recurrence` field (`daily | weekly | monthly | weekdays`) that is saved to the database and shown in the UI, but no backend job or client-side logic ever creates recurring task instances. Users set recurrence expecting it to work, but nothing happens.~~
+- ~~**Fix:** Already implemented. `createNextOccurrence` in `useToggleTaskCompleteMutation` creates a new task with the next due date when a recurring task is completed.~~
 
 ### ~~26. Trash Auto-Purge Promised But Not Implemented~~ FIXED
 
@@ -178,11 +178,11 @@
 - ~~**Issue:** UI tells users "Deleted tasks will appear here for 30 days" and "Task will be permanently deleted after 30 days", but no backend job or scheduled function implements auto-purge. Trashed tasks remain forever.~~
 - ~~**Fix:** Implemented Inngest cron function (`purgeTrash`) running daily at 2 AM. Permanently deletes trashed tasks older than 30 days (including storage attachments). Also auto-archives completed tasks >30 days for users with `autoArchiveEnabled`. "30 days" UI messaging is now accurate.~~
 
-### 27. Reminders UI Complete But No Backend Delivery `NEW`
+### ~~27. Reminders UI Complete But No Backend Delivery~~ FIXED
 
-- **Files:** `src/features/reminders/services/reminder.service.ts`, `src/routes/_protected/settings/index.lazy.tsx`
-- **Issue:** Settings UI allows configuring reminder preferences (email, Discord, daily summary, per-task reminders) but no backend job sends actual notifications. Users configure reminders thinking they'll work.
-- **Fix:** Implement notification delivery via Appwrite Functions with email (SMTP) and Discord webhook integrations, or clearly mark as "coming soon" in the UI.
+- ~~**Files:** `src/features/reminders/services/reminder.service.ts`, `src/routes/_protected/settings/index.lazy.tsx`~~
+- ~~**Issue:** Settings UI allows configuring reminder preferences (email, Discord, daily summary, per-task reminders) but no backend job sends actual notifications. Users configure reminders thinking they'll work.~~
+- ~~**Fix:** Already implemented. Inngest cron functions handle delivery: `check-reminders.ts` runs every 15 min (email via Appwrite Messaging + Discord DMs), `daily-summary.ts` runs hourly (HTML digest emails).~~
 
 ### ~~28. Silent `.catch(() => {})` Swallowing Errors~~ FIXED
 
@@ -349,9 +349,9 @@
 | ~~F5~~   | ~~**Focus Mode**~~                   | ~~FIXED — Implemented focus mode with minimal top bar, `F` keyboard shortcut, header icon toggle, and settings default preference stored in `user_preferences`.~~ | ~~Medium~~ | ~~Medium~~ |
 | ~~F6~~   | ~~**Terms/Privacy Pages**~~          | ~~FIXED — Created `/terms` and `/privacy` routes with content pages. Updated auth-form and footer links.~~     | ~~Low~~    | ~~Medium~~ |
 | ~~F7~~   | ~~**Email Verification**~~           | ~~Removed — requires Appwrite paid plan~~                        | ~~Low~~   | ~~Medium~~ |
-| F8   | **Recurring Tasks Processing**   | Recurrence field exists in UI/DB but no backend processes it. Implement via Appwrite Function cron             | High   | Medium |
+| ~~F8~~   | ~~**Recurring Tasks Processing**~~   | ~~FIXED — `createNextOccurrence` in `useToggleTaskCompleteMutation` handles recurrence on task completion.~~ | ~~High~~   | ~~Medium~~ |
 | ~~F9~~   | ~~**Trash Auto-Purge (30 days)**~~   | ~~FIXED — Inngest cron `purgeTrash` runs daily, permanently deletes trashed tasks >30 days and auto-archives completed tasks.~~ | ~~Medium~~ | ~~Low~~    |
-| F10  | **Reminder Notifications**       | Settings UI complete but no backend sends notifications. Implement email + Discord webhook delivery             | High   | Medium |
+| ~~F10~~  | ~~**Reminder Notifications**~~       | ~~FIXED — Inngest cron functions: `check-reminders.ts` (email + Discord DMs every 15 min), `daily-summary.ts` (hourly HTML digest).~~ | ~~High~~   | ~~Medium~~ |
 | F11  | **Project Icon Picker**          | Icon field exists but no picker UI. Add icon selection in create/edit project dialog                            | Low    | Low    |
 
 ### UI/UX Improvements
