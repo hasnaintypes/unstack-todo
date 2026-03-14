@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isToday, isFuture, startOfDay, parseISO } from "date-fns";
+import { isToday, isFuture, parseISO } from "date-fns";
 import { useTasks } from "@/shared/hooks/use-tasks";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useTrashTasksQuery } from "@/features/tasks/hooks/use-tasks-query";
@@ -83,33 +83,6 @@ export function useTrashTasks(): CalendarTask[] {
   const { user } = useAuth();
   const { data: trashTasks = [] } = useTrashTasksQuery(user?.$id);
   return trashTasks;
-}
-
-/**
- * Hook to get overdue tasks
- * Returns all incomplete tasks that are past due
- */
-export function useOverdueTasks() {
-  const { tasks } = useTasks();
-
-  return useMemo(() => {
-    const today = startOfDay(new Date());
-
-    return tasks.filter((task) => {
-      // Exclude completed tasks
-      if (task.status === "completed") return false;
-
-      // Include only overdue tasks
-      if (!task.dueDate) return false;
-
-      try {
-        const taskDate = startOfDay(parseISO(task.dueDate));
-        return taskDate < today;
-      } catch {
-        return false;
-      }
-    });
-  }, [tasks]);
 }
 
 /**
