@@ -155,14 +155,25 @@ export const taskService = {
    */
   async getAllTasks(userId: string): Promise<CalendarTask[]> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.isNull("deletedAt"),
-        Query.orderDesc("$createdAt"),
-        Query.limit(1000), // Adjust based on your needs
-      ]);
+      const BATCH = 100;
+      const allDocs: Models.DefaultDocument[] = [];
+      let offset = 0;
 
-      return response.documents.map(documentToTask);
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNull("deletedAt"),
+          Query.orderDesc("$createdAt"),
+          Query.limit(BATCH),
+          Query.offset(offset),
+        ]);
+
+        allDocs.push(...response.documents);
+        if (response.documents.length < BATCH) break;
+        offset += BATCH;
+      }
+
+      return allDocs.map(documentToTask);
     } catch (error) {
       logger.error("Error fetching tasks", { error });
       throw new Error("Failed to fetch tasks");
@@ -386,14 +397,25 @@ export const taskService = {
    */
   async getTrashTasks(userId: string): Promise<CalendarTask[]> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.isNotNull("deletedAt"),
-        Query.orderDesc("deletedAt"),
-        Query.limit(100),
-      ]);
+      const BATCH = 100;
+      const allDocs: Models.DefaultDocument[] = [];
+      let offset = 0;
 
-      return response.documents.map(
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNotNull("deletedAt"),
+          Query.orderDesc("deletedAt"),
+          Query.limit(BATCH),
+          Query.offset(offset),
+        ]);
+
+        allDocs.push(...response.documents);
+        if (response.documents.length < BATCH) break;
+        offset += BATCH;
+      }
+
+      return allDocs.map(
         (doc) =>
           ({
             ...documentToTask(doc),
@@ -411,18 +433,24 @@ export const taskService = {
    */
   async clearCompleted(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.equal("status", "completed"),
-        Query.isNull("deletedAt"),
-        Query.limit(500),
-      ]);
+      const BATCH = 100;
 
-      await processInChunks(response.documents, (doc) =>
-        databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
-          deletedAt: new Date().toISOString(),
-        })
-      );
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.equal("status", "completed"),
+          Query.isNull("deletedAt"),
+          Query.limit(BATCH),
+        ]);
+
+        if (response.documents.length === 0) break;
+
+        await processInChunks(response.documents, (doc) =>
+          databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+            deletedAt: new Date().toISOString(),
+          })
+        );
+      }
     } catch (error) {
       logger.error("Error clearing completed", { error });
       throw new Error("Failed to clear completed tasks");
@@ -434,16 +462,22 @@ export const taskService = {
    */
   async emptyTrash(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.isNotNull("deletedAt"),
-        Query.limit(500),
-      ]);
+      const BATCH = 100;
 
-      await processInChunks(response.documents, async (doc) => {
-        await this.deleteTaskComments(doc.$id);
-        await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id);
-      });
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNotNull("deletedAt"),
+          Query.limit(BATCH),
+        ]);
+
+        if (response.documents.length === 0) break;
+
+        await processInChunks(response.documents, async (doc) => {
+          await this.deleteTaskComments(doc.$id);
+          await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id);
+        });
+      }
     } catch (error) {
       logger.error("Error emptying trash", { error });
       throw new Error("Failed to empty trash");
@@ -568,15 +602,21 @@ export const taskService = {
    */
   async restoreAllFromTrash(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.isNotNull("deletedAt"),
-        Query.limit(500),
-      ]);
+      const BATCH = 100;
 
-      await processInChunks(response.documents, (doc) =>
-        databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
-      );
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNotNull("deletedAt"),
+          Query.limit(BATCH),
+        ]);
+
+        if (response.documents.length === 0) break;
+
+        await processInChunks(response.documents, (doc) =>
+          databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
+        );
+      }
     } catch (error) {
       logger.error("Error restoring all", { error });
       throw new Error("Failed to restore all tasks");
