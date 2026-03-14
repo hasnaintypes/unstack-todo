@@ -12,6 +12,7 @@ import { CategoryProvider } from "@/app/providers/category-provider";
 import { Toaster } from "@/shared/components/ui/sonner";
 import type { Models } from "appwrite";
 import { cn } from "@/shared/lib/utils";
+import { OfflineBanner } from "@/shared/components/offline-banner";
 
 interface MyRouterContext {
   auth: {
@@ -39,6 +40,7 @@ function RootComponent() {
           <ProjectProvider>
             <CategoryProvider>
               <div className="flex flex-col min-h-screen font-sans antialiased text-foreground bg-background">
+                <OfflineBanner />
                 {!isMinimalLayout && <Header />}
                 <main
                   className={cn(
