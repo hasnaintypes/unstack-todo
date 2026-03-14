@@ -1,44 +1,33 @@
 import * as React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Project } from "@/features/projects/types/project.types";
-import { projectService } from "@/features/projects/services/project.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { ProjectContext, type ProjectContextValue } from "@/app/context/project-context";
+import { queryKeys } from "@/shared/lib/query-keys";
+import {
+  useProjectsQuery,
+  useAddProjectMutation,
+  useUpdateProjectMutation,
+  useDeleteProjectMutation,
+} from "@/features/projects/hooks/use-projects-query";
 
 export function ProjectProvider({ children }: { children: React.ReactNode }) {
-  const [projects, setProjects] = React.useState<Project[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
   const { user } = useAuth();
+  const userId = user?.$id;
+  const queryClient = useQueryClient();
 
-  const loadProjects = React.useCallback(async () => {
-    if (!user?.$id) {
-      setProjects([]);
-      setIsLoading(false);
-      return;
-    }
+  const { data: projects = [], isLoading } = useProjectsQuery(userId);
 
-    setIsLoading(true);
-    try {
-      const fetched = await projectService.getAllProjects(user.$id);
-      setProjects(fetched);
-    } catch (err) {
-      console.error("Error loading projects:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.$id]);
-
-  React.useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+  const addProjectMutation = useAddProjectMutation(userId);
+  const updateProjectMutation = useUpdateProjectMutation(userId);
+  const deleteProjectMutation = useDeleteProjectMutation(userId);
 
   const addProject = React.useCallback(
     async (data: { name: string; description?: string; color?: string; icon?: string }) => {
-      if (!user?.$id) throw new Error("User not authenticated");
-      const newProject = await projectService.createProject(data, user.$id);
-      setProjects((prev) => [...prev, newProject]);
-      return newProject;
+      if (!userId) throw new Error("User not authenticated");
+      return addProjectMutation.mutateAsync(data);
     },
-    [user?.$id]
+    [userId, addProjectMutation]
   );
 
   const updateProject = React.useCallback(
@@ -51,16 +40,25 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
         >
       >
     ) => {
-      const updated = await projectService.updateProject(id, updates);
-      setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      await updateProjectMutation.mutateAsync({ id, updates });
     },
-    []
+    [updateProjectMutation]
   );
 
-  const deleteProject = React.useCallback(async (id: string) => {
-    await projectService.deleteProject(id);
-    setProjects((prev) => prev.filter((p) => p.id !== id));
-  }, []);
+  const deleteProject = React.useCallback(
+    async (id: string) => {
+      if (!userId) throw new Error("User not authenticated");
+      await deleteProjectMutation.mutateAsync(id);
+    },
+    [userId, deleteProjectMutation]
+  );
+
+  const refreshProjects = React.useCallback(async () => {
+    if (!userId) return;
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.projects.all(userId),
+    });
+  }, [userId, queryClient]);
 
   const value: ProjectContextValue = {
     projects,
@@ -68,7 +66,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     addProject,
     updateProject,
     deleteProject,
-    refreshProjects: loadProjects,
+    refreshProjects,
   };
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;

@@ -4,6 +4,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { commentService } from "../services/comment.service";
 import type { TaskComment } from "../types/comment.types";
+import { logger } from "@/shared/lib/logger";
 import { formatDistanceToNow } from "date-fns";
 
 interface CommentListProps {
@@ -41,7 +42,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
       setComments((prev) => [comment, ...prev]);
       setNewComment("");
     } catch (error) {
-      console.error("Error adding comment:", error);
+      logger.error("Error adding comment", { error });
     } finally {
       setIsSending(false);
     }
@@ -52,7 +53,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
       await commentService.deleteComment(commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
     } catch (error) {
-      console.error("Error deleting comment:", error);
+      logger.error("Error deleting comment", { error });
     }
   };
 
@@ -69,7 +70,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
       setEditingId(null);
       setEditContent("");
     } catch (error) {
-      console.error("Error updating comment:", error);
+      logger.error("Error updating comment", { error });
     }
   };
 
@@ -109,6 +110,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
           className="shrink-0 mt-auto"
           disabled={!newComment.trim() || isSending}
           onClick={handleSubmit}
+          aria-label="Send comment"
         >
           {isSending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
         </Button>
@@ -137,15 +139,16 @@ export function CommentList({ taskId, userId }: CommentListProps) {
                       }}
                     />
                     <div className="flex gap-1 justify-end">
-                      <Button size="icon" variant="ghost" className="size-6" onClick={handleCancelEdit}>
+                      <Button size="icon" variant="ghost" className="size-6" onClick={handleCancelEdit} aria-label="Cancel editing">
                         <X className="size-3.5" />
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="size-6 text-[#e44232]"
+                        className="size-6 text-brand"
                         disabled={!editContent.trim()}
                         onClick={handleSaveEdit}
+                        aria-label="Save comment"
                       >
                         <Check className="size-3.5" />
                       </Button>

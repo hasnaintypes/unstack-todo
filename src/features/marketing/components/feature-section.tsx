@@ -65,9 +65,9 @@ const Features = () => {
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[22rem]">
-          {features.map((feature, i) => (
+          {features.map((feature) => (
             <div
-              key={i}
+              key={feature.title}
               className={cn(
                 "group relative overflow-hidden rounded-[2.5rem] border border-border/50 bg-card p-8 transition-all duration-500",
                 "hover:border-primary/30 hover:shadow-[0_0_40px_-15px_rgba(0,0,0,0.3)]",
@@ -106,9 +106,9 @@ const Features = () => {
                   {/* Tags / Highlights (Matching your image) */}
                   {feature.highlights && (
                     <div className="flex flex-wrap gap-2 pt-2">
-                      {feature.highlights.map((tag, idx) => (
+                      {feature.highlights.map((tag) => (
                         <span
-                          key={idx}
+                          key={tag}
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/5 border border-orange-500/20 text-[11px] font-medium text-orange-500/80"
                         >
                           <CheckCircle2 size={12} />

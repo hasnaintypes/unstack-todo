@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Sparkles, Loader2, Check, Plus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
 import { useProjects } from "@/shared/hooks/use-projects";
 import { PROJECT_COLORS } from "@/features/projects/utils/colors";
+import { PROJECT_ICONS } from "@/features/projects/utils/icons";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +29,7 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("blue");
+  const [icon, setIcon] = useState("folder");
   const [generateWithAi, setGenerateWithAi] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,6 +37,7 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
     setName("");
     setDescription("");
     setColor("blue");
+    setIcon("folder");
     setGenerateWithAi(false);
     setIsSubmitting(false);
   };
@@ -46,13 +50,14 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
         name: name.trim(),
         description: description.trim() || undefined,
         color,
+        icon,
       });
       const shouldGenerate = generateWithAi;
       resetForm();
       onOpenChange(false);
       onCreated?.(created.id, shouldGenerate);
     } catch (err) {
-      console.error("Error creating project:", err);
+      logger.error("Error creating project", { error: err });
     } finally {
       setIsSubmitting(false);
     }
@@ -128,6 +133,32 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
             </div>
           </div>
 
+          {/* Icon Picker */}
+          <div className="space-y-3">
+            <Label>Project Icon</Label>
+            <div className="flex gap-2 flex-wrap">
+              {PROJECT_ICONS.map((i) => {
+                const IconComp = i.icon;
+                return (
+                  <button
+                    key={i.value}
+                    type="button"
+                    onClick={() => setIcon(i.value)}
+                    title={i.label}
+                    className={cn(
+                      "relative size-8 rounded-lg transition-all duration-200 flex items-center justify-center",
+                      icon === i.value
+                        ? "ring-2 ring-offset-2 ring-offset-background ring-primary bg-primary/10 text-primary scale-110 shadow-sm"
+                        : "text-muted-foreground opacity-70 hover:opacity-100 hover:bg-accent hover:scale-105"
+                    )}
+                  >
+                    <IconComp className="size-4" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* AI Task Generation Toggle */}
           <div
             className={cn(
@@ -142,7 +173,7 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
                 className={cn(
                   "flex size-10 items-center justify-center rounded-lg transition-colors",
                   generateWithAi
-                    ? "bg-[#e44232] text-white shadow-md shadow-primary/20"
+                    ? "bg-brand text-white shadow-md shadow-primary/20"
                     : "bg-background text-muted-foreground border"
                 )}
               >
@@ -173,7 +204,7 @@ export function CreateProjectDialog({ open, onOpenChange, onCreated }: CreatePro
           <Button
             onClick={handleCreate}
             disabled={!name.trim() || isSubmitting}
-            className="h-9 px-6 bg-[#e44232] hover:bg-[#c3392b] text-white shadow-sm transition-all active:scale-95"
+            className="h-9 px-6 bg-brand hover:bg-brand-hover text-white shadow-sm transition-all active:scale-95"
           >
             {isSubmitting ? (
               <>

@@ -34,6 +34,9 @@ export function Header() {
             <Link to="/" activeProps={activeLinkProps} inactiveProps={inactiveLinkProps}>
               Home
             </Link>
+            <Link to="/features" activeProps={activeLinkProps} inactiveProps={inactiveLinkProps}>
+              Features
+            </Link>
             <Link to="/about" activeProps={activeLinkProps} inactiveProps={inactiveLinkProps}>
               About
             </Link>

@@ -1,9 +1,12 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
+import { processInChunks } from "@/shared/lib/utils";
 import type { Project } from "@/features/projects/types/project.types";
+
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PROJECTS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROJECTS_COLLECTION_ID || "projects";
+const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
 
 function generateSlug(name: string): string {
   return name
@@ -14,8 +17,7 @@ function generateSlug(name: string): string {
     .replace(/-+/g, "-");
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToProject(doc: any): Project {
+function documentToProject(doc: Models.DefaultDocument): Project {
   return {
     id: doc.$id,
     name: doc.name,
@@ -84,7 +86,7 @@ export const projectService = {
     if (updates.icon !== undefined) payload.icon = updates.icon || null;
     if (updates.order !== undefined) payload.position = updates.order;
 
-    const doc = await databases.updateDocument(
+    const doc = await databases.updateDocument<Models.DefaultDocument>(
       DATABASE_ID,
       PROJECTS_COLLECTION_ID,
       projectId,
@@ -93,7 +95,27 @@ export const projectService = {
     return documentToProject(doc);
   },
 
-  async deleteProject(projectId: string): Promise<void> {
+  async deleteProject(projectId: string, userId: string): Promise<void> {
+    // Get project name to find associated tasks
+    const projectDoc = await databases.getDocument(DATABASE_ID, PROJECTS_COLLECTION_ID, projectId);
+    const projectName = projectDoc.name;
+
+    // Unassign all tasks that belong to this project (move to inbox)
+    try {
+      const tasks = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.equal("projectId", projectName),
+        Query.limit(500),
+      ]);
+      await processInChunks(tasks.documents, (doc) =>
+        databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+          projectId: null,
+        })
+      );
+    } catch {
+      // Tasks collection may not exist or no tasks, continue
+    }
+
     await databases.deleteDocument(DATABASE_ID, PROJECTS_COLLECTION_ID, projectId);
   },
 };

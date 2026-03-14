@@ -10,7 +10,6 @@ import {
   ChevronDown,
   ChevronRight,
   Trash2,
-  Hash,
   CircleDot,
   FolderOpen,
   MoreHorizontal,
@@ -18,19 +17,23 @@ import {
   Archive,
   ArchiveRestore,
   Trash,
+  Keyboard,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { logger } from "@/shared/lib/logger";
 import { logo } from "@/assets";
 import { cn } from "@/shared/lib/utils";
 import { useProjects } from "@/shared/hooks/use-projects";
 import { useTasks } from "@/shared/hooks/use-tasks";
 import { getColorClass } from "@/features/projects/utils/colors";
+import { ProjectIconDisplay } from "@/features/projects/components/project-icon-display";
 import { CreateProjectDialog } from "@/features/projects/components/create-project-dialog";
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -40,6 +43,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/shared/components/ui/sidebar";
+import { KeyboardShortcutsDialog } from "@/shared/components/keyboard-shortcuts-dialog";
 import {
   Collapsible,
   CollapsibleContent,
@@ -71,6 +75,7 @@ export function AppSidebar() {
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
   const navigateTo = useNavigate();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
   const activeProjects = useMemo(() => projects.filter((p) => !p.isArchived), [projects]);
   const archivedProjects = useMemo(() => projects.filter((p) => p.isArchived), [projects]);
@@ -128,7 +133,7 @@ export function AppSidebar() {
         description: "You can find it in the Archived section.",
       });
     } catch (err) {
-      console.error("Error archiving project:", err);
+      logger.error("Error archiving project", { error: err });
       toast.error("Failed to archive project");
     }
   };
@@ -140,7 +145,7 @@ export function AppSidebar() {
         description: "Project is now active again.",
       });
     } catch (err) {
-      console.error("Error unarchiving project:", err);
+      logger.error("Error unarchiving project", { error: err });
       toast.error("Failed to restore project");
     }
   };
@@ -153,7 +158,7 @@ export function AppSidebar() {
         description: "The project has been permanently removed.",
       });
     } catch (err) {
-      console.error("Error deleting project:", err);
+      logger.error("Error deleting project", { error: err });
       toast.error("Failed to delete project");
     }
   };
@@ -172,12 +177,14 @@ export function AppSidebar() {
             state === "expanded" ? "gap-3 px-1" : "justify-center"
           )}
         >
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 p-1 shrink-0">
-            <img src={logo} alt="UnStack Todo" className="size-full" />
-          </div>
-          {state === "expanded" && (
-            <span className="text-lg font-bold tracking-tight">UnStack</span>
-          )}
+          <a href="/inbox" className="flex items-center gap-3">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 p-1 shrink-0">
+              <img src={logo} alt="UnStack Todo" className="size-full" />
+            </div>
+            {state === "expanded" && (
+              <span className="text-lg font-bold tracking-tight">UnStack</span>
+            )}
+          </a>
         </div>
       </SidebarHeader>
 
@@ -253,7 +260,7 @@ export function AppSidebar() {
                         <div className="space-y-2 px-2 py-1">
                           {[...Array(3)].map((_, i) => (
                             <div
-                              key={i}
+                              key={`skeleton-${i}`}
                               className="h-8 rounded-md bg-muted animate-pulse"
                               style={{ animationDelay: `${i * 0.1}s` }}
                             />
@@ -315,7 +322,8 @@ export function AppSidebar() {
                                         to="/projects/$projectId"
                                         params={{ projectId: project.id }}
                                       >
-                                        <Hash
+                                        <ProjectIconDisplay
+                                          icon={project.icon}
                                           className={cn(
                                             "size-4 shrink-0",
                                             getColorClass(project.color).replace("bg-", "text-")
@@ -481,7 +489,8 @@ export function AppSidebar() {
                                     params={{ projectId: project.id }}
                                     className="flex items-center gap-2 w-full"
                                   >
-                                    <Hash
+                                    <ProjectIconDisplay
+                                      icon={project.icon}
                                       className={cn(
                                         "size-3.5 shrink-0",
                                         getColorClass(project.color).replace("bg-", "text-")
@@ -539,7 +548,8 @@ export function AppSidebar() {
                       <TooltipTrigger asChild>
                         <SidebarMenuButton asChild className="justify-center">
                           <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                            <Hash
+                            <ProjectIconDisplay
+                              icon={project.icon}
                               className={cn(
                                 "size-4",
                                 getColorClass(project.color).replace("bg-", "text-")
@@ -582,11 +592,44 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
+      <SidebarFooter className="border-t p-2">
+        {state === "expanded" ? (
+          <button
+            onClick={() => setIsShortcutsOpen(true)}
+            className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          >
+            <Keyboard className="size-4 shrink-0" />
+            <span className="flex-1 text-left">Shortcuts</span>
+            <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-mono text-[10px] font-medium text-muted-foreground">
+              ?
+            </kbd>
+          </button>
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setIsShortcutsOpen(true)}
+                  className="flex items-center justify-center w-full rounded-md py-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                >
+                  <Keyboard className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Shortcuts (?)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </SidebarFooter>
+
       <CreateProjectDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onCreated={handleProjectCreated}
       />
+
+      <KeyboardShortcutsDialog open={isShortcutsOpen} onOpenChange={setIsShortcutsOpen} />
     </Sidebar>
   );
 }

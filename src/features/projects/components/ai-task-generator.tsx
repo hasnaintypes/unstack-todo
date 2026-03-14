@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Sparkles, X, Check, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { cn } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
 import { generateTaskSuggestions, type TaskSuggestion } from "@/shared/services/ai.service";
 import type { Project } from "@/features/projects/types/project.types";
 
@@ -31,18 +32,19 @@ export function AiTaskGenerator({
       setSuggestions(result);
       setSelectedSuggestions(new Set(result.map((_: TaskSuggestion, i: number) => i)));
     } catch (err) {
-      console.error("Error generating suggestions:", err);
+      logger.error("Error generating suggestions", { error: err });
     } finally {
       setIsGenerating(false);
     }
   }, [project]);
 
   // Auto-generate on mount if requested
-  useState(() => {
-    if (autoGenerate && suggestions.length === 0) {
+  useEffect(() => {
+    if (autoGenerate) {
       handleGenerate();
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleSuggestion = (idx: number) => {
     setSelectedSuggestions((prev) => {
@@ -60,27 +62,27 @@ export function AiTaskGenerator({
       await onAddTasks(selected);
       onClose();
     } catch (err) {
-      console.error("Error adding tasks:", err);
+      logger.error("Error adding tasks", { error: err });
     } finally {
       setIsAdding(false);
     }
   };
 
   return (
-    <div className="rounded-xl border bg-card overflow-hidden">
+    <div className="overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/30">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-[#e44232]" />
+          <Sparkles className="size-4 text-brand" />
           <span className="text-sm font-semibold">AI Task Suggestions</span>
         </div>
-        <Button variant="ghost" size="icon" className="size-7" onClick={onClose}>
+        <Button variant="ghost" size="icon" className="size-7" onClick={onClose} aria-label="Close AI suggestions">
           <X className="size-3.5" />
         </Button>
       </div>
       <div className="p-5">
         {isGenerating ? (
           <div className="flex flex-col items-center py-8 gap-3">
-            <Loader2 className="size-6 animate-spin text-[#e44232]" />
+            <Loader2 className="size-6 animate-spin text-brand" />
             <p className="text-sm text-muted-foreground">
               Generating tasks for &quot;{project.name}&quot;...
             </p>
@@ -90,12 +92,12 @@ export function AiTaskGenerator({
             <div className="space-y-2">
               {suggestions.map((s, i) => (
                 <button
-                  key={i}
+                  key={`suggestion-${s.title}`}
                   onClick={() => toggleSuggestion(i)}
                   className={cn(
                     "flex items-start gap-3 w-full text-left p-3 rounded-lg border transition-all",
                     selectedSuggestions.has(i)
-                      ? "border-[#e44232]/30 bg-[#e44232]/5"
+                      ? "border-brand/30 bg-brand/5"
                       : "border-transparent hover:bg-accent/50"
                   )}
                 >
@@ -103,7 +105,7 @@ export function AiTaskGenerator({
                     className={cn(
                       "flex size-5 items-center justify-center rounded border-2 shrink-0 mt-0.5 transition-colors",
                       selectedSuggestions.has(i)
-                        ? "bg-[#e44232] border-[#e44232]"
+                        ? "bg-brand border-brand"
                         : "border-muted-foreground/30"
                     )}
                   >
@@ -140,7 +142,7 @@ export function AiTaskGenerator({
                   size="sm"
                   onClick={handleAddSelected}
                   disabled={selectedSuggestions.size === 0 || isAdding}
-                  className="bg-[#e44232] hover:bg-[#c3392b] text-white gap-1.5"
+                  className="bg-brand hover:bg-brand-hover text-white gap-1.5"
                 >
                   {isAdding ? (
                     <Loader2 className="size-3.5 animate-spin" />
@@ -161,7 +163,7 @@ export function AiTaskGenerator({
             <Button
               size="sm"
               onClick={handleGenerate}
-              className="bg-[#e44232] hover:bg-[#c3392b] text-white"
+              className="bg-brand hover:bg-brand-hover text-white"
             >
               Generate Tasks
             </Button>

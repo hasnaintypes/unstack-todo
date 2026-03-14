@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { profileService } from "@/features/profile/services/profile.service";
+import { logger } from "@/shared/lib/logger";
 
 export function useProfile() {
   const { user, checkAuth } = useAuth();
@@ -16,7 +17,7 @@ export function useProfile() {
         description: `Your name has been changed to "${name}".`,
       });
     } catch (err) {
-      console.error("Error updating name:", err);
+      logger.error("Error updating name", { error: err });
       toast.error("Couldn't update your name", {
         description: "Something went wrong. Please try again.",
       });
@@ -35,7 +36,7 @@ export function useProfile() {
         description: `Your email has been changed to "${email}".`,
       });
     } catch (err) {
-      console.error("Error updating email:", err);
+      logger.error("Error updating email", { error: err });
       toast.error("Couldn't update email", {
         description: "Please verify your password is correct.",
       });
@@ -53,7 +54,7 @@ export function useProfile() {
         description: "Your account is now using the new password.",
       });
     } catch (err) {
-      console.error("Error updating password:", err);
+      logger.error("Error updating password", { error: err });
       toast.error("Couldn't update password", {
         description: "Please verify your current password is correct.",
       });

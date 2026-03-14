@@ -1,10 +1,13 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
+import { processInChunks } from "@/shared/lib/utils";
 import type { Category } from "@/features/categories/types/category.types";
+
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const CATEGORIES_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_CATEGORIES_COLLECTION_ID || "categories";
+const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
 
 function generateSlug(name: string): string {
   return name
@@ -15,8 +18,7 @@ function generateSlug(name: string): string {
     .replace(/-+/g, "-");
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToCategory(doc: any): Category {
+function documentToCategory(doc: Models.DefaultDocument): Category {
   return {
     id: doc.$id,
     name: doc.name,
@@ -66,7 +68,7 @@ export const categoryService = {
     }
     if (updates.color !== undefined) payload.color = updates.color || null;
 
-    const doc = await databases.updateDocument(
+    const doc = await databases.updateDocument<Models.DefaultDocument>(
       DATABASE_ID,
       CATEGORIES_COLLECTION_ID,
       categoryId,
@@ -75,7 +77,31 @@ export const categoryService = {
     return documentToCategory(doc);
   },
 
-  async deleteCategory(categoryId: string): Promise<void> {
+  async deleteCategory(categoryId: string, userId: string): Promise<void> {
+    // Get category name to find associated tasks
+    const categoryDoc = await databases.getDocument(
+      DATABASE_ID,
+      CATEGORIES_COLLECTION_ID,
+      categoryId
+    );
+    const categoryName = categoryDoc.name;
+
+    // Unassign category from all tasks that use it
+    try {
+      const tasks = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+        Query.equal("userId", userId),
+        Query.equal("categoryId", categoryName),
+        Query.limit(500),
+      ]);
+      await processInChunks(tasks.documents, (doc) =>
+        databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+          categoryId: null,
+        })
+      );
+    } catch {
+      // Tasks collection may not exist or no tasks, continue
+    }
+
     await databases.deleteDocument(DATABASE_ID, CATEGORIES_COLLECTION_ID, categoryId);
   },
 };

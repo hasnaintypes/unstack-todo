@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { User, LogOut, Settings, Search } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { storageService } from "@/shared/services/storage.service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
   DropdownMenu,
@@ -53,6 +55,17 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
     navigate({ to: "/settings" });
   };
 
+  const avatarFileId = (user?.prefs as Record<string, string> | undefined)?.avatarFileId;
+  const avatarUrl = useMemo(
+    () => (avatarFileId ? storageService.getFileDownloadUrl(avatarFileId).toString() : null),
+    [avatarFileId]
+  );
+
+  const fallbackAvatarUrl = useMemo(
+    () => `https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || "User"}`,
+    [user?.name]
+  );
+
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -91,13 +104,13 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHea
       </div>
 
       {/* Right: Avatar */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 rounded-full outline-none transition-transform active:scale-95">
               <Avatar className="size-9 border border-border transition-colors hover:border-primary/50">
                 <AvatarImage
-                  src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || `User`}`}
+                  src={avatarUrl || fallbackAvatarUrl}
                 />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                   {initials}

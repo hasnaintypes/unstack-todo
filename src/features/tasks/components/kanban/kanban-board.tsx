@@ -22,9 +22,9 @@ interface KanbanBoardProps {
 }
 
 const COLUMNS: { id: TaskStatus; title: string; colorClass: string }[] = [
-  { id: "todo", title: "To Do", colorClass: "bg-muted-foreground" },
-  { id: "in-progress", title: "In Progress", colorClass: "bg-blue-500" },
-  { id: "completed", title: "Completed", colorClass: "bg-green-500" },
+  { id: "todo", title: "To Do", colorClass: "bg-slate-500" },
+  { id: "in-progress", title: "In Progress", colorClass: "bg-amber-500" },
+  { id: "completed", title: "Completed", colorClass: "bg-emerald-500" },
 ];
 
 export function KanbanBoard({
@@ -101,18 +101,20 @@ export function KanbanBoard({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {COLUMNS.map((column) => (
-          <KanbanColumn
-            key={column.id}
-            id={column.id}
-            title={column.title}
-            colorClass={column.colorClass}
-            tasks={tasksByStatus[column.id]}
-            onTaskClick={onTaskClick}
-            onToggleComplete={onToggleComplete}
-          />
-        ))}
+      <div className="rounded-2xl border border-border/60 bg-background/45 p-3 shadow-sm">
+        <div className="flex gap-4 overflow-x-auto pb-1">
+          {COLUMNS.map((column) => (
+            <KanbanColumn
+              key={column.id}
+              id={column.id}
+              title={column.title}
+              colorClass={column.colorClass}
+              tasks={tasksByStatus[column.id]}
+              onTaskClick={onTaskClick}
+              onToggleComplete={onToggleComplete}
+            />
+          ))}
+        </div>
       </div>
 
       <DragOverlay>

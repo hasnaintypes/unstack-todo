@@ -23,6 +23,9 @@ import { Route as ProtectedCompletedIndexRouteImport } from './routes/_protected
 import { Route as ProtectedProjectsProjectIdRouteImport } from './routes/_protected/projects/$projectId'
 import { Route as PublicAuthSignUpIndexRouteImport } from './routes/_public/auth/sign-up/index'
 import { Route as PublicAuthSignInIndexRouteImport } from './routes/_public/auth/sign-in/index'
+import { Route as PublicMarketingTermsIndexRouteImport } from './routes/_public/_marketing/terms/index'
+import { Route as PublicMarketingPrivacyIndexRouteImport } from './routes/_public/_marketing/privacy/index'
+import { Route as PublicMarketingFeaturesIndexRouteImport } from './routes/_public/_marketing/features/index'
 import { Route as PublicMarketingAboutIndexRouteImport } from './routes/_public/_marketing/about/index'
 
 const PublicRoute = PublicRouteImport.update({
@@ -46,43 +49,59 @@ const ProtectedUpcomingIndexRoute = ProtectedUpcomingIndexRouteImport.update({
   id: '/upcoming/',
   path: '/upcoming/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/upcoming/index.lazy').then((d) => d.Route),
+)
 const ProtectedTrashIndexRoute = ProtectedTrashIndexRouteImport.update({
   id: '/trash/',
   path: '/trash/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/trash/index.lazy').then((d) => d.Route),
+)
 const ProtectedTodayIndexRoute = ProtectedTodayIndexRouteImport.update({
   id: '/today/',
   path: '/today/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/today/index.lazy').then((d) => d.Route),
+)
 const ProtectedSettingsIndexRoute = ProtectedSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/settings/index.lazy').then((d) => d.Route),
+)
 const ProtectedProfileIndexRoute = ProtectedProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/profile/index.lazy').then((d) => d.Route),
+)
 const ProtectedInboxIndexRoute = ProtectedInboxIndexRouteImport.update({
   id: '/inbox/',
   path: '/inbox/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/inbox/index.lazy').then((d) => d.Route),
+)
 const ProtectedCompletedIndexRoute = ProtectedCompletedIndexRouteImport.update({
   id: '/completed/',
   path: '/completed/',
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_protected/completed/index.lazy').then((d) => d.Route),
+)
 const ProtectedProjectsProjectIdRoute =
   ProtectedProjectsProjectIdRouteImport.update({
     id: '/projects/$projectId',
     path: '/projects/$projectId',
     getParentRoute: () => ProtectedRoute,
-  } as any)
+  } as any).lazy(() =>
+    import('./routes/_protected/projects/$projectId.lazy').then((d) => d.Route),
+  )
 const PublicAuthSignUpIndexRoute = PublicAuthSignUpIndexRouteImport.update({
   id: '/auth/sign-up/',
   path: '/auth/sign-up/',
@@ -93,6 +112,24 @@ const PublicAuthSignInIndexRoute = PublicAuthSignInIndexRouteImport.update({
   path: '/auth/sign-in/',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicMarketingTermsIndexRoute =
+  PublicMarketingTermsIndexRouteImport.update({
+    id: '/terms/',
+    path: '/terms/',
+    getParentRoute: () => PublicMarketingRoute,
+  } as any)
+const PublicMarketingPrivacyIndexRoute =
+  PublicMarketingPrivacyIndexRouteImport.update({
+    id: '/privacy/',
+    path: '/privacy/',
+    getParentRoute: () => PublicMarketingRoute,
+  } as any)
+const PublicMarketingFeaturesIndexRoute =
+  PublicMarketingFeaturesIndexRouteImport.update({
+    id: '/features/',
+    path: '/features/',
+    getParentRoute: () => PublicMarketingRoute,
+  } as any)
 const PublicMarketingAboutIndexRoute =
   PublicMarketingAboutIndexRouteImport.update({
     id: '/about/',
@@ -111,6 +148,9 @@ export interface FileRoutesByFullPath {
   '/trash/': typeof ProtectedTrashIndexRoute
   '/upcoming/': typeof ProtectedUpcomingIndexRoute
   '/about/': typeof PublicMarketingAboutIndexRoute
+  '/features/': typeof PublicMarketingFeaturesIndexRoute
+  '/privacy/': typeof PublicMarketingPrivacyIndexRoute
+  '/terms/': typeof PublicMarketingTermsIndexRoute
   '/auth/sign-in/': typeof PublicAuthSignInIndexRoute
   '/auth/sign-up/': typeof PublicAuthSignUpIndexRoute
 }
@@ -125,6 +165,9 @@ export interface FileRoutesByTo {
   '/trash': typeof ProtectedTrashIndexRoute
   '/upcoming': typeof ProtectedUpcomingIndexRoute
   '/about': typeof PublicMarketingAboutIndexRoute
+  '/features': typeof PublicMarketingFeaturesIndexRoute
+  '/privacy': typeof PublicMarketingPrivacyIndexRoute
+  '/terms': typeof PublicMarketingTermsIndexRoute
   '/auth/sign-in': typeof PublicAuthSignInIndexRoute
   '/auth/sign-up': typeof PublicAuthSignUpIndexRoute
 }
@@ -143,6 +186,9 @@ export interface FileRoutesById {
   '/_protected/upcoming/': typeof ProtectedUpcomingIndexRoute
   '/_public/_marketing/': typeof PublicMarketingIndexRoute
   '/_public/_marketing/about/': typeof PublicMarketingAboutIndexRoute
+  '/_public/_marketing/features/': typeof PublicMarketingFeaturesIndexRoute
+  '/_public/_marketing/privacy/': typeof PublicMarketingPrivacyIndexRoute
+  '/_public/_marketing/terms/': typeof PublicMarketingTermsIndexRoute
   '/_public/auth/sign-in/': typeof PublicAuthSignInIndexRoute
   '/_public/auth/sign-up/': typeof PublicAuthSignUpIndexRoute
 }
@@ -159,6 +205,9 @@ export interface FileRouteTypes {
     | '/trash/'
     | '/upcoming/'
     | '/about/'
+    | '/features/'
+    | '/privacy/'
+    | '/terms/'
     | '/auth/sign-in/'
     | '/auth/sign-up/'
   fileRoutesByTo: FileRoutesByTo
@@ -173,6 +222,9 @@ export interface FileRouteTypes {
     | '/trash'
     | '/upcoming'
     | '/about'
+    | '/features'
+    | '/privacy'
+    | '/terms'
     | '/auth/sign-in'
     | '/auth/sign-up'
   id:
@@ -190,6 +242,9 @@ export interface FileRouteTypes {
     | '/_protected/upcoming/'
     | '/_public/_marketing/'
     | '/_public/_marketing/about/'
+    | '/_public/_marketing/features/'
+    | '/_public/_marketing/privacy/'
+    | '/_public/_marketing/terms/'
     | '/_public/auth/sign-in/'
     | '/_public/auth/sign-up/'
   fileRoutesById: FileRoutesById
@@ -299,6 +354,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicAuthSignInIndexRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/_marketing/terms/': {
+      id: '/_public/_marketing/terms/'
+      path: '/terms'
+      fullPath: '/terms/'
+      preLoaderRoute: typeof PublicMarketingTermsIndexRouteImport
+      parentRoute: typeof PublicMarketingRoute
+    }
+    '/_public/_marketing/privacy/': {
+      id: '/_public/_marketing/privacy/'
+      path: '/privacy'
+      fullPath: '/privacy/'
+      preLoaderRoute: typeof PublicMarketingPrivacyIndexRouteImport
+      parentRoute: typeof PublicMarketingRoute
+    }
+    '/_public/_marketing/features/': {
+      id: '/_public/_marketing/features/'
+      path: '/features'
+      fullPath: '/features/'
+      preLoaderRoute: typeof PublicMarketingFeaturesIndexRouteImport
+      parentRoute: typeof PublicMarketingRoute
+    }
     '/_public/_marketing/about/': {
       id: '/_public/_marketing/about/'
       path: '/about'
@@ -338,11 +414,17 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 interface PublicMarketingRouteChildren {
   PublicMarketingIndexRoute: typeof PublicMarketingIndexRoute
   PublicMarketingAboutIndexRoute: typeof PublicMarketingAboutIndexRoute
+  PublicMarketingFeaturesIndexRoute: typeof PublicMarketingFeaturesIndexRoute
+  PublicMarketingPrivacyIndexRoute: typeof PublicMarketingPrivacyIndexRoute
+  PublicMarketingTermsIndexRoute: typeof PublicMarketingTermsIndexRoute
 }
 
 const PublicMarketingRouteChildren: PublicMarketingRouteChildren = {
   PublicMarketingIndexRoute: PublicMarketingIndexRoute,
   PublicMarketingAboutIndexRoute: PublicMarketingAboutIndexRoute,
+  PublicMarketingFeaturesIndexRoute: PublicMarketingFeaturesIndexRoute,
+  PublicMarketingPrivacyIndexRoute: PublicMarketingPrivacyIndexRoute,
+  PublicMarketingTermsIndexRoute: PublicMarketingTermsIndexRoute,
 }
 
 const PublicMarketingRouteWithChildren = PublicMarketingRoute._addFileChildren(

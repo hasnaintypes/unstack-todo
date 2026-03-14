@@ -27,12 +27,12 @@ export function KanbanColumn({
   const taskIds = tasks.map((t) => t.id);
 
   return (
-    <div className="flex flex-col min-w-[280px] flex-1">
+    <div className="flex min-w-75 flex-1 flex-col rounded-xl border border-border/60 bg-card/70 shadow-sm">
       {/* Column header */}
-      <div className="flex items-center gap-2 px-2 py-3">
+      <div className="flex items-center gap-2 border-b border-border/60 bg-background/70 px-3 py-3">
         <div className={cn("size-2.5 rounded-full", colorClass)} />
-        <h3 className="text-sm font-semibold">{title}</h3>
-        <Badge variant="secondary" className="text-xs h-5 px-1.5 rounded-full">
+        <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+        <Badge variant="secondary" className="h-5 rounded-full px-1.5 text-xs">
           {tasks.length}
         </Badge>
       </div>
@@ -41,8 +41,8 @@ export function KanbanColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          "flex-1 rounded-lg border border-dashed p-2 space-y-2 min-h-[200px] transition-colors",
-          isOver ? "border-primary/50 bg-primary/5" : "border-transparent"
+          "min-h-80 flex-1 space-y-2 rounded-b-xl border border-dashed p-2.5 transition-colors",
+          isOver ? "border-primary/50 bg-primary/6" : "border-transparent"
         )}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
@@ -57,7 +57,7 @@ export function KanbanColumn({
         </SortableContext>
 
         {tasks.length === 0 && (
-          <div className="flex items-center justify-center h-20 text-xs text-muted-foreground/50">
+          <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-border/60 bg-muted/20 text-xs text-muted-foreground/60">
             Drop tasks here
           </div>
         )}

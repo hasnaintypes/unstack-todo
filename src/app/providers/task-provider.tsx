@@ -1,304 +1,126 @@
 import * as React from "react";
-import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
-import { taskService } from "@/features/tasks/services/task.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { TaskContext, type TaskContextValue } from "@/app/context/task-context";
+import { queryKeys } from "@/shared/lib/query-keys";
+import {
+  useTasksQuery,
+  useAddTaskMutation,
+  useAddTasksBatchMutation,
+  useUpdateTaskMutation,
+  useToggleTaskCompleteMutation,
+  useMoveToTrashMutation,
+  useRestoreFromTrashMutation,
+  usePermanentlyDeleteMutation,
+  useClearCompletedMutation,
+  useEmptyTrashMutation,
+  useRestoreAllFromTrashMutation,
+} from "@/features/tasks/hooks/use-tasks-query";
 
 export function TaskProvider({ children }: { children: React.ReactNode }) {
-  const [tasks, setTasks] = React.useState<CalendarTask[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const [selectedTask, setSelectedTask] = React.useState<CalendarTask | null>(null);
   const { user } = useAuth();
+  const userId = user?.$id;
+  const queryClient = useQueryClient();
 
-  const moveToTrashRef = React.useRef<(id: string) => Promise<void>>(null!);
-  const restoreFromTrashRef = React.useRef<(id: string) => Promise<void>>(null!);
+  const [selectedTask, setSelectedTask] = React.useState<CalendarTask | null>(null);
 
-  // Load tasks from Appwrite when user is authenticated
-  React.useEffect(() => {
-    const loadTasks = async () => {
-      if (!user?.$id) {
-        setTasks([]);
-        setIsLoading(false);
-        return;
-      }
+  const { data: tasks = [], isLoading, error: queryError } = useTasksQuery(userId);
+  const error = queryError ? "Failed to load tasks" : null;
 
-      setIsLoading(true);
-      setError(null);
-      try {
-        const fetchedTasks = await taskService.getAllTasks(user.$id);
-        setTasks(fetchedTasks);
-      } catch (err) {
-        console.error("Error loading tasks:", err);
-        setError("Failed to load tasks");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadTasks();
-  }, [user?.$id]);
+  const addTaskMutation = useAddTaskMutation(userId);
+  const addTasksBatchMutation = useAddTasksBatchMutation(userId);
+  const updateTaskMutation = useUpdateTaskMutation(userId);
+  const toggleMutation = useToggleTaskCompleteMutation(userId);
+  const moveToTrashMutation = useMoveToTrashMutation(userId);
+  const restoreFromTrashMutation = useRestoreFromTrashMutation(userId);
+  const permanentlyDeleteMutation = usePermanentlyDeleteMutation(userId);
+  const clearCompletedMutation = useClearCompletedMutation(userId);
+  const emptyTrashMutation = useEmptyTrashMutation(userId);
+  const restoreAllMutation = useRestoreAllFromTrashMutation(userId);
 
   const addTask = React.useCallback(
     async (taskData: Omit<CalendarTask, "id">) => {
-      if (!user?.$id) {
-        setError("User not authenticated");
-        throw new Error("User not authenticated");
-      }
-
-      try {
-        const newTask = await taskService.createTask(taskData, user.$id);
-        setTasks((prev) => [newTask, ...prev]);
-        toast.success(`"${newTask.title}" added to your tasks`, {
-          description: newTask.dueDate ? `Due ${newTask.dueDate}` : "No due date set",
-          action: { label: "Undo", onClick: () => moveToTrashRef.current(newTask.id) },
-        });
-      } catch (err) {
-        console.error("Error adding task:", err);
-        setError("Failed to add task");
-        toast.error("Couldn't create task", {
-          description: "Please check your connection and try again.",
-        });
-        throw err;
-      }
+      if (!userId) throw new Error("User not authenticated");
+      await addTaskMutation.mutateAsync(taskData);
     },
-    [user?.$id]
+    [userId, addTaskMutation]
+  );
+
+  const addTasksBatch = React.useCallback(
+    async (taskDataList: Omit<CalendarTask, "id">[]): Promise<CalendarTask[]> => {
+      if (!userId) throw new Error("User not authenticated");
+      return addTasksBatchMutation.mutateAsync(taskDataList);
+    },
+    [userId, addTasksBatchMutation]
   );
 
   const updateTask = React.useCallback(
     async (id: string, updates: Partial<CalendarTask>) => {
-      if (!user?.$id) {
-        setError("User not authenticated");
-        throw new Error("User not authenticated");
-      }
-
-      try {
-        const updatedTask = await taskService.updateTask(id, updates);
-        setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
-        toast.success("Changes saved", {
-          description: `"${updatedTask.title}" has been updated.`,
-        });
-      } catch (err) {
-        console.error("Error updating task:", err);
-        setError("Failed to update task");
-        toast.error("Couldn't save changes", {
-          description: "Please check your connection and try again.",
-        });
-        throw err;
-      }
+      if (!userId) throw new Error("User not authenticated");
+      const updatedTask = await updateTaskMutation.mutateAsync({ id, updates });
+      setSelectedTask((prev) => (prev?.id === id ? updatedTask : prev));
     },
-    [user?.$id]
+    [userId, updateTaskMutation]
   );
 
-  const deleteTask = React.useCallback(async (id: string) => {
-    try {
-      await taskService.permanentlyDelete(id);
-      setTasks((prev) => prev.filter((task) => task.id !== id));
-    } catch (err) {
-      console.error("Error deleting task:", err);
-      setError("Failed to delete task");
-      throw err;
-    }
-  }, []);
+  const deleteTask = React.useCallback(
+    async (id: string) => {
+      await permanentlyDeleteMutation.mutateAsync(id);
+    },
+    [permanentlyDeleteMutation]
+  );
 
   const toggleTaskComplete = React.useCallback(
     async (id: string) => {
-      try {
-        const updatedTask = await taskService.toggleTaskComplete(id);
-        setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
-
-        // Auto-create next occurrence for recurring tasks
-        if (updatedTask.status === "completed" && updatedTask.recurrence && user?.$id) {
-          try {
-            const nextTask = await taskService.createNextOccurrence(updatedTask, user.$id);
-            setTasks((prev) => [nextTask, ...prev]);
-            toast.success(`"${updatedTask.title}" completed`, {
-              description: `Next occurrence created for ${nextTask.dueDate}`,
-              action: { label: "Undo", onClick: () => toggleTaskComplete(id) },
-            });
-          } catch {
-            toast.success(`"${updatedTask.title}" completed`, {
-              description: "Failed to create next occurrence.",
-            });
-          }
-        } else {
-          toast.success(
-            updatedTask.status === "completed"
-              ? `"${updatedTask.title}" completed`
-              : `"${updatedTask.title}" reopened`,
-            {
-              description:
-                updatedTask.status === "completed"
-                  ? "Great job! Keep up the momentum."
-                  : "Task is back on your active list.",
-              action: { label: "Undo", onClick: () => toggleTaskComplete(id) },
-            }
-          );
-        }
-      } catch (err) {
-        console.error("Error toggling task:", err);
-        setError("Failed to toggle task");
-        throw err;
-      }
+      await toggleMutation.mutateAsync(id);
     },
-    [user?.$id]
+    [toggleMutation]
   );
 
-  const moveToTrash = React.useCallback(async (id: string) => {
-    try {
-      await taskService.moveToTrash(id);
-      setTasks((prev) => prev.filter((task) => task.id !== id));
-      toast.success("Moved to trash", {
-        description: "Task will be permanently deleted after 30 days.",
-        action: { label: "Undo", onClick: () => restoreFromTrashRef.current(id) },
-      });
-    } catch (err) {
-      console.error("Error moving to trash:", err);
-      setError("Failed to move task to trash");
-      toast.error("Couldn't move task to trash", {
-        description: "Please check your connection and try again.",
-      });
-      throw err;
-    }
-  }, []);
+  const moveToTrash = React.useCallback(
+    async (id: string) => {
+      await moveToTrashMutation.mutateAsync(id);
+    },
+    [moveToTrashMutation]
+  );
 
-  const restoreFromTrash = React.useCallback(async (id: string) => {
-    try {
-      const restoredTask = await taskService.restoreFromTrash(id);
-      setTasks((prev) => [restoredTask, ...prev]);
-      toast.success("Task restored", {
-        description: `"${restoredTask.title}" is back in your tasks.`,
-        action: { label: "Undo", onClick: () => moveToTrashRef.current(id) },
-      });
-    } catch (err) {
-      console.error("Error restoring task:", err);
-      setError("Failed to restore task");
-      toast.error("Couldn't restore task", {
-        description: "Please check your connection and try again.",
-      });
-      throw err;
-    }
-  }, []);
-
-  moveToTrashRef.current = moveToTrash;
-  restoreFromTrashRef.current = restoreFromTrash;
+  const restoreFromTrash = React.useCallback(
+    async (id: string) => {
+      await restoreFromTrashMutation.mutateAsync(id);
+    },
+    [restoreFromTrashMutation]
+  );
 
   const permanentlyDelete = React.useCallback(
     async (id: string) => {
-      try {
-        // Capture task before deleting for undo
-        const deletedTask = tasks.find((t) => t.id === id);
-        await taskService.permanentlyDelete(id);
-        setTasks((prev) => prev.filter((task) => task.id !== id));
-        if (selectedTask?.id === id) setSelectedTask(null);
-        toast.success("Task permanently deleted", {
-          description: deletedTask ? `"${deletedTask.title}" has been removed.` : undefined,
-          action:
-            deletedTask && user?.$id
-              ? {
-                  label: "Undo",
-                  onClick: async () => {
-                    try {
-                      const restored = await taskService.createTask(
-                        {
-                          title: deletedTask.title,
-                          description: deletedTask.description,
-                          dueDate: deletedTask.dueDate,
-                          priority: deletedTask.priority,
-                          category: deletedTask.category,
-                          project: deletedTask.project,
-                          status: deletedTask.status,
-                          subtasks: deletedTask.subtasks,
-                        },
-                        user.$id
-                      );
-                      setTasks((prev) => [restored, ...prev]);
-                      toast.success("Task restored");
-                    } catch {
-                      toast.error("Failed to undo delete");
-                    }
-                  },
-                }
-              : undefined,
-        });
-      } catch (err) {
-        console.error("Error permanently deleting:", err);
-        setError("Failed to permanently delete task");
-        toast.error("Couldn't delete task");
-        throw err;
-      }
+      if (selectedTask?.id === id) setSelectedTask(null);
+      await permanentlyDeleteMutation.mutateAsync(id);
     },
-    [tasks, selectedTask, user?.$id]
+    [permanentlyDeleteMutation, selectedTask]
   );
 
   const clearCompleted = React.useCallback(async () => {
-    if (!user?.$id) return;
-
-    try {
-      const count = tasks.filter((t) => t.status === "completed").length;
-      await taskService.clearCompleted(user.$id);
-      setTasks((prev) => prev.filter((task) => task.status !== "completed"));
-      toast.success(`${count} completed task${count !== 1 ? "s" : ""} moved to trash`);
-    } catch (err) {
-      console.error("Error clearing completed:", err);
-      setError("Failed to clear completed tasks");
-      toast.error("Couldn't clear completed tasks");
-      throw err;
-    }
-  }, [user?.$id, tasks]);
+    if (!userId) return;
+    await clearCompletedMutation.mutateAsync();
+  }, [userId, clearCompletedMutation]);
 
   const emptyTrash = React.useCallback(async () => {
-    if (!user?.$id) return;
-
-    try {
-      await taskService.emptyTrash(user.$id);
-      const fetchedTasks = await taskService.getAllTasks(user.$id);
-      setTasks(fetchedTasks);
-      toast.success("Trash emptied", {
-        description: "All trashed tasks have been permanently deleted.",
-      });
-    } catch (err) {
-      console.error("Error emptying trash:", err);
-      setError("Failed to empty trash");
-      toast.error("Couldn't empty trash");
-      throw err;
-    }
-  }, [user?.$id]);
+    if (!userId) return;
+    await emptyTrashMutation.mutateAsync();
+  }, [userId, emptyTrashMutation]);
 
   const restoreAllFromTrash = React.useCallback(async () => {
-    if (!user?.$id) return;
-
-    try {
-      await taskService.restoreAllFromTrash(user.$id);
-      const fetchedTasks = await taskService.getAllTasks(user.$id);
-      setTasks(fetchedTasks);
-      toast.success("All tasks restored", {
-        description: "Tasks have been moved back to their original locations.",
-      });
-    } catch (err) {
-      console.error("Error restoring all:", err);
-      setError("Failed to restore all tasks");
-      toast.error("Couldn't restore tasks");
-      throw err;
-    }
-  }, [user?.$id]);
+    if (!userId) return;
+    await restoreAllMutation.mutateAsync();
+  }, [userId, restoreAllMutation]);
 
   const refreshTasks = React.useCallback(async () => {
-    if (!user?.$id) return;
-
-    setIsLoading(true);
-    setError(null);
-    try {
-      const fetchedTasks = await taskService.getAllTasks(user.$id);
-      setTasks(fetchedTasks);
-    } catch (err) {
-      console.error("Error refreshing tasks:", err);
-      setError("Failed to refresh tasks");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.$id]);
+    if (!userId) return;
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.tasks.all(userId),
+    });
+  }, [userId, queryClient]);
 
   const value: TaskContextValue = {
     tasks,
@@ -307,6 +129,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     selectedTask,
     setSelectedTask,
     addTask,
+    addTasksBatch,
     updateTask,
     deleteTask,
     toggleTaskComplete,

@@ -1,8 +1,8 @@
-import { useMemo, useState, useEffect } from "react";
-import { isToday, isFuture, startOfDay } from "date-fns";
+import { useMemo } from "react";
+import { isToday, isFuture, parseISO } from "date-fns";
 import { useTasks } from "@/shared/hooks/use-tasks";
-import { taskService } from "@/features/tasks/services/task.service";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useTrashTasksQuery } from "@/features/tasks/hooks/use-tasks-query";
 import type { CalendarTask } from "@/features/tasks/types/task.types";
 
 /**
@@ -34,7 +34,7 @@ export function useTodayTasks() {
       if (!task.dueDate) return false;
 
       try {
-        return isToday(new Date(task.dueDate));
+        return isToday(parseISO(task.dueDate));
       } catch {
         return false;
       }
@@ -55,7 +55,7 @@ export function useUpcomingTasks() {
       if (!task.dueDate) return false;
 
       try {
-        const date = new Date(task.dueDate);
+        const date = parseISO(task.dueDate);
         return isFuture(date) && !isToday(date);
       } catch {
         return false;
@@ -77,65 +77,12 @@ export function useCompletedTasks() {
 
 /**
  * Hook to get tasks in trash
- * Fetches tasks separately from Appwrite with deletedAt field
+ * Uses React Query for caching and background refresh
  */
-export function useTrashTasks() {
+export function useTrashTasks(): CalendarTask[] {
   const { user } = useAuth();
-  const [trashTasks, setTrashTasks] = useState<CalendarTask[]>([]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchTrash = async () => {
-      if (!user?.$id) {
-        if (mounted) setTrashTasks([]);
-        return;
-      }
-
-      try {
-        const tasks = await taskService.getTrashTasks(user.$id);
-        if (mounted) setTrashTasks(tasks);
-      } catch (err) {
-        console.error("Error loading trash:", err);
-        if (mounted) setTrashTasks([]);
-      }
-    };
-
-    fetchTrash();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user?.$id]);
-
+  const { data: trashTasks = [] } = useTrashTasksQuery(user?.$id);
   return trashTasks;
-}
-
-/**
- * Hook to get overdue tasks
- * Returns all incomplete tasks that are past due
- */
-export function useOverdueTasks() {
-  const { tasks } = useTasks();
-
-  return useMemo(() => {
-    const today = startOfDay(new Date());
-
-    return tasks.filter((task) => {
-      // Exclude completed tasks
-      if (task.status === "completed") return false;
-
-      // Include only overdue tasks
-      if (!task.dueDate) return false;
-
-      try {
-        const taskDate = startOfDay(new Date(task.dueDate));
-        return taskDate < today;
-      } catch {
-        return false;
-      }
-    });
-  }, [tasks]);
 }
 
 /**

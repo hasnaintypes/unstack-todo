@@ -1,25 +1,9 @@
 import { Client, Account, Databases, Storage } from "appwrite";
-
-const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT;
-const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID;
-
-if (!endpoint) {
-  throw new Error(
-    "Missing VITE_APPWRITE_ENDPOINT environment variable. " +
-      "Please check your .env file and ensure it contains a valid Appwrite endpoint URL."
-  );
-}
-
-if (!projectId) {
-  throw new Error(
-    "Missing VITE_APPWRITE_PROJECT_ID environment variable. " +
-      "Please check your .env file and ensure it contains a valid Appwrite project ID."
-  );
-}
+import { env } from "./env";
 
 export const client = new Client();
 
-client.setEndpoint(endpoint).setProject(projectId);
+client.setEndpoint(env.VITE_APPWRITE_ENDPOINT).setProject(env.VITE_APPWRITE_PROJECT_ID);
 
 export const account = new Account(client);
 export const databases = new Databases(client);

@@ -1,5 +1,8 @@
 import { databases, ID, Query } from "@/config/appwrite";
-import { Permission, Role } from "appwrite";
+import { Permission, Role, type Models } from "appwrite";
+import { processInChunks } from "@/shared/lib/utils";
+import { logger } from "@/shared/lib/logger";
+import { withRetry } from "@/shared/lib/retry";
 import type {
   CalendarTask,
   Subtask,
@@ -51,12 +54,8 @@ import type {
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const TASKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "tasks";
-
-if (!DATABASE_ID) {
-  console.error(
-    "Missing Appwrite configuration. Please set VITE_APPWRITE_DATABASE_ID in your .env file"
-  );
-}
+const COMMENTS_COLLECTION_ID =
+  import.meta.env.VITE_APPWRITE_TASK_COMMENTS_COLLECTION_ID || "task_comments";
 
 /**
  * Convert CalendarTask to Appwrite document format
@@ -113,7 +112,15 @@ function safeParseAttachments(raw: string): Attachment[] {
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed as Attachment[];
+    return parsed.filter(
+      (item: unknown): item is Attachment =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as Record<string, unknown>).fileId === "string" &&
+        typeof (item as Record<string, unknown>).name === "string" &&
+        typeof (item as Record<string, unknown>).size === "number" &&
+        typeof (item as Record<string, unknown>).mimeType === "string"
+    );
   } catch {
     return [];
   }
@@ -122,8 +129,7 @@ function safeParseAttachments(raw: string): Attachment[] {
 /**
  * Convert Appwrite document to CalendarTask
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function documentToTask(doc: any): CalendarTask {
+function documentToTask(doc: Models.DefaultDocument): CalendarTask {
   return {
     id: doc.$id,
     title: doc.title,
@@ -150,16 +156,27 @@ export const taskService = {
    */
   async getAllTasks(userId: string): Promise<CalendarTask[]> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.isNull("deletedAt"),
-        Query.orderDesc("$createdAt"),
-        Query.limit(1000), // Adjust based on your needs
-      ]);
+      const BATCH = 100;
+      const allDocs: Models.DefaultDocument[] = [];
+      let offset = 0;
 
-      return response.documents.map(documentToTask);
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNull("deletedAt"),
+          Query.orderDesc("$createdAt"),
+          Query.limit(BATCH),
+          Query.offset(offset),
+        ]);
+
+        allDocs.push(...response.documents);
+        if (response.documents.length < BATCH) break;
+        offset += BATCH;
+      }
+
+      return allDocs.map(documentToTask);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      logger.error("Error fetching tasks", { error });
       throw new Error("Failed to fetch tasks");
     }
   },
@@ -169,11 +186,11 @@ export const taskService = {
    */
   async getTask(taskId: string): Promise<CalendarTask> {
     try {
-      const doc = await databases.getDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
+      const doc = await databases.getDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error fetching task:", error);
+      logger.error("Error fetching task", { error });
       throw new Error("Failed to fetch task");
     }
   },
@@ -183,22 +200,56 @@ export const taskService = {
    */
   async createTask(task: Omit<CalendarTask, "id">, userId: string): Promise<CalendarTask> {
     try {
-      const doc = await databases.createDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        ID.unique(),
-        taskToDocument(task, userId),
-        [
-          Permission.read(Role.user(userId)),
-          Permission.update(Role.user(userId)),
-          Permission.delete(Role.user(userId)),
-        ]
+      const doc = await withRetry(() =>
+        databases.createDocument(
+          DATABASE_ID,
+          TASKS_COLLECTION_ID,
+          ID.unique(),
+          taskToDocument(task, userId),
+          [
+            Permission.read(Role.user(userId)),
+            Permission.update(Role.user(userId)),
+            Permission.delete(Role.user(userId)),
+          ]
+        )
       );
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error creating task:", error);
+      logger.error("Error creating task", { error });
       throw new Error("Failed to create task");
+    }
+  },
+
+  /**
+   * Create multiple tasks in parallel (batch)
+   */
+  async createTasksBatch(
+    tasks: Omit<CalendarTask, "id">[],
+    userId: string
+  ): Promise<CalendarTask[]> {
+    try {
+      const docs: Models.DefaultDocument[] = [];
+      await processInChunks(tasks, async (task) => {
+        const doc = await withRetry(() =>
+          databases.createDocument(
+            DATABASE_ID,
+            TASKS_COLLECTION_ID,
+            ID.unique(),
+            taskToDocument(task, userId),
+            [
+              Permission.read(Role.user(userId)),
+              Permission.update(Role.user(userId)),
+              Permission.delete(Role.user(userId)),
+            ]
+          )
+        );
+        docs.push(doc);
+      });
+      return docs.map(documentToTask);
+    } catch (error) {
+      logger.error("Error creating tasks batch", { error });
+      throw new Error("Failed to create tasks");
     }
   },
 
@@ -250,16 +301,18 @@ export const taskService = {
             : null;
       }
 
-      const doc = await databases.updateDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        taskId,
-        updatePayload
+      const doc = await withRetry(() =>
+        databases.updateDocument<Models.DefaultDocument>(
+          DATABASE_ID,
+          TASKS_COLLECTION_ID,
+          taskId,
+          updatePayload
+        )
       );
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error updating task:", error);
+      logger.error("Error updating task", { error });
       throw new Error("Failed to update task");
     }
   },
@@ -270,18 +323,18 @@ export const taskService = {
   async toggleTaskComplete(taskId: string): Promise<CalendarTask> {
     try {
       // First get the current task
-      const currentTask = await databases.getDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
+      const currentTask = await databases.getDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
 
       const newStatus = currentTask.status === "completed" ? "todo" : "completed";
 
-      const doc = await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+      const doc = await databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
         status: newStatus,
         completedAt: newStatus === "completed" ? new Date().toISOString() : null,
       });
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error toggling task:", error);
+      logger.error("Error toggling task", { error });
       throw new Error("Failed to toggle task");
     }
   },
@@ -295,7 +348,7 @@ export const taskService = {
         deletedAt: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("Error moving task to trash:", error);
+      logger.error("Error moving task to trash", { error });
       throw new Error("Failed to move task to trash");
     }
   },
@@ -305,25 +358,43 @@ export const taskService = {
    */
   async restoreFromTrash(taskId: string): Promise<CalendarTask> {
     try {
-      const doc = await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+      const doc = await databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
         deletedAt: null,
       });
 
       return documentToTask(doc);
     } catch (error) {
-      console.error("Error restoring task:", error);
+      logger.error("Error restoring task", { error });
       throw new Error("Failed to restore task");
     }
   },
 
   /**
-   * Permanently delete a task
+   * Delete all comments associated with a task
+   */
+  async deleteTaskComments(taskId: string): Promise<void> {
+    try {
+      const comments = await databases.listDocuments(DATABASE_ID, COMMENTS_COLLECTION_ID, [
+        Query.equal("taskId", taskId),
+        Query.limit(500),
+      ]);
+      await processInChunks(comments.documents, (doc) =>
+        databases.deleteDocument(DATABASE_ID, COMMENTS_COLLECTION_ID, doc.$id)
+      );
+    } catch {
+      // Comments collection may not exist or no comments, continue
+    }
+  },
+
+  /**
+   * Permanently delete a task and its associated comments
    */
   async permanentlyDelete(taskId: string): Promise<void> {
     try {
+      await this.deleteTaskComments(taskId);
       await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
     } catch (error) {
-      console.error("Error deleting task:", error);
+      logger.error("Error deleting task", { error });
       throw new Error("Failed to delete task");
     }
   },
@@ -333,14 +404,25 @@ export const taskService = {
    */
   async getTrashTasks(userId: string): Promise<CalendarTask[]> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.isNotNull("deletedAt"),
-        Query.orderDesc("deletedAt"),
-        Query.limit(100),
-      ]);
+      const BATCH = 100;
+      const allDocs: Models.DefaultDocument[] = [];
+      let offset = 0;
 
-      return response.documents.map(
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNotNull("deletedAt"),
+          Query.orderDesc("deletedAt"),
+          Query.limit(BATCH),
+          Query.offset(offset),
+        ]);
+
+        allDocs.push(...response.documents);
+        if (response.documents.length < BATCH) break;
+        offset += BATCH;
+      }
+
+      return allDocs.map(
         (doc) =>
           ({
             ...documentToTask(doc),
@@ -348,7 +430,7 @@ export const taskService = {
           }) as CalendarTask & { deletedAt: string }
       );
     } catch (error) {
-      console.error("Error fetching trash:", error);
+      logger.error("Error fetching trash", { error });
       throw new Error("Failed to fetch trash");
     }
   },
@@ -358,43 +440,53 @@ export const taskService = {
    */
   async clearCompleted(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.equal("status", "completed"),
-        Query.isNull("deletedAt"),
-      ]);
+      const BATCH = 100;
 
-      // Move all completed tasks to trash
-      await Promise.all(
-        response.documents.map((doc) =>
-          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.equal("status", "completed"),
+          Query.isNull("deletedAt"),
+          Query.limit(BATCH),
+        ]);
+
+        if (response.documents.length === 0) break;
+
+        await processInChunks(response.documents, (doc) =>
+          databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, {
             deletedAt: new Date().toISOString(),
           })
-        )
-      );
+        );
+      }
     } catch (error) {
-      console.error("Error clearing completed:", error);
+      logger.error("Error clearing completed", { error });
       throw new Error("Failed to clear completed tasks");
     }
   },
 
   /**
-   * Empty trash - permanently delete all trashed tasks
+   * Empty trash - permanently delete all trashed tasks and their comments
    */
   async emptyTrash(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.isNotNull("deletedAt"),
-      ]);
+      const BATCH = 100;
 
-      await Promise.all(
-        response.documents.map((doc) =>
-          databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id)
-        )
-      );
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNotNull("deletedAt"),
+          Query.limit(BATCH),
+        ]);
+
+        if (response.documents.length === 0) break;
+
+        await processInChunks(response.documents, async (doc) => {
+          await this.deleteTaskComments(doc.$id);
+          await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id);
+        });
+      }
     } catch (error) {
-      console.error("Error emptying trash:", error);
+      logger.error("Error emptying trash", { error });
       throw new Error("Failed to empty trash");
     }
   },
@@ -467,17 +559,29 @@ export const taskService = {
       "title",
       "description",
       "dueDate",
+      "startTime",
+      "endTime",
       "priority",
       "status",
       "category",
       "project",
+      "tags",
       "recurrence",
+      "reminderEnabled",
+      "reminderBefore",
     ];
     const csvRows = [headers.join(",")];
     for (const task of tasks) {
       const row = headers.map((h) => {
         const val = task[h as keyof CalendarTask];
-        const str = val != null ? String(val) : "";
+        let str: string;
+        if (val == null) {
+          str = "";
+        } else if (Array.isArray(val)) {
+          str = val.join("; ");
+        } else {
+          str = String(val);
+        }
         return `"${str.replace(/"/g, '""')}"`;
       });
       csvRows.push(row.join(","));
@@ -505,18 +609,23 @@ export const taskService = {
    */
   async restoreAllFromTrash(userId: string): Promise<void> {
     try {
-      const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-        Query.equal("userId", userId),
-        Query.isNotNull("deletedAt"),
-      ]);
+      const BATCH = 100;
 
-      await Promise.all(
-        response.documents.map((doc) =>
-          databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
-        )
-      );
+      while (true) {
+        const response = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+          Query.equal("userId", userId),
+          Query.isNotNull("deletedAt"),
+          Query.limit(BATCH),
+        ]);
+
+        if (response.documents.length === 0) break;
+
+        await processInChunks(response.documents, (doc) =>
+          databases.updateDocument<Models.DefaultDocument>(DATABASE_ID, TASKS_COLLECTION_ID, doc.$id, { deletedAt: null })
+        );
+      }
     } catch (error) {
-      console.error("Error restoring all:", error);
+      logger.error("Error restoring all", { error });
       throw new Error("Failed to restore all tasks");
     }
   },

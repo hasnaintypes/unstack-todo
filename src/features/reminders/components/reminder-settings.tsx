@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, Clock, Mail, MessageCircle, Link, Unlink, Loader2 } from "lucide-react";
+import { Bell, Clock, Mail, MessageCircle, Link, Loader2 } from "lucide-react";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
 import { Button } from "@/shared/components/ui/button";
@@ -159,19 +159,6 @@ function DiscordSection({
     }
   };
 
-  const handleDisconnect = async () => {
-    setIsConnecting(true);
-    try {
-      await updatePref("discordEnabled", false);
-      await updatePref("discordUserId", null);
-      toast.success("Discord disconnected");
-    } catch {
-      toast.error("Failed to disconnect");
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-4">
@@ -190,21 +177,10 @@ function DiscordSection({
         </div>
         <div className="flex items-center gap-2">
           {isConnected ? (
-            <>
-              <Switch
-                checked={prefs.discordEnabled}
-                onCheckedChange={(checked) => updatePref("discordEnabled", checked)}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDisconnect}
-                disabled={isConnecting}
-                className="text-destructive hover:text-destructive"
-              >
-                {isConnecting ? <Loader2 className="size-4 animate-spin" /> : <Unlink className="size-4" />}
-              </Button>
-            </>
+            <Switch
+              checked={prefs.discordEnabled}
+              onCheckedChange={(checked) => updatePref("discordEnabled", checked)}
+            />
           ) : (
             <Button
               variant="outline"

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { User, Mail, Camera, Loader2 } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
@@ -13,6 +13,7 @@ import {
 import { Separator } from "@/shared/components/ui/separator";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { storageService } from "@/shared/services/storage.service";
+import { logger } from "@/shared/lib/logger";
 import { account } from "@/config/appwrite";
 import { toast } from "sonner";
 
@@ -26,22 +27,40 @@ export function PersonalInfoCard() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load existing avatar from account prefs on mount
+  const avatarFileId = (user?.prefs as Record<string, string> | undefined)?.avatarFileId;
+  useEffect(() => {
+    if (avatarFileId) {
+      setAvatarUrl(storageService.getFileDownloadUrl(avatarFileId).toString());
+    }
+  }, [avatarFileId]);
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      toast.error("Only JPEG, PNG, WebP, and GIF images are allowed");
+      return;
+    }
     if (file.size > 2 * 1024 * 1024) {
       toast.error("File size must be under 2MB");
       return;
     }
     setIsUploadingAvatar(true);
     try {
+      // Delete old avatar file if it exists
+      const currentAvatarId = (user?.prefs as Record<string, string> | undefined)?.avatarFileId;
+      if (currentAvatarId) {
+        try { await storageService.deleteTaskAttachment(currentAvatarId); } catch { /* old file may be gone */ }
+      }
       const result = await storageService.uploadTaskAttachment(file);
       const url = storageService.getFileDownloadUrl(result.$id);
       await account.updatePrefs({ avatarFileId: result.$id });
       setAvatarUrl(url.toString());
       toast.success("Profile picture updated");
     } catch (err) {
-      console.error("Avatar upload error:", err);
+      logger.error("Avatar upload error", { error: err });
       toast.error("Failed to upload profile picture");
     } finally {
       setIsUploadingAvatar(false);
@@ -57,7 +76,8 @@ export function PersonalInfoCard() {
         .toUpperCase()
     : "U";
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     if (!fullName) return;
     try {
@@ -90,7 +110,7 @@ export function PersonalInfoCard() {
                 {initials}
               </div>
             )}
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleAvatarUpload} />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
@@ -109,44 +129,47 @@ export function PersonalInfoCard() {
         <Separator />
 
         {/* Form Fields */}
-        <div className="grid gap-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
+        <form onSubmit={handleSave}>
+          <div className="grid gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  autoComplete="given-name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" autoComplete="family-name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5" />
+                Email Address
+              </Label>
+              <Input id="email" type="email" autoComplete="email" value={user?.email || ""} disabled />
+              <p className="text-xs text-muted-foreground">
+                Email changes require password verification. Contact support to update.
+              </p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5" />
-              Email Address
-            </Label>
-            <Input id="email" type="email" value={user?.email || ""} disabled />
-            <p className="text-xs text-muted-foreground">
-              Email changes require password verification. Contact support to update.
-            </p>
+          <div className="flex justify-end pt-2">
+            <Button
+              size="lg"
+              className="w-full md:w-auto px-8"
+              type="submit"
+              disabled={isUpdating}
+            >
+              {isUpdating ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
-        </div>
-
-        <div className="flex justify-end pt-2">
-          <Button
-            size="lg"
-            className="w-full md:w-auto px-8"
-            onClick={handleSave}
-            disabled={isUpdating}
-          >
-            {isUpdating ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );

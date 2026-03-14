@@ -32,7 +32,7 @@ export function TaskReminderToggle({
           className={cn(
             "h-9 gap-2 px-3 text-sm font-medium",
             enabled
-              ? "text-[#e44232] border-[#e44232]/30 hover:bg-[#e44232]/5"
+              ? "text-brand border-brand/30 hover:bg-brand/5"
               : "text-muted-foreground hover:bg-accent"
           )}
         >
@@ -52,7 +52,7 @@ export function TaskReminderToggle({
               onClick={() => onToggle(!enabled)}
               className={cn(
                 "text-xs font-medium transition-colors",
-                enabled ? "text-[#e44232]" : "text-muted-foreground hover:text-foreground"
+                enabled ? "text-brand" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {enabled ? "Disable" : "Enable"}
@@ -68,7 +68,7 @@ export function TaskReminderToggle({
               className={cn(
                 "flex items-center w-full rounded-md px-2 py-1.5 text-sm transition-colors",
                 enabled && reminderBefore === option.value
-                  ? "bg-[#e44232]/10 text-[#e44232]"
+                  ? "bg-brand/10 text-brand"
                   : "hover:bg-accent text-foreground"
               )}
             >

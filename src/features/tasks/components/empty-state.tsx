@@ -26,7 +26,7 @@ export function TaskEmptyState({
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] px-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="mb-8">
-          <img src={image} alt={imageAlt} className="w-64 h-64 object-contain" />
+          <img src={image} alt={imageAlt} className="w-64 h-64 object-contain" loading="lazy" />
         </div>
         <div className="text-center space-y-2 max-w-md">
           <h2 className="text-xl font-semibold">{heading}</h2>
@@ -45,7 +45,7 @@ export function TaskEmptyState({
           variant="ghost"
           size="sm"
           onClick={onAddTask}
-          className="text-[#e44232] hover:bg-[#e44232]/5 hover:text-[#c3392b] font-semibold gap-1.5 cursor-pointer"
+          className="text-brand hover:bg-brand/5 hover:text-brand-hover font-semibold gap-1.5 cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Add task
@@ -56,7 +56,7 @@ export function TaskEmptyState({
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
           <div className="mb-6">
-            <img src={image} alt={imageAlt} className="w-72 h-72 object-contain opacity-90" />
+            <img src={image} alt={imageAlt} className="w-72 h-72 object-contain opacity-90" loading="lazy" />
           </div>
 
           <div className="space-y-2 max-w-sm mb-6">
@@ -66,7 +66,7 @@ export function TaskEmptyState({
 
           <Button
             onClick={onAddTask}
-            className="bg-[#e44232] hover:bg-[#c3392b] text-white font-semibold px-6"
+            className="bg-brand hover:bg-brand-hover text-white font-semibold px-6"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add your first task
