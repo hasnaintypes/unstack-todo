@@ -2,6 +2,7 @@ import { databases, ID, Query } from "@/config/appwrite";
 import { Permission, Role, type Models } from "appwrite";
 import { processInChunks } from "@/shared/lib/utils";
 import { logger } from "@/shared/lib/logger";
+import { withRetry } from "@/shared/lib/retry";
 import type {
   CalendarTask,
   Subtask,
@@ -199,16 +200,18 @@ export const taskService = {
    */
   async createTask(task: Omit<CalendarTask, "id">, userId: string): Promise<CalendarTask> {
     try {
-      const doc = await databases.createDocument(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        ID.unique(),
-        taskToDocument(task, userId),
-        [
-          Permission.read(Role.user(userId)),
-          Permission.update(Role.user(userId)),
-          Permission.delete(Role.user(userId)),
-        ]
+      const doc = await withRetry(() =>
+        databases.createDocument(
+          DATABASE_ID,
+          TASKS_COLLECTION_ID,
+          ID.unique(),
+          taskToDocument(task, userId),
+          [
+            Permission.read(Role.user(userId)),
+            Permission.update(Role.user(userId)),
+            Permission.delete(Role.user(userId)),
+          ]
+        )
       );
 
       return documentToTask(doc);
@@ -228,16 +231,18 @@ export const taskService = {
     try {
       const docs: Models.DefaultDocument[] = [];
       await processInChunks(tasks, async (task) => {
-        const doc = await databases.createDocument(
-          DATABASE_ID,
-          TASKS_COLLECTION_ID,
-          ID.unique(),
-          taskToDocument(task, userId),
-          [
-            Permission.read(Role.user(userId)),
-            Permission.update(Role.user(userId)),
-            Permission.delete(Role.user(userId)),
-          ]
+        const doc = await withRetry(() =>
+          databases.createDocument(
+            DATABASE_ID,
+            TASKS_COLLECTION_ID,
+            ID.unique(),
+            taskToDocument(task, userId),
+            [
+              Permission.read(Role.user(userId)),
+              Permission.update(Role.user(userId)),
+              Permission.delete(Role.user(userId)),
+            ]
+          )
         );
         docs.push(doc);
       });
@@ -296,11 +301,13 @@ export const taskService = {
             : null;
       }
 
-      const doc = await databases.updateDocument<Models.DefaultDocument>(
-        DATABASE_ID,
-        TASKS_COLLECTION_ID,
-        taskId,
-        updatePayload
+      const doc = await withRetry(() =>
+        databases.updateDocument<Models.DefaultDocument>(
+          DATABASE_ID,
+          TASKS_COLLECTION_ID,
+          taskId,
+          updatePayload
+        )
       );
 
       return documentToTask(doc);

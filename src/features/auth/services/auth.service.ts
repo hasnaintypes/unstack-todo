@@ -2,6 +2,7 @@ import { account, databases, ID, Query } from "@/config/appwrite";
 import { AppwriteException, OAuthProvider, Permission, Role } from "appwrite";
 import { storageService } from "@/shared/services/storage.service";
 import { logger } from "@/shared/lib/logger";
+import { withRetry } from "@/shared/lib/retry";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PROFILES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROFILES_COLLECTION_ID || "profiles";
@@ -22,10 +23,10 @@ export const authService = {
   },
 
   async signUp(email: string, password: string, name?: string) {
-    const user = await account.create(ID.unique(), email, password, name);
+    const user = await withRetry(() => account.create(ID.unique(), email, password, name));
 
     // Auto-login to get session for creating documents
-    await account.createEmailPasswordSession(email, password);
+    await withRetry(() => account.createEmailPasswordSession(email, password));
 
     const userPermissions = [
       Permission.read(Role.user(user.$id)),
@@ -80,7 +81,7 @@ export const authService = {
   },
 
   async signIn(email: string, password: string) {
-    return await account.createEmailPasswordSession(email, password);
+    return await withRetry(() => account.createEmailPasswordSession(email, password));
   },
 
   async logout() {
