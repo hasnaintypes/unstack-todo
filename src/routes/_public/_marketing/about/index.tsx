@@ -11,6 +11,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import StackIcon from "tech-stack-icons";
+import type { IconName } from "tech-stack-icons";
+import { useTheme } from "@/app/providers/theme-provider";
 
 export const Route = createFileRoute("/_public/_marketing/about/")({
   component: About,
@@ -64,15 +67,15 @@ const values: Value[] = [
   },
 ];
 
-const techStack = [
-  { name: "React 19", icon: "~", color: "text-sky-500 bg-sky-500/10 border-sky-500/20" },
-  { name: "TypeScript", icon: "TS", color: "text-blue-500 bg-blue-500/10 border-blue-500/20" },
-  { name: "Appwrite", icon: "AW", color: "text-pink-500 bg-pink-500/10 border-pink-500/20" },
-  { name: "Tailwind CSS", icon: "TW", color: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20" },
-  { name: "TanStack Router", icon: "TR", color: "text-orange-500 bg-orange-500/10 border-orange-500/20" },
-  { name: "Vite", icon: "V", color: "text-violet-500 bg-violet-500/10 border-violet-500/20" },
-  { name: "shadcn/ui", icon: "UI", color: "text-zinc-500 bg-zinc-500/10 border-zinc-500/20" },
-  { name: "React Query", icon: "RQ", color: "text-red-500 bg-red-500/10 border-red-500/20" },
+const techStack: { name: string; icon: IconName }[] = [
+  { name: "React 19", icon: "react" },
+  { name: "TypeScript", icon: "typescript" },
+  { name: "Appwrite", icon: "appwrite" },
+  { name: "Tailwind CSS", icon: "tailwindcss" },
+  { name: "TanStack Router", icon: "tanstack" },
+  { name: "Vite", icon: "vitejs" },
+  { name: "shadcn/ui", icon: "shadcnui" },
+  { name: "React Query", icon: "reactquery" },
 ];
 
 function ValueCard({ value, size }: { value: Value; size: "small" | "large" }) {
@@ -143,6 +146,65 @@ function ValueCard({ value, size }: { value: Value; size: "small" | "large" }) {
         strokeWidth={0.8}
       />
     </div>
+  );
+}
+
+function useResolvedTheme(): "light" | "dark" {
+  const { theme } = useTheme();
+  if (theme === "dark") return "dark";
+  if (theme === "light") return "light";
+  // "system" — check actual preference
+  if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    return "dark";
+  }
+  return "light";
+}
+
+function TechStackSection() {
+  const resolvedTheme = useResolvedTheme();
+  const iconVariant = resolvedTheme === "dark" ? "dark" : "light";
+
+  return (
+    <section className="py-24 bg-muted/30">
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="flex flex-col items-center text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+            </span>
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">
+              Stack
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+            Powered by modern tools
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto text-lg">
+            Built on a battle-tested stack — chosen for speed, reliability, and developer experience.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {techStack.map((tech) => (
+            <div
+              key={tech.name}
+              className={cn(
+                "group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-6 transition-all duration-300",
+                "hover:border-primary/30 hover:shadow-[0_0_30px_-12px_rgba(0,0,0,0.15)] hover:scale-[1.03]"
+              )}
+            >
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div className="size-10 transition-transform duration-300 group-hover:scale-110">
+                  <StackIcon name={tech.icon} variant={iconVariant} className="size-full" />
+                </div>
+                <span className="text-sm font-semibold text-foreground">{tech.name}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -291,45 +353,7 @@ function About() {
       </section>
 
       {/* Tech Stack */}
-      <section className="py-24 bg-muted/30">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="flex flex-col items-center text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-              </span>
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary">
-                Stack
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
-              Powered by modern tools
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-lg">
-              Built on a battle-tested stack — chosen for speed, reliability, and developer experience.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {techStack.map((tech) => (
-              <div
-                key={tech.name}
-                className={cn(
-                  "group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300",
-                  "hover:shadow-[0_0_30px_-12px_rgba(0,0,0,0.2)] hover:scale-[1.02]",
-                  tech.color
-                )}
-              >
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <span className="text-lg font-bold opacity-60">{tech.icon}</span>
-                  <span className="text-sm font-semibold">{tech.name}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TechStackSection />
 
       {/* CTA */}
       <section className="py-24 bg-background">

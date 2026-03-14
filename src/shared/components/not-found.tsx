@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/shared/components/ui/button";
-import { ArrowLeft, Home, Search } from "lucide-react";
+import { ArrowLeft, Home } from "lucide-react";
 import { logo } from "@/assets";
 
 export function NotFound() {
@@ -26,9 +26,6 @@ export function NotFound() {
           <span className="text-[10rem] sm:text-[14rem] font-black leading-none tracking-tighter bg-clip-text text-transparent bg-linear-to-b from-foreground/15 to-foreground/5 select-none">
             404
           </span>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Search className="size-16 sm:size-20 text-primary/40" strokeWidth={1.5} />
-          </div>
         </div>
 
         {/* Message */}
