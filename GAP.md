@@ -236,17 +236,17 @@
 - ~~**Issue:** Fields are in `<Card>` but not in `<form>`. Enter key doesn't submit, password managers can't detect them.~~
 - ~~**Fix:** Wrapped personal-info-card fields in `<form onSubmit>`, changed button from `onClick` to `type="submit"`. Enables Enter key submission and password manager detection. security-card.tsx was already wrapped.~~
 
-### 36. No Password Strength Indicator
+### ~~36. No Password Strength Indicator~~ FIXED
 
-- **File:** `src/features/auth/components/auth-form.tsx`
-- **Issue:** Sign-up accepts any password meeting minimum. No visual strength feedback.
-- **Fix:** Add password strength meter component.
+- ~~**File:** `src/features/auth/components/auth-form.tsx`~~
+- ~~**Issue:** Sign-up accepts any password meeting minimum. No visual strength feedback.~~
+- ~~**Fix:** Added `PasswordStrengthMeter` component with 4-segment bar evaluating against `passwordSchema` rules. Shows Weak/Fair/Good/Strong with color progression. Only visible on sign-up.~~
 
-### 37. Missing ARIA Labels
+### ~~37. Missing ARIA Labels~~ FIXED
 
-- **Files:** `src/features/tasks/components/task-add-dialog.tsx`
-- **Issue:** Some icon-only buttons lack `aria-label` attributes.
-- **Fix:** Add descriptive `aria-label` to all icon buttons.
+- ~~**Files:** `src/features/tasks/components/task-details-sheet.tsx`, `src/features/comments/components/comment-list.tsx`, `src/features/templates/components/template-picker.tsx`, `src/features/projects/components/ai-task-generator.tsx`, `src/features/projects/components/project-header.tsx`~~
+- ~~**Issue:** Some icon-only buttons lack `aria-label` attributes.~~
+- ~~**Fix:** Added `aria-label` to 10 icon-only buttons across 5 files.~~
 
 ### ~~38. `dbService` is Dead Code~~ FIXED
 
@@ -260,11 +260,11 @@
 - ~~**Issue:** `return parsed as Attachment[]` without validating element shape. Malformed JSON produces type-unsafe objects.~~
 - ~~**Fix:** Replaced unsafe cast with `.filter()` type guard validating each element has required fields (`fileId: string`, `name: string`, `size: number`, `mimeType: string`). Malformed entries are silently dropped.~~
 
-### 40. No Rate Limiting on Auth Attempts
+### ~~40. No Rate Limiting on Auth Attempts~~ FIXED
 
-- **File:** `src/features/auth/components/auth-form.tsx`
-- **Issue:** Users can spam login attempts indefinitely. No throttling or lockout.
-- **Fix:** Add attempt counter with exponential backoff. Appwrite has some built-in protection, but client-side throttling improves UX.
+- ~~**File:** `src/features/auth/components/auth-form.tsx`~~
+- ~~**Issue:** Users can spam login attempts indefinitely. No throttling or lockout.~~
+- ~~**Fix:** Added `useAuthThrottle` hook with escalating lockouts (3 fails=15s, 6=30s, 9=60s). Submit button disabled during cooldown with countdown. Resets on success.~~
 
 ### ~~41. No CI/CD Pipeline~~ FIXED
 
@@ -361,7 +361,7 @@
 | U1   | **Animated Transitions**        | framer-motion installed but barely used. Add page transitions and list animations           | Low    | Low    |
 | U2   | **Dark Mode Refinement**        | Some components use hardcoded colors that don't adapt to themes                             | Low    | Medium |
 | U3   | **Offline Indicator**           | Show banner/toast when user goes offline. Currently mutations fail silently                 | Low    | Medium |
-| U4   | **Password Strength Meter**     | Add visual strength indicator on signup and password change forms                           | Low    | Low    |
+| ~~U4~~   | ~~**Password Strength Meter**~~     | ~~FIXED — `PasswordStrengthMeter` component added to sign-up form~~                       | ~~Low~~    | ~~Low~~    |
 
 ### Developer Experience
 
