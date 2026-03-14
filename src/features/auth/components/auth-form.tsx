@@ -32,6 +32,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
   const { signIn, signUp, loginWithGoogle, loginWithDiscord } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [signUpPassword, setSignUpPassword] = useState("");
 
   const isSignIn = type === "sign-in";
   const { canAttempt, remainingSeconds, recordFailure, reset } = useAuthThrottle();
@@ -134,7 +135,11 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete={isSignIn ? "current-password" : "new-password"}
-                {...register("password")}
+                {...register("password", {
+                  onChange: (e) => {
+                    if (!isSignIn) setSignUpPassword(e.target.value);
+                  },
+                })}
                 disabled={isSubmitting}
                 className="pr-10"
               />
@@ -156,7 +161,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
             {errors.password && (
               <p className="text-xs text-destructive">{errors.password.message}</p>
             )}
-            {!isSignIn && <PasswordStrengthMeter password={signUpForm.watch("password")} />}
+            {!isSignIn && <PasswordStrengthMeter password={signUpPassword} />}
           </Field>
           <Field className="pt-1">
             <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting || (isSignIn && !canAttempt)}>

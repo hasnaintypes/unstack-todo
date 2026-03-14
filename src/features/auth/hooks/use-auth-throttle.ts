@@ -17,50 +17,39 @@ function getLockoutDuration(attempts: number): number {
 }
 
 export function useAuthThrottle() {
-  const [attempts, setAttempts] = useState(0);
+  const attemptsRef = useRef(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!lockedUntil) {
-      setRemainingSeconds(0);
-      return;
-    }
+    if (!lockedUntil) return;
 
-    const tick = () => {
+    const id = setInterval(() => {
       const left = Math.ceil((lockedUntil - Date.now()) / 1000);
       if (left <= 0) {
         setRemainingSeconds(0);
         setLockedUntil(null);
-        if (intervalRef.current) clearInterval(intervalRef.current);
       } else {
         setRemainingSeconds(left);
       }
-    };
-
-    tick();
-    intervalRef.current = setInterval(tick, 1000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    }, 1000);
+    return () => clearInterval(id);
   }, [lockedUntil]);
 
   const canAttempt = remainingSeconds === 0;
 
   const recordFailure = useCallback(() => {
-    setAttempts((prev) => {
-      const next = prev + 1;
-      const duration = getLockoutDuration(next);
-      if (duration > 0) {
-        setLockedUntil(Date.now() + duration * 1000);
-      }
-      return next;
-    });
+    attemptsRef.current += 1;
+    const duration = getLockoutDuration(attemptsRef.current);
+    if (duration > 0) {
+      const target = Date.now() + duration * 1000;
+      setLockedUntil(target);
+      setRemainingSeconds(duration);
+    }
   }, []);
 
   const reset = useCallback(() => {
-    setAttempts(0);
+    attemptsRef.current = 0;
     setLockedUntil(null);
     setRemainingSeconds(0);
   }, []);
