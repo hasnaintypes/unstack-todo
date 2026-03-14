@@ -111,7 +111,15 @@ function safeParseAttachments(raw: string): Attachment[] {
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed as Attachment[];
+    return parsed.filter(
+      (item: unknown): item is Attachment =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as Record<string, unknown>).fileId === "string" &&
+        typeof (item as Record<string, unknown>).name === "string" &&
+        typeof (item as Record<string, unknown>).size === "number" &&
+        typeof (item as Record<string, unknown>).mimeType === "string"
+    );
   } catch {
     return [];
   }
