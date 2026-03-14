@@ -23,6 +23,8 @@ export const SHORTCUT_REGISTRY: ShortcutEntry[] = [
   { keys: "Ctrl+K", description: "Open search", category: "General" },
   { keys: "E", description: "Edit selected task", category: "Tasks" },
   { keys: "Delete", description: "Delete selected task", category: "Tasks" },
+  { keys: "F", description: "Toggle focus mode", category: "General" },
+  { keys: "Ctrl+B", description: "Toggle sidebar", category: "UI" },
 ];
 
 function isInputElement(el: EventTarget | null): boolean {

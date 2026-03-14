@@ -17,6 +17,7 @@ import {
   Archive,
   ArchiveRestore,
   Trash,
+  Keyboard,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -32,6 +33,7 @@ import { CreateProjectDialog } from "@/features/projects/components/create-proje
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -41,6 +43,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/shared/components/ui/sidebar";
+import { KeyboardShortcutsDialog } from "@/shared/components/keyboard-shortcuts-dialog";
 import {
   Collapsible,
   CollapsibleContent,
@@ -72,6 +75,7 @@ export function AppSidebar() {
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
   const navigateTo = useNavigate();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
   const activeProjects = useMemo(() => projects.filter((p) => !p.isArchived), [projects]);
   const archivedProjects = useMemo(() => projects.filter((p) => p.isArchived), [projects]);
@@ -588,11 +592,44 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
+      <SidebarFooter className="border-t p-2">
+        {state === "expanded" ? (
+          <button
+            onClick={() => setIsShortcutsOpen(true)}
+            className="flex items-center gap-2 w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          >
+            <Keyboard className="size-4 shrink-0" />
+            <span className="flex-1 text-left">Shortcuts</span>
+            <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-mono text-[10px] font-medium text-muted-foreground">
+              ?
+            </kbd>
+          </button>
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setIsShortcutsOpen(true)}
+                  className="flex items-center justify-center w-full rounded-md py-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                >
+                  <Keyboard className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Shortcuts (?)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </SidebarFooter>
+
       <CreateProjectDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onCreated={handleProjectCreated}
       />
+
+      <KeyboardShortcutsDialog open={isShortcutsOpen} onOpenChange={setIsShortcutsOpen} />
     </Sidebar>
   );
 }
