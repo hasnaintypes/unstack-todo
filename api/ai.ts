@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { logger } from "./lib/logger";
+import { rateLimit } from "./lib/rate-limit";
 
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
@@ -18,6 +19,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!model) {
     return res.status(501).json({ error: "AI not configured" });
+  }
+
+  // Rate limit by IP
+  const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || "unknown";
+  const { success, remaining, resetIn } = rateLimit(ip);
+  res.setHeader("X-RateLimit-Remaining", remaining);
+
+  if (!success) {
+    const retryAfter = Math.ceil(resetIn / 1000);
+    res.setHeader("Retry-After", retryAfter);
+    logger.warn("AI rate limit exceeded", { ip, retryAfter });
+    return res.status(429).json({ error: "Too many requests. Please try again later." });
   }
 
   const { action, ...params } = req.body || {};
