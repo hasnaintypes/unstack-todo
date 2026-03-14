@@ -24,7 +24,8 @@ import {
 import { cn } from "@/shared/lib/utils";
 import type { Project } from "@/features/projects/types/project.types";
 import { PROJECT_COLORS, PROJECT_COLOR_MAP } from "@/features/projects/utils/colors";
-import { PROJECT_ICONS, getProjectIcon } from "@/features/projects/utils/icons";
+import { PROJECT_ICONS } from "@/features/projects/utils/icons";
+import { ProjectIconDisplay } from "@/features/projects/components/project-icon-display";
 
 export type ViewMode = "list" | "kanban";
 
@@ -184,18 +185,13 @@ export function ProjectHeader({
       </Button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
-          {(() => {
-            const ProjectIcon = getProjectIcon(project.icon);
-            const colorClass = PROJECT_COLOR_MAP[project.color] || "bg-blue-500";
-            return (
-              <ProjectIcon
-                className={cn(
-                  "size-5 shrink-0",
-                  colorClass.replace("bg-", "text-")
-                )}
-              />
-            );
-          })()}
+          <ProjectIconDisplay
+            icon={project.icon}
+            className={cn(
+              "size-5 shrink-0",
+              (PROJECT_COLOR_MAP[project.color] || "bg-blue-500").replace("bg-", "text-")
+            )}
+          />
           <h1 className="text-2xl font-bold tracking-tight truncate">{project.name}</h1>
         </div>
         {project.description && (
