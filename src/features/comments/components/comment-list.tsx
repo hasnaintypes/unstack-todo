@@ -110,6 +110,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
           className="shrink-0 mt-auto"
           disabled={!newComment.trim() || isSending}
           onClick={handleSubmit}
+          aria-label="Send comment"
         >
           {isSending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
         </Button>
@@ -138,7 +139,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
                       }}
                     />
                     <div className="flex gap-1 justify-end">
-                      <Button size="icon" variant="ghost" className="size-6" onClick={handleCancelEdit}>
+                      <Button size="icon" variant="ghost" className="size-6" onClick={handleCancelEdit} aria-label="Cancel editing">
                         <X className="size-3.5" />
                       </Button>
                       <Button
@@ -147,6 +148,7 @@ export function CommentList({ taskId, userId }: CommentListProps) {
                         className="size-6 text-brand"
                         disabled={!editContent.trim()}
                         onClick={handleSaveEdit}
+                        aria-label="Save comment"
                       >
                         <Check className="size-3.5" />
                       </Button>

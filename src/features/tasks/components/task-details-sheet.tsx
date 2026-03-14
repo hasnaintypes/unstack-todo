@@ -104,6 +104,7 @@ export function TaskDetailSheet({
                       size="icon"
                       className="size-7 rounded-full hover:bg-muted"
                       onClick={() => setIsEditing(true)}
+                      aria-label="Edit task"
                     >
                       <Pencil className="size-3.5" />
                     </Button>
@@ -111,7 +112,7 @@ export function TaskDetailSheet({
                   {onDelete && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-7 rounded-full hover:bg-muted">
+                        <Button variant="ghost" size="icon" className="size-7 rounded-full hover:bg-muted" aria-label="Task options">
                           <MoreVertical className="size-3.5" />
                         </Button>
                       </DropdownMenuTrigger>

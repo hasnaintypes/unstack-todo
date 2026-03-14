@@ -93,6 +93,7 @@ export function TemplatePicker({ open, onOpenChange, userId, onSelect }: Templat
                     e.stopPropagation();
                     handleDelete(template.id);
                   }}
+                  aria-label="Delete template"
                 >
                   <Trash2 className="size-3.5" />
                 </Button>

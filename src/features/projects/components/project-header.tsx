@@ -83,6 +83,7 @@ export function ProjectHeader({
           size="icon"
           className="shrink-0 mt-1"
           onClick={() => navigate({ to: "/inbox" })}
+          aria-label="Go back"
         >
           <ArrowLeft className="size-4" />
         </Button>
@@ -149,6 +150,7 @@ export function ProjectHeader({
         size="icon"
         className="shrink-0 mt-1"
         onClick={() => navigate({ to: "/inbox" })}
+        aria-label="Go back"
       >
         <ArrowLeft className="size-4" />
       </Button>
@@ -214,7 +216,7 @@ export function ProjectHeader({
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
+            <Button variant="ghost" size="icon" className="size-8" aria-label="Project options">
               <MoreHorizontal className="size-4" />
             </Button>
           </DropdownMenuTrigger>

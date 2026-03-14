@@ -75,7 +75,7 @@ export function AiTaskGenerator({
           <Sparkles className="size-4 text-brand" />
           <span className="text-sm font-semibold">AI Task Suggestions</span>
         </div>
-        <Button variant="ghost" size="icon" className="size-7" onClick={onClose}>
+        <Button variant="ghost" size="icon" className="size-7" onClick={onClose} aria-label="Close AI suggestions">
           <X className="size-3.5" />
         </Button>
       </div>
