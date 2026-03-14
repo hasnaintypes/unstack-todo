@@ -19,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, signUpSchema } from "@/shared/lib/validation";
 import type { z } from "zod";
 import { PasswordStrengthMeter } from "./password-strength-meter";
+import { useAuthThrottle } from "../hooks/use-auth-throttle";
 
 type SignInData = z.infer<typeof signInSchema>;
 type SignUpData = z.infer<typeof signUpSchema>;
@@ -33,6 +34,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   const isSignIn = type === "sign-in";
+  const { canAttempt, remainingSeconds, recordFailure, reset } = useAuthThrottle();
 
   const signInForm = useForm<SignInData>({
     resolver: zodResolver(signInSchema),
@@ -53,6 +55,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
       if (isSignIn) {
         const d = data as SignInData;
         await signIn(d.email, d.password);
+        reset();
         toast.success("Welcome back!");
       } else {
         const d = data as SignUpData;
@@ -61,6 +64,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
       }
       navigate({ to: "/inbox" });
     } catch (err: unknown) {
+      if (isSignIn) recordFailure();
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred. Please try again.";
       toast.error(errorMessage);
@@ -155,8 +159,14 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
             {!isSignIn && <PasswordStrengthMeter password={signUpForm.watch("password")} />}
           </Field>
           <Field className="pt-1">
-            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
-              {isSubmitting ? "Loading..." : isSignIn ? "Login" : "Register"}
+            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting || (isSignIn && !canAttempt)}>
+              {isSubmitting
+                ? "Loading..."
+                : isSignIn && !canAttempt
+                  ? `Try again in ${remainingSeconds}s`
+                  : isSignIn
+                    ? "Login"
+                    : "Register"}
             </Button>
           </Field>
           <FieldSeparator>Or</FieldSeparator>
