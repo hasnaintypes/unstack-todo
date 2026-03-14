@@ -271,10 +271,10 @@
 - ~~**Issue:** No GitHub Actions. No automated linting, type-checking, or deployment.~~
 - ~~**Fix:** Added `.github/workflows/ci.yml` with lint, typecheck, build steps. Runs on push/PR to develop and master.~~
 
-### 42. No Offline Indicator in UI `NEW`
+### ~~42. No Offline Indicator in UI~~ FIXED
 
-- **Issue:** PWA supports offline caching via Workbox, but there's no visual indicator when the user is offline. Mutations fail silently without network.
-- **Fix:** Add an offline banner/toast using `navigator.onLine` and the `online`/`offline` events.
+- ~~**Issue:** PWA supports offline caching via Workbox, but there's no visual indicator when the user is offline. Mutations fail silently without network.~~
+- ~~**Fix:** Added `OfflineBanner` component using `useSyncExternalStore` with `online`/`offline` events. Fixed amber banner at top of page with WifiOff icon. Rendered in `__root.tsx`.~~
 
 ### ~~43. Auto-Archive Toggle is Placeholder~~ FIXED
 
@@ -287,11 +287,11 @@
 - **Issue:** Users sign up with email/password but email is never verified. No call to Appwrite's `account.createVerification()`. Fake emails can create accounts.
 - **Fix:** Add email verification flow after signup using Appwrite's verification API.
 
-### 45. Project Icon Picker Missing `NEW`
+### ~~45. Project Icon Picker Missing~~ FIXED
 
-- **Files:** `src/features/projects/types/project.types.ts`, `src/features/projects/components/create-project-dialog.tsx`
-- **Issue:** Project type has an `icon` field but no icon picker UI exists in the create/edit project dialog. Icons default to a generic folder icon.
-- **Fix:** Add an icon picker component with common project icons (similar to color picker already implemented).
+- ~~**Files:** `src/features/projects/types/project.types.ts`, `src/features/projects/components/create-project-dialog.tsx`~~
+- ~~**Issue:** Project type has an `icon` field but no icon picker UI exists in the create/edit project dialog. Icons default to a generic folder icon.~~
+- ~~**Fix:** Added icon registry (`icons.ts`) with 16 Lucide icons. Icon picker grid in create and edit project dialogs. Sidebar and project header show selected icon. Defaults to folder.~~
 
 ---
 
@@ -345,14 +345,14 @@
 | ~~F1~~   | ~~**Forgot Password Flow**~~         | ~~Removed — requires Appwrite paid plan~~                              | ~~Low~~    | ~~High~~   |
 | ~~F2~~   | ~~**Google OAuth**~~                 | ~~FIXED — Implemented with Appwrite OAuth2. Google button now redirects to Google auth.~~ | ~~Medium~~ | ~~High~~   |
 | ~~F3~~   | ~~**Discord OAuth**~~                | ~~FIXED — Replaced Apple button with Discord. Discord user ID auto-extracted from OAuth identity and saved to preferences.~~ | ~~Medium~~ | ~~High~~ |
-| F4   | **Mobile Bottom Navigation**     | Sidebar is hamburger on mobile. Add proper bottom tab bar for mobile                                           | Medium | High   |
+| ~~F4~~   | ~~**Mobile Bottom Navigation**~~     | ~~FIXED — Added fixed bottom tab bar (Inbox, Today, Upcoming, Done, Trash) visible on mobile (<768px). FAB raised above nav. Auto-closes sidebar drawer on tap.~~ | ~~Medium~~ | ~~High~~   |
 | ~~F5~~   | ~~**Focus Mode**~~                   | ~~FIXED — Implemented focus mode with minimal top bar, `F` keyboard shortcut, header icon toggle, and settings default preference stored in `user_preferences`.~~ | ~~Medium~~ | ~~Medium~~ |
 | ~~F6~~   | ~~**Terms/Privacy Pages**~~          | ~~FIXED — Created `/terms` and `/privacy` routes with content pages. Updated auth-form and footer links.~~     | ~~Low~~    | ~~Medium~~ |
 | ~~F7~~   | ~~**Email Verification**~~           | ~~Removed — requires Appwrite paid plan~~                        | ~~Low~~   | ~~Medium~~ |
 | ~~F8~~   | ~~**Recurring Tasks Processing**~~   | ~~FIXED — `createNextOccurrence` in `useToggleTaskCompleteMutation` handles recurrence on task completion.~~ | ~~High~~   | ~~Medium~~ |
 | ~~F9~~   | ~~**Trash Auto-Purge (30 days)**~~   | ~~FIXED — Inngest cron `purgeTrash` runs daily, permanently deletes trashed tasks >30 days and auto-archives completed tasks.~~ | ~~Medium~~ | ~~Low~~    |
 | ~~F10~~  | ~~**Reminder Notifications**~~       | ~~FIXED — Inngest cron functions: `check-reminders.ts` (email + Discord DMs every 15 min), `daily-summary.ts` (hourly HTML digest).~~ | ~~High~~   | ~~Medium~~ |
-| F11  | **Project Icon Picker**          | Icon field exists but no picker UI. Add icon selection in create/edit project dialog                            | Low    | Low    |
+| ~~F11~~  | ~~**Project Icon Picker**~~          | ~~FIXED — Icon registry with 16 icons. Picker in create/edit dialogs. Sidebar/header show selected icon.~~ | ~~Low~~    | ~~Low~~    |
 
 ### UI/UX Improvements
 
@@ -360,7 +360,7 @@
 | ---- | ------------------------------- | ------------------------------------------------------------------------------------------ | ------ | ------ |
 | U1   | **Animated Transitions**        | framer-motion installed but barely used. Add page transitions and list animations           | Low    | Low    |
 | U2   | **Dark Mode Refinement**        | Some components use hardcoded colors that don't adapt to themes                             | Low    | Medium |
-| U3   | **Offline Indicator**           | Show banner/toast when user goes offline. Currently mutations fail silently                 | Low    | Medium |
+| ~~U3~~   | ~~**Offline Indicator**~~           | ~~FIXED — Amber banner with WifiOff icon using useSyncExternalStore~~ | ~~Low~~    | ~~Medium~~ |
 | ~~U4~~   | ~~**Password Strength Meter**~~     | ~~FIXED — `PasswordStrengthMeter` component added to sign-up form~~                       | ~~Low~~    | ~~Low~~    |
 
 ### Developer Experience
@@ -425,6 +425,6 @@
 30. **F8** — Implement recurring task processing
 31. **F9** — Implement trash auto-purge (30-day)
 32. **F10** — Implement reminder notification delivery
-33. **F4** — Mobile bottom navigation
-34. **F11** — Project icon picker
-35. **U1-U4** — UI polish (animations, dark mode, offline indicator, password meter)
+33. ~~**F4** — Mobile bottom navigation~~
+34. ~~**F11** — Project icon picker~~
+35. **U1-U2** — UI polish (animations, dark mode)
