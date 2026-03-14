@@ -124,11 +124,11 @@
 - ~~**Issue:** Error details and stack traces exposed in browser console in production. Reveals code structure, API endpoints, and internal state.~~
 - ~~**Fix:** Created `src/shared/lib/logger.ts` (browser) and `api/lib/logger.ts` (server) using Better Stack (Logtail). Replaced all 53 `console.error` calls across 21 files. Logs ship to Better Stack in production, fall back to console in development.~~
 
-### 18. Task Pagination Hardcoded to 1000
+### ~~18. Task Pagination Hardcoded to 1000~~ FIXED
 
-- **File:** `src/features/tasks/services/task.service.ts:159`
-- **Issue:** `Query.limit(1000)` loads all tasks at once. Tasks beyond 1000 are silently lost. Performance degrades for power users.
-- **Fix:** Implement cursor-based pagination or infinite scroll.
+- ~~**File:** `src/features/tasks/services/task.service.ts:159`~~
+- ~~**Issue:** `Query.limit(1000)` loads all tasks at once. Tasks beyond 1000 are silently lost. Performance degrades for power users.~~
+- ~~**Fix:** Replaced hardcoded limits with paginated loops. Read methods use offset-based batching (100 per batch). Mutation methods (clearCompleted, emptyTrash, restoreAll) use re-query loops.~~
 
 ### ~~19. Missing Timezone Handling~~ FIXED
 
@@ -154,17 +154,17 @@
 - ~~**Issue:** `auth: undefined!` uses TypeScript non-null assertion, which can cause runtime errors if accessed before auth initializes.~~
 - ~~**Fix:** Replaced with valid default `{ user: null, isLoading: true, sessionExpired: false }`.~~
 
-### 23. Task Form Component Too Large (338 lines)
+### ~~23. Task Form Component Too Large (338 lines)~~ FIXED
 
-- **File:** `src/features/tasks/components/task-add-dialog.tsx`
-- **Issue:** Single component handles creation, editing, subtasks, categories, projects, dates, priorities, templates, and AI description — a "god component".
-- **Fix:** Break into smaller composable form field components (`TitleField`, `PriorityField`, `DateField`, etc.).
+- ~~**File:** `src/features/tasks/components/task-add-dialog.tsx`~~
+- ~~**Issue:** Single component handles creation, editing, subtasks, categories, projects, dates, priorities, templates, and AI description — a "god component".~~
+- ~~**Fix:** Extracted `TaskSubtasksEditor`, `TaskTagsInput`, `TaskDescriptionInput`, and `TaskMetadataRow` into `task-form/` directory. Reduced task-add-dialog from 596 to ~280 lines.~~
 
-### 24. Task Detail Sheet Too Large (500+ lines) `NEW`
+### ~~24. Task Detail Sheet Too Large (500+ lines)~~ FIXED
 
-- **File:** `src/features/tasks/components/task-details-sheet.tsx`
-- **Issue:** Another god component with 8+ `useState` calls handling sheet shell, editing state, title/description edits, property edits, subtask UI, comments integration, and save-as-template logic.
-- **Fix:** Extract into `TaskDetailSheetHeader`, `TaskDetailEditorPanel`, `TaskDetailPropertiesPanel` using compound component pattern.
+- ~~**File:** `src/features/tasks/components/task-details-sheet.tsx`~~
+- ~~**Issue:** Another god component with 8+ `useState` calls handling sheet shell, editing state, title/description edits, property edits, subtask UI, comments integration, and save-as-template logic.~~
+- ~~**Fix:** Extracted `TaskDetailEditForm` component. Reuses `TaskSubtasksEditor` and `TaskTagsInput` from task-form/. Reduced task-details-sheet from 597 to ~175 lines.~~
 
 ### 25. Recurrence Fields Stored But Never Processed `NEW`
 
@@ -410,10 +410,10 @@
 ### Phase 4 — Quality & Scale ✅ DONE
 
 22. ~~**#17** — Replaced console.error with Better Stack logger (53 calls across 21 files)~~
-23. **#18** — Skipped (task pagination — low priority for current user base)
+23. ~~**#18** — Fixed task pagination with offset-based batching loops~~
 24. ~~**#19** — Fixed timezone handling with parseISO~~
 25. ~~**#20-21** — Differentiated auth errors + session refresh on tab focus~~
-26. **#23-24** — Skipped (god components — refactor deferred)
+26. ~~**#23-24** — Refactored god components into smaller subcomponents~~
 27. ~~**#22** — Replaced unsafe non-null assertion in main.tsx~~
 28. ~~**#28** — Replaced silent .catch with logger.warn~~
 29. ~~**#29** — Replaced hardcoded route detection with inverse check~~
