@@ -172,11 +172,11 @@
 - **Issue:** Tasks have a `recurrence` field (`daily | weekly | monthly | weekdays`) that is saved to the database and shown in the UI, but no backend job or client-side logic ever creates recurring task instances. Users set recurrence expecting it to work, but nothing happens.
 - **Fix:** Either implement recurrence processing via Appwrite Functions/cron job, or remove the UI and mark as "coming soon".
 
-### 26. Trash Auto-Purge Promised But Not Implemented `NEW`
+### ~~26. Trash Auto-Purge Promised But Not Implemented~~ FIXED
 
-- **Files:** `src/routes/_protected/trash/index.lazy.tsx:55`, `src/features/tasks/hooks/use-tasks-query.ts:228`
-- **Issue:** UI tells users "Deleted tasks will appear here for 30 days" and "Task will be permanently deleted after 30 days", but no backend job or scheduled function implements auto-purge. Trashed tasks remain forever.
-- **Fix:** Implement an Appwrite Function on a cron schedule that hard-deletes tasks where `deletedAt` is older than 30 days, or remove the 30-day promise from the UI.
+- ~~**Files:** `api/inngest/functions/purge-trash.ts`, `api/inngest.ts`~~
+- ~~**Issue:** UI tells users "Deleted tasks will appear here for 30 days" and "Task will be permanently deleted after 30 days", but no backend job or scheduled function implements auto-purge. Trashed tasks remain forever.~~
+- ~~**Fix:** Implemented Inngest cron function (`purgeTrash`) running daily at 2 AM. Permanently deletes trashed tasks older than 30 days (including storage attachments). Also auto-archives completed tasks >30 days for users with `autoArchiveEnabled`. "30 days" UI messaging is now accurate.~~
 
 ### 27. Reminders UI Complete But No Backend Delivery `NEW`
 
@@ -206,17 +206,17 @@
 - ~~**Issue:** `next-themes` (zero imports) in production dependencies.~~
 - ~~**Fix:** Removed `next-themes`. `node-appwrite` and `inngest` kept — actively used by `api/` serverless functions.~~
 
-### 31. `Forgot Password?` Link is Dead
+### ~~31. `Forgot Password?` Link is Dead~~ FIXED
 
-- **File:** `src/features/auth/components/auth-form.tsx:121`
-- **Issue:** `<a href="#">Forgot Password?</a>` does nothing.
-- **Fix:** Implement using Appwrite's `account.createRecovery()` or remove until implemented.
+- ~~**File:** `src/features/auth/components/auth-form.tsx:121`~~
+- ~~**Issue:** `<a href="#">Forgot Password?</a>` does nothing.~~
+- ~~**Fix:** Removed the dead link. Password recovery requires Appwrite paid plan.~~
 
-### 32. Terms/Privacy Links are Dead
+### ~~32. Terms/Privacy Links are Dead~~ FIXED
 
-- **File:** `src/features/auth/components/auth-form.tsx:193-198`
-- **Issue:** Both links point to `href="#"`. Legal liability for production.
-- **Fix:** Create actual pages or remove the links.
+- ~~**Files:** `src/routes/_public/_marketing/terms/index.tsx`, `src/routes/_public/_marketing/privacy/index.tsx`, `src/features/auth/components/auth-form.tsx`~~
+- ~~**Issue:** Both links point to `href="#"`. Legal liability for production.~~
+- ~~**Fix:** Created `/terms` and `/privacy` routes with proper content pages. Updated auth-form links from `<a href="#">` to `<Link to="/terms">` and `<Link to="/privacy">`.~~
 
 ### ~~33. Social Login Buttons Show "Coming Soon" Toast~~ FIXED
 
@@ -224,17 +224,17 @@
 - ~~**Issue:** Apple and Google sign-in buttons look functional but show "coming soon" toast. Misleading UX.~~
 - ~~**Fix:** Replaced Apple with Discord OAuth, implemented Google OAuth. Both now redirect to provider auth pages.~~
 
-### 34. Missing `autocomplete` Attributes on Auth Forms
+### ~~34. Missing `autocomplete` Attributes on Auth Forms~~ FIXED
 
-- **File:** `src/features/auth/components/auth-form.tsx`
-- **Issue:** Email and password inputs lack `autocomplete` attributes. Password managers cannot assist.
-- **Fix:** Add `autocomplete="email"`, `autocomplete="current-password"`, `autocomplete="new-password"`.
+- ~~**Files:** `src/features/auth/components/auth-form.tsx`, `src/features/profile/components/security-card.tsx`, `src/features/profile/components/personal-info-card.tsx`~~
+- ~~**Issue:** Email and password inputs lack `autocomplete` attributes. Password managers cannot assist.~~
+- ~~**Fix:** Added `autoComplete` attributes: `name`, `email`, `current-password`, `new-password`, `given-name`, `family-name` across all auth and profile forms.~~
 
-### 35. Profile/Security Forms Not Wrapped in `<form>`
+### ~~35. Profile/Security Forms Not Wrapped in `<form>`~~ FIXED
 
-- **Files:** `src/features/profile/components/personal-info-card.tsx`, `src/features/profile/components/security-card.tsx`
-- **Issue:** Fields are in `<Card>` but not in `<form>`. Enter key doesn't submit, password managers can't detect them.
-- **Fix:** Wrap in `<form>` with `onSubmit`.
+- ~~**Files:** `src/features/profile/components/personal-info-card.tsx`, `src/features/profile/components/security-card.tsx`~~
+- ~~**Issue:** Fields are in `<Card>` but not in `<form>`. Enter key doesn't submit, password managers can't detect them.~~
+- ~~**Fix:** Wrapped personal-info-card fields in `<form onSubmit>`, changed button from `onClick` to `type="submit"`. Enables Enter key submission and password manager detection. security-card.tsx was already wrapped.~~
 
 ### 36. No Password Strength Indicator
 
@@ -254,11 +254,11 @@
 - ~~**Issue:** Generic database wrapper never imported anywhere. All services call `databases` directly.~~
 - ~~**Fix:** Deleted `db.service.ts` and its sole consumer `database.types.ts`.~~
 
-### 39. `safeParseAttachments` Casts Without Validation
+### ~~39. `safeParseAttachments` Casts Without Validation~~ FIXED
 
-- **File:** `src/features/tasks/services/task.service.ts:114-122`
-- **Issue:** `return parsed as Attachment[]` without validating element shape. Malformed JSON produces type-unsafe objects.
-- **Fix:** Validate each element has required fields (`fileId`, `name`, `size`, `mimeType`) before casting.
+- ~~**File:** `src/features/tasks/services/task.service.ts`~~
+- ~~**Issue:** `return parsed as Attachment[]` without validating element shape. Malformed JSON produces type-unsafe objects.~~
+- ~~**Fix:** Replaced unsafe cast with `.filter()` type guard validating each element has required fields (`fileId: string`, `name: string`, `size: number`, `mimeType: string`). Malformed entries are silently dropped.~~
 
 ### 40. No Rate Limiting on Auth Attempts
 
@@ -276,11 +276,11 @@
 - **Issue:** PWA supports offline caching via Workbox, but there's no visual indicator when the user is offline. Mutations fail silently without network.
 - **Fix:** Add an offline banner/toast using `navigator.onLine` and the `online`/`offline` events.
 
-### 43. Auto-Archive Toggle is Placeholder `NEW`
+### ~~43. Auto-Archive Toggle is Placeholder~~ FIXED
 
-- **File:** `src/routes/_protected/settings/index.lazy.tsx:193-212`
-- **Issue:** Settings page has an "Auto-archive completed tasks after 30 days" toggle, but it's a UI-only placeholder — no backend logic implements it.
-- **Fix:** Implement via Appwrite Function cron job, or remove the toggle until implemented.
+- ~~**Files:** `src/routes/_protected/settings/index.lazy.tsx`, `src/features/reminders/services/reminder.service.ts`, `src/features/reminders/types/reminder.types.ts`~~
+- ~~**Issue:** Settings page has an "Auto-archive completed tasks after 30 days" toggle, but it's a UI-only placeholder — no backend logic implements it.~~
+- ~~**Fix:** Wired the toggle to `autoArchiveEnabled` preference (load + save). Backend `purgeTrash` cron function auto-archives completed tasks >30 days for users with this preference enabled.~~
 
 ### 44. No Email Verification on Signup `NEW`
 
@@ -347,10 +347,10 @@
 | ~~F3~~   | ~~**Discord OAuth**~~                | ~~FIXED — Replaced Apple button with Discord. Discord user ID auto-extracted from OAuth identity and saved to preferences.~~ | ~~Medium~~ | ~~High~~ |
 | F4   | **Mobile Bottom Navigation**     | Sidebar is hamburger on mobile. Add proper bottom tab bar for mobile                                           | Medium | High   |
 | ~~F5~~   | ~~**Focus Mode**~~                   | ~~FIXED — Implemented focus mode with minimal top bar, `F` keyboard shortcut, header icon toggle, and settings default preference stored in `user_preferences`.~~ | ~~Medium~~ | ~~Medium~~ |
-| F6   | **Terms/Privacy Pages**          | Dead anchor links. Create actual pages or remove for legal compliance                                          | Low    | Medium |
+| ~~F6~~   | ~~**Terms/Privacy Pages**~~          | ~~FIXED — Created `/terms` and `/privacy` routes with content pages. Updated auth-form and footer links.~~     | ~~Low~~    | ~~Medium~~ |
 | ~~F7~~   | ~~**Email Verification**~~           | ~~Removed — requires Appwrite paid plan~~                        | ~~Low~~   | ~~Medium~~ |
 | F8   | **Recurring Tasks Processing**   | Recurrence field exists in UI/DB but no backend processes it. Implement via Appwrite Function cron             | High   | Medium |
-| F9   | **Trash Auto-Purge (30 days)**   | UI promises 30-day auto-delete but no backend implements it. Add Appwrite Function cron                        | Medium | Low    |
+| ~~F9~~   | ~~**Trash Auto-Purge (30 days)**~~   | ~~FIXED — Inngest cron `purgeTrash` runs daily, permanently deletes trashed tasks >30 days and auto-archives completed tasks.~~ | ~~Medium~~ | ~~Low~~    |
 | F10  | **Reminder Notifications**       | Settings UI complete but no backend sends notifications. Implement email + Discord webhook delivery             | High   | Medium |
 | F11  | **Project Icon Picker**          | Icon field exists but no picker UI. Add icon selection in create/edit project dialog                            | Low    | Low    |
 
