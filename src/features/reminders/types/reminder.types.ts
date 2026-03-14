@@ -8,4 +8,5 @@ export interface UserReminderPreferences {
   dailySummaryTime: string; // HH:mm format, e.g. "09:00"
   defaultReminderBefore: "1d" | "1h" | "30m" | "on_due";
   focusModeDefault?: boolean;
+  autoArchiveEnabled?: boolean;
 }

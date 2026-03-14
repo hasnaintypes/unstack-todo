@@ -43,6 +43,7 @@ function SettingsPage() {
   const [isExporting, setIsExporting] = useState<"json" | "csv" | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [focusModeDefault, setFocusModeDefault] = useState(false);
+  const [autoArchiveEnabled, setAutoArchiveEnabled] = useState(false);
   const [preferencesId, setPreferencesId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,6 +52,7 @@ function SettingsPage() {
     if (!user?.$id) return;
     reminderService.getPreferences(user.$id).then((prefs) => {
       setFocusModeDefault(prefs.focusModeDefault ?? false);
+      setAutoArchiveEnabled(prefs.autoArchiveEnabled ?? false);
       if (prefs.id) setPreferencesId(prefs.id);
     }).catch(() => {});
   }, [user?.$id]);
@@ -64,6 +66,18 @@ function SettingsPage() {
     } catch {
       setFocusModeDefault(!checked);
       toast.error("Failed to update focus mode preference");
+    }
+  };
+
+  const handleAutoArchiveToggle = async (checked: boolean) => {
+    setAutoArchiveEnabled(checked);
+    if (!preferencesId) return;
+    try {
+      await reminderService.updatePreferences(preferencesId, { autoArchiveEnabled: checked });
+      toast.success(checked ? "Completed tasks will auto-archive after 30 days" : "Auto-archive disabled");
+    } catch {
+      setAutoArchiveEnabled(!checked);
+      toast.error("Failed to update auto-archive preference");
     }
   };
 
@@ -238,9 +252,9 @@ function SettingsPage() {
           <SettingRow
             icon={<Archive className="size-4" />}
             title="Auto-archive completed tasks"
-            description="Move completed tasks to trash after 30 days"
+            description="Automatically move completed tasks to trash after 30 days"
           >
-            <Switch />
+            <Switch checked={autoArchiveEnabled} onCheckedChange={handleAutoArchiveToggle} />
           </SettingRow>
         </div>
       </div>

@@ -17,6 +17,7 @@ const DEFAULT_PREFERENCES: Omit<UserReminderPreferences, "id" | "userId"> = {
   dailySummaryTime: "09:00",
   defaultReminderBefore: "1h",
   focusModeDefault: false,
+  autoArchiveEnabled: false,
 };
 
 function documentToPreferences(doc: Models.DefaultDocument): UserReminderPreferences {
@@ -30,6 +31,7 @@ function documentToPreferences(doc: Models.DefaultDocument): UserReminderPrefere
     dailySummaryTime: doc.dailySummaryTime || "09:00",
     defaultReminderBefore: doc.defaultReminderBefore || "1h",
     focusModeDefault: doc.focusModeDefault ?? false,
+    autoArchiveEnabled: doc.autoArchiveEnabled ?? false,
   };
 }
 
