@@ -7,6 +7,7 @@ import { DashboardHeader } from "@/shared/components/layout/dashboard-header";
 import { TaskDetailSheet } from "@/features/tasks/components/task-details-sheet";
 import { TaskAddDialog } from "@/features/tasks/components/task-add-dialog";
 import { QuickAddFAB } from "@/shared/components/quick-add-fab";
+import { MobileBottomNav } from "@/shared/components/layout/mobile-bottom-nav";
 import { KeyboardShortcutsDialog } from "@/shared/components/keyboard-shortcuts-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { useKeyboardShortcuts, type Shortcut } from "@/shared/hooks/use-keyboard-shortcuts";
@@ -199,13 +200,16 @@ function ProtectedLayout() {
             searchOpen={isSearchOpen}
             onSearchOpenChange={setSearchOpen}
           />
-          <main className="flex-1 overflow-y-auto p-6 md:p-8">
+          <main className="flex-1 overflow-y-auto p-6 pb-20 md:p-8 md:pb-8">
             <div className={isCalendarPage ? "max-w-screen-2xl mx-auto" : "max-w-5xl mx-auto"}>
               <Outlet />
             </div>
           </main>
         </SidebarInset>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
 
       {/* Global Task Detail Sheet */}
       <TaskDetailSheet
