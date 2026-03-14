@@ -18,6 +18,7 @@ import { useForm, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, signUpSchema } from "@/shared/lib/validation";
 import type { z } from "zod";
+import { PasswordStrengthMeter } from "./password-strength-meter";
 
 type SignInData = z.infer<typeof signInSchema>;
 type SignUpData = z.infer<typeof signUpSchema>;
@@ -151,6 +152,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
             {errors.password && (
               <p className="text-xs text-destructive">{errors.password.message}</p>
             )}
+            {!isSignIn && <PasswordStrengthMeter password={signUpForm.watch("password")} />}
           </Field>
           <Field className="pt-1">
             <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
