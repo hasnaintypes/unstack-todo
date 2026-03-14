@@ -215,7 +215,7 @@ export function TaskList({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40",
+        "flex h-full flex-col overflow-hidden rounded-xl  border-border/60 bg-card/40",
         className
       )}
     >
