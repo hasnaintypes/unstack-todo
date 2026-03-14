@@ -36,6 +36,11 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
 
   const isSignIn = type === "sign-in";
   const { canAttempt, remainingSeconds, recordFailure, reset } = useAuthThrottle();
+  const {
+    canAttempt: canAttemptSignUp,
+    remainingSeconds: signUpRemainingSeconds,
+    recordFailure: recordSignUpFailure,
+  } = useAuthThrottle();
 
   const signInForm = useForm<SignInData>({
     resolver: zodResolver(signInSchema),
@@ -66,6 +71,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
       navigate({ to: "/inbox" });
     } catch (err: unknown) {
       if (isSignIn) recordFailure();
+      else recordSignUpFailure();
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred. Please try again.";
       toast.error(errorMessage);
@@ -164,14 +170,16 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
             {!isSignIn && <PasswordStrengthMeter password={signUpPassword} />}
           </Field>
           <Field className="pt-1">
-            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting || (isSignIn && !canAttempt)}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting || (isSignIn && !canAttempt) || (!isSignIn && !canAttemptSignUp)}>
               {isSubmitting
                 ? "Loading..."
                 : isSignIn && !canAttempt
                   ? `Try again in ${remainingSeconds}s`
-                  : isSignIn
-                    ? "Login"
-                    : "Register"}
+                  : !isSignIn && !canAttemptSignUp
+                    ? `Try again in ${signUpRemainingSeconds}s`
+                    : isSignIn
+                      ? "Login"
+                      : "Register"}
             </Button>
           </Field>
           <FieldSeparator>Or</FieldSeparator>
