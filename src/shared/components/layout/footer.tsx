@@ -1,4 +1,4 @@
-import { Github } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { ModeToggle } from "@/shared/components/mode-toggle";
 
@@ -27,6 +27,22 @@ export function Footer() {
                 aria-label="GitHub"
               >
                 <Github size={20} />
+              </a>
+              <a
+                href="https://linkedin.com/in/hasnainx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+                aria-label="LinkedIn"
+              >
+                <Linkedin size={20} />
+              </a>
+              <a
+                href="mailto:hasnainoffice2024@gmail.com"
+                className="text-muted-foreground hover:text-primary transition-colors"
+                aria-label="Email"
+              >
+                <Mail size={20} />
               </a>
             </div>
           </div>

@@ -29,7 +29,7 @@ function RootComponent() {
   const showRouterDevtools =
     import.meta.env.DEV && import.meta.env.VITE_SHOW_ROUTER_DEVTOOLS !== "false";
   const location = useLocation();
-  const isMarketingRoute = location.pathname === "/" || location.pathname.startsWith("/about");
+  const isMarketingRoute = location.pathname === "/" || location.pathname.startsWith("/about") || location.pathname.startsWith("/terms") || location.pathname.startsWith("/privacy");
   const isMinimalLayout = !isMarketingRoute;
 
   return (
