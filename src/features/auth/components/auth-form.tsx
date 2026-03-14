@@ -97,6 +97,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
                 id="name"
                 type="text"
                 placeholder="John Doe"
+                autoComplete="name"
                 {...register("name")}
                 disabled={isSubmitting}
               />
@@ -111,6 +112,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
               id="email"
               type="email"
               placeholder="m@example.com"
+              autoComplete="email"
               {...register("email")}
               disabled={isSubmitting}
             />
@@ -126,6 +128,7 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete={isSignIn ? "current-password" : "new-password"}
                 {...register("password")}
                 disabled={isSubmitting}
                 className="pr-10"
@@ -189,13 +192,13 @@ export function AuthForm({ className, type, ...props }: AuthFormProps) {
       </form>
       <FieldDescription className="text-center text-[11px] leading-tight">
         By clicking continue, you agree to our{" "}
-        <a href="#" className="underline">
+        <Link to="/terms" className="underline underline-offset-4">
           Terms
-        </a>{" "}
+        </Link>{" "}
         and{" "}
-        <a href="#" className="underline">
+        <Link to="/privacy" className="underline underline-offset-4">
           Privacy
-        </a>
+        </Link>
         .
       </FieldDescription>
     </div>
