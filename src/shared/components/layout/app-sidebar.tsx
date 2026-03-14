@@ -10,7 +10,6 @@ import {
   ChevronDown,
   ChevronRight,
   Trash2,
-  Hash,
   CircleDot,
   FolderOpen,
   MoreHorizontal,
@@ -27,6 +26,7 @@ import { cn } from "@/shared/lib/utils";
 import { useProjects } from "@/shared/hooks/use-projects";
 import { useTasks } from "@/shared/hooks/use-tasks";
 import { getColorClass } from "@/features/projects/utils/colors";
+import { getProjectIcon } from "@/features/projects/utils/icons";
 import { CreateProjectDialog } from "@/features/projects/components/create-project-dialog";
 
 import {
@@ -318,12 +318,17 @@ export function AppSidebar() {
                                         to="/projects/$projectId"
                                         params={{ projectId: project.id }}
                                       >
-                                        <Hash
-                                          className={cn(
-                                            "size-4 shrink-0",
-                                            getColorClass(project.color).replace("bg-", "text-")
-                                          )}
-                                        />
+                                        {(() => {
+                                          const Icon = getProjectIcon(project.icon);
+                                          return (
+                                            <Icon
+                                              className={cn(
+                                                "size-4 shrink-0",
+                                                getColorClass(project.color).replace("bg-", "text-")
+                                              )}
+                                            />
+                                          );
+                                        })()}
                                         <span className="flex-1 font-medium text-foreground/90 text-left truncate">
                                           {project.name}
                                         </span>
@@ -484,12 +489,17 @@ export function AppSidebar() {
                                     params={{ projectId: project.id }}
                                     className="flex items-center gap-2 w-full"
                                   >
-                                    <Hash
-                                      className={cn(
-                                        "size-3.5 shrink-0",
-                                        getColorClass(project.color).replace("bg-", "text-")
-                                      )}
-                                    />
+                                    {(() => {
+                                      const Icon = getProjectIcon(project.icon);
+                                      return (
+                                        <Icon
+                                          className={cn(
+                                            "size-3.5 shrink-0",
+                                            getColorClass(project.color).replace("bg-", "text-")
+                                          )}
+                                        />
+                                      );
+                                    })()}
                                     <span className="flex-1 font-medium text-foreground/70 truncate">
                                       {project.name}
                                     </span>
@@ -542,12 +552,17 @@ export function AppSidebar() {
                       <TooltipTrigger asChild>
                         <SidebarMenuButton asChild className="justify-center">
                           <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                            <Hash
-                              className={cn(
-                                "size-4",
-                                getColorClass(project.color).replace("bg-", "text-")
-                              )}
-                            />
+                            {(() => {
+                              const Icon = getProjectIcon(project.icon);
+                              return (
+                                <Icon
+                                  className={cn(
+                                    "size-4",
+                                    getColorClass(project.color).replace("bg-", "text-")
+                                  )}
+                                />
+                              );
+                            })()}
                           </Link>
                         </SidebarMenuButton>
                       </TooltipTrigger>

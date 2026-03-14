@@ -24,6 +24,7 @@ import {
 import { cn } from "@/shared/lib/utils";
 import type { Project } from "@/features/projects/types/project.types";
 import { PROJECT_COLORS, PROJECT_COLOR_MAP } from "@/features/projects/utils/colors";
+import { PROJECT_ICONS, getProjectIcon } from "@/features/projects/utils/icons";
 
 export type ViewMode = "list" | "kanban";
 
@@ -33,7 +34,7 @@ interface ProjectHeaderProps {
   isAiGenerating?: boolean;
   onAddTask: () => void;
   onDelete: () => void;
-  onUpdate: (data: { name?: string; description?: string; color?: string }) => void;
+  onUpdate: (data: { name?: string; description?: string; color?: string; icon?: string }) => void;
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
 }
@@ -53,11 +54,13 @@ export function ProjectHeader({
   const [editName, setEditName] = useState(project.name);
   const [editDescription, setEditDescription] = useState(project.description || "");
   const [editColor, setEditColor] = useState(project.color);
+  const [editIcon, setEditIcon] = useState(project.icon || "folder");
 
   const handleStartEdit = () => {
     setEditName(project.name);
     setEditDescription(project.description || "");
     setEditColor(project.color);
+    setEditIcon(project.icon || "folder");
     setIsEditing(true);
   };
 
@@ -67,6 +70,7 @@ export function ProjectHeader({
       name: editName.trim(),
       description: editDescription.trim() || undefined,
       color: editColor,
+      icon: editIcon,
     });
     setIsEditing(false);
   };
@@ -123,6 +127,30 @@ export function ProjectHeader({
               ))}
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground mr-1">Icon:</span>
+            <div className="flex gap-1.5 flex-wrap">
+              {PROJECT_ICONS.map((i) => {
+                const IconComp = i.icon;
+                return (
+                  <button
+                    key={i.value}
+                    type="button"
+                    onClick={() => setEditIcon(i.value)}
+                    title={i.label}
+                    className={cn(
+                      "relative size-6 rounded-lg transition-all duration-200 flex items-center justify-center",
+                      editIcon === i.value
+                        ? "ring-2 ring-offset-1 ring-offset-background ring-primary bg-primary/10 text-primary scale-110"
+                        : "text-muted-foreground opacity-60 hover:opacity-100 hover:scale-105"
+                    )}
+                  >
+                    <IconComp className="size-3.5" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
         <div className="flex gap-2 shrink-0">
           <Button variant="outline" size="sm" onClick={handleCancel} className="gap-1.5">
@@ -156,12 +184,18 @@ export function ProjectHeader({
       </Button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
-          <div
-            className={cn(
-              "size-3.5 rounded-full shrink-0",
-              PROJECT_COLOR_MAP[project.color] || "bg-blue-500"
-            )}
-          />
+          {(() => {
+            const ProjectIcon = getProjectIcon(project.icon);
+            const colorClass = PROJECT_COLOR_MAP[project.color] || "bg-blue-500";
+            return (
+              <ProjectIcon
+                className={cn(
+                  "size-5 shrink-0",
+                  colorClass.replace("bg-", "text-")
+                )}
+              />
+            );
+          })()}
           <h1 className="text-2xl font-bold tracking-tight truncate">{project.name}</h1>
         </div>
         {project.description && (
