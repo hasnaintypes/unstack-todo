@@ -198,7 +198,6 @@ function ProtectedLayout() {
           <DashboardHeader
             searchOpen={isSearchOpen}
             onSearchOpenChange={setSearchOpen}
-            onToggleFocusMode={toggleFocusMode}
           />
           <main className="flex-1 overflow-y-auto p-6 md:p-8">
             <div className={isCalendarPage ? "max-w-screen-2xl mx-auto" : "max-w-5xl mx-auto"}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { User, LogOut, Settings, Search, Maximize2 } from "lucide-react";
+import { User, LogOut, Settings, Search } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { storageService } from "@/shared/services/storage.service";
@@ -15,7 +15,6 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 import { Separator } from "@/shared/components/ui/separator";
-import { Button } from "@/shared/components/ui/button";
 import { CommandPalette } from "@/shared/components/command-palette";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -39,10 +38,9 @@ function getPageTitle(pathname: string): string {
 interface DashboardHeaderProps {
   searchOpen?: boolean;
   onSearchOpenChange?: (open: boolean) => void;
-  onToggleFocusMode?: () => void;
 }
 
-export function DashboardHeader({ searchOpen, onSearchOpenChange, onToggleFocusMode }: DashboardHeaderProps) {
+export function DashboardHeader({ searchOpen, onSearchOpenChange }: DashboardHeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -105,19 +103,8 @@ export function DashboardHeader({ searchOpen, onSearchOpenChange, onToggleFocusM
         </button>
       </div>
 
-      {/* Right: Focus + Avatar */}
+      {/* Right: Avatar */}
       <div className="flex items-center gap-2">
-        {onToggleFocusMode && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-9"
-            onClick={onToggleFocusMode}
-            title="Focus Mode (F)"
-          >
-            <Maximize2 className="size-4" />
-          </Button>
-        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 rounded-full outline-none transition-transform active:scale-95">
