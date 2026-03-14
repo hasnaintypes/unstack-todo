@@ -58,6 +58,7 @@ export function SecurityCard() {
               id="oldPassword"
               type="password"
               placeholder="••••••••"
+              autoComplete="current-password"
               {...register("currentPassword")}
             />
             {errors.currentPassword && (
@@ -72,6 +73,7 @@ export function SecurityCard() {
                 id="newPassword"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 {...register("newPassword")}
               />
               {errors.newPassword && (
@@ -84,6 +86,7 @@ export function SecurityCard() {
                 id="confirmPassword"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 {...register("confirmPassword")}
               />
               {errors.confirmPassword && (

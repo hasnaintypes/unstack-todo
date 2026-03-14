@@ -76,7 +76,8 @@ export function PersonalInfoCard() {
         .toUpperCase()
     : "U";
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     if (!fullName) return;
     try {
@@ -128,44 +129,47 @@ export function PersonalInfoCard() {
         <Separator />
 
         {/* Form Fields */}
-        <div className="grid gap-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
+        <form onSubmit={handleSave}>
+          <div className="grid gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  autoComplete="given-name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" autoComplete="family-name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5" />
+                Email Address
+              </Label>
+              <Input id="email" type="email" autoComplete="email" value={user?.email || ""} disabled />
+              <p className="text-xs text-muted-foreground">
+                Email changes require password verification. Contact support to update.
+              </p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5" />
-              Email Address
-            </Label>
-            <Input id="email" type="email" value={user?.email || ""} disabled />
-            <p className="text-xs text-muted-foreground">
-              Email changes require password verification. Contact support to update.
-            </p>
+          <div className="flex justify-end pt-2">
+            <Button
+              size="lg"
+              className="w-full md:w-auto px-8"
+              type="submit"
+              disabled={isUpdating}
+            >
+              {isUpdating ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
-        </div>
-
-        <div className="flex justify-end pt-2">
-          <Button
-            size="lg"
-            className="w-full md:w-auto px-8"
-            onClick={handleSave}
-            disabled={isUpdating}
-          >
-            {isUpdating ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );
