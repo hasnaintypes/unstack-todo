@@ -25,6 +25,7 @@ import { Route as PublicAuthSignUpIndexRouteImport } from './routes/_public/auth
 import { Route as PublicAuthSignInIndexRouteImport } from './routes/_public/auth/sign-in/index'
 import { Route as PublicMarketingTermsIndexRouteImport } from './routes/_public/_marketing/terms/index'
 import { Route as PublicMarketingPrivacyIndexRouteImport } from './routes/_public/_marketing/privacy/index'
+import { Route as PublicMarketingFeaturesIndexRouteImport } from './routes/_public/_marketing/features/index'
 import { Route as PublicMarketingAboutIndexRouteImport } from './routes/_public/_marketing/about/index'
 
 const PublicRoute = PublicRouteImport.update({
@@ -123,6 +124,12 @@ const PublicMarketingPrivacyIndexRoute =
     path: '/privacy/',
     getParentRoute: () => PublicMarketingRoute,
   } as any)
+const PublicMarketingFeaturesIndexRoute =
+  PublicMarketingFeaturesIndexRouteImport.update({
+    id: '/features/',
+    path: '/features/',
+    getParentRoute: () => PublicMarketingRoute,
+  } as any)
 const PublicMarketingAboutIndexRoute =
   PublicMarketingAboutIndexRouteImport.update({
     id: '/about/',
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/trash/': typeof ProtectedTrashIndexRoute
   '/upcoming/': typeof ProtectedUpcomingIndexRoute
   '/about/': typeof PublicMarketingAboutIndexRoute
+  '/features/': typeof PublicMarketingFeaturesIndexRoute
   '/privacy/': typeof PublicMarketingPrivacyIndexRoute
   '/terms/': typeof PublicMarketingTermsIndexRoute
   '/auth/sign-in/': typeof PublicAuthSignInIndexRoute
@@ -157,6 +165,7 @@ export interface FileRoutesByTo {
   '/trash': typeof ProtectedTrashIndexRoute
   '/upcoming': typeof ProtectedUpcomingIndexRoute
   '/about': typeof PublicMarketingAboutIndexRoute
+  '/features': typeof PublicMarketingFeaturesIndexRoute
   '/privacy': typeof PublicMarketingPrivacyIndexRoute
   '/terms': typeof PublicMarketingTermsIndexRoute
   '/auth/sign-in': typeof PublicAuthSignInIndexRoute
@@ -177,6 +186,7 @@ export interface FileRoutesById {
   '/_protected/upcoming/': typeof ProtectedUpcomingIndexRoute
   '/_public/_marketing/': typeof PublicMarketingIndexRoute
   '/_public/_marketing/about/': typeof PublicMarketingAboutIndexRoute
+  '/_public/_marketing/features/': typeof PublicMarketingFeaturesIndexRoute
   '/_public/_marketing/privacy/': typeof PublicMarketingPrivacyIndexRoute
   '/_public/_marketing/terms/': typeof PublicMarketingTermsIndexRoute
   '/_public/auth/sign-in/': typeof PublicAuthSignInIndexRoute
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/trash/'
     | '/upcoming/'
     | '/about/'
+    | '/features/'
     | '/privacy/'
     | '/terms/'
     | '/auth/sign-in/'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/trash'
     | '/upcoming'
     | '/about'
+    | '/features'
     | '/privacy'
     | '/terms'
     | '/auth/sign-in'
@@ -230,6 +242,7 @@ export interface FileRouteTypes {
     | '/_protected/upcoming/'
     | '/_public/_marketing/'
     | '/_public/_marketing/about/'
+    | '/_public/_marketing/features/'
     | '/_public/_marketing/privacy/'
     | '/_public/_marketing/terms/'
     | '/_public/auth/sign-in/'
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicMarketingPrivacyIndexRouteImport
       parentRoute: typeof PublicMarketingRoute
     }
+    '/_public/_marketing/features/': {
+      id: '/_public/_marketing/features/'
+      path: '/features'
+      fullPath: '/features/'
+      preLoaderRoute: typeof PublicMarketingFeaturesIndexRouteImport
+      parentRoute: typeof PublicMarketingRoute
+    }
     '/_public/_marketing/about/': {
       id: '/_public/_marketing/about/'
       path: '/about'
@@ -394,6 +414,7 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 interface PublicMarketingRouteChildren {
   PublicMarketingIndexRoute: typeof PublicMarketingIndexRoute
   PublicMarketingAboutIndexRoute: typeof PublicMarketingAboutIndexRoute
+  PublicMarketingFeaturesIndexRoute: typeof PublicMarketingFeaturesIndexRoute
   PublicMarketingPrivacyIndexRoute: typeof PublicMarketingPrivacyIndexRoute
   PublicMarketingTermsIndexRoute: typeof PublicMarketingTermsIndexRoute
 }
@@ -401,6 +422,7 @@ interface PublicMarketingRouteChildren {
 const PublicMarketingRouteChildren: PublicMarketingRouteChildren = {
   PublicMarketingIndexRoute: PublicMarketingIndexRoute,
   PublicMarketingAboutIndexRoute: PublicMarketingAboutIndexRoute,
+  PublicMarketingFeaturesIndexRoute: PublicMarketingFeaturesIndexRoute,
   PublicMarketingPrivacyIndexRoute: PublicMarketingPrivacyIndexRoute,
   PublicMarketingTermsIndexRoute: PublicMarketingTermsIndexRoute,
 }

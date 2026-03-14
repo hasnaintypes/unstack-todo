@@ -2,6 +2,7 @@ import { createRootRouteWithContext, Outlet, useLocation } from "@tanstack/react
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorFallback } from "@/shared/components/error-fallback";
+import { NotFound } from "@/shared/components/not-found";
 import { Header } from "@/shared/components/layout/header";
 import { Footer } from "@/shared/components/layout/footer";
 import { ThemeProvider } from "@/app/providers/theme-provider";
@@ -24,6 +25,7 @@ interface MyRouterContext {
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: RootComponent,
+  notFoundComponent: NotFound,
 });
 
 function RootComponent() {
